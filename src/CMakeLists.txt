@@ -5,7 +5,7 @@ set(CLUSTER_TYPE map_based)
 option(SHINZUI_USE_SYSTEM_BOOST "Use system installed Boost libraries" OFF)
 
 if (SHINZUI_USE_SYSTEM_BOOST)
-    find_package(Boost 1.62)
+    find_package(Boost 1.62 REQUIRED)
     set(BOOST_DEPENDENCIES "")
 else()
     set(BOOST_DEPENDENCIES

@@ -22,9 +22,12 @@ function(RequireBoost)
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
         TEST_COMMAND ""
+        UPDATE_COMMAND ""
     )
-
+    
+    set_target_properties(Boost_${ARG_MODULE} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     add_dependencies(${ARG_TARGET} Boost_${ARG_MODULE})
+
     AddToSources(
         TARGET ${ARG_TARGET}
         INC_PATH ${CMAKE_BINARY_DIR}/third_party/src/Boost_${ARG_MODULE}/include
