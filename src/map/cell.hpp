@@ -19,10 +19,11 @@ class Cell : public ClusterElement<Cell<E>*, 6>
     friend class Map<E>;
 
 public:
-    Cell(const Offset&& offset) :
+    explicit Cell(const Offset&& offset) :
         _offset(std::move(offset))
     {
-        LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
+        int b;
+        LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s(), b);
         ++cellCount;
     }
 
