@@ -27,8 +27,9 @@ private:
 };
 
 // Windows does not define "cos" as constexpr yet... :(
+constexpr uint8_t cellSize = 9;
+
 #if defined(_WIN32) || defined(__clang__)
-	constexpr uint8_t cellSize = 9;
 	const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
 	const Offset offsetOf(int32_t x, int32_t y)
@@ -36,7 +37,6 @@ private:
 		return Offset(x / slopeX, y / cellSize);
 	}
 #else
-	constexpr uint8_t cellSize = 9;
 	constexpr double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
 	constexpr Offset offsetOf(int32_t x, int32_t y)

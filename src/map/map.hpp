@@ -23,6 +23,8 @@ public:
 
     void setSiblings(Cell<E>* cell);
 
+    inline int size() { return _cells.size(); }
+
 private:
     int32_t _x;
     int32_t _y;

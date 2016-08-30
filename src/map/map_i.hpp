@@ -102,11 +102,15 @@ void Map<E>::setSiblings(Cell<E>* cell)
         {
             auto sibling = getOrCreate(q + getter.dx, r + getter.dy, false, &count);
 
+            bool cellCountChanges = sibling->_siblings[getter.reciprocal] == nullptr;
             cell->_siblings[getter.idx] = sibling;
             sibling->_siblings[getter.reciprocal] = cell;
 
-            // FIXME: This might not be true :/ Only + 1 if (sibling->_siblings[getter.reciprocal]) was nullptr
-            sibling->_siblingCount = sibling->_siblingCount >= 6 ? 6 : sibling->_siblingCount + 1;
+            // Update sibling count
+            if (cellCountChanges && sibling->_siblingCount < 6)
+            {
+                ++sibling->_siblingCount;
+            }
         }
 
         cell->_siblingCount = count;
