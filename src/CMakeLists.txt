@@ -7,9 +7,13 @@ if (SHINZUI_USE_SYSTEM_BOOST)
     set(BOOST_DEPENDENCIES "")
 else()
     set(BOOST_DEPENDENCIES
-        core config assert static_assert lockfree type_traits mpl preprocessor
+        # Lockfree dependencies
+        lockfree core config assert static_assert type_traits mpl preprocessor
         array throw_exception functional align parameter atomic detail
         utility predef
+
+        # Asio dependencies
+        asio system date_time smart_ptr bind regex
     )
 endif()
 
@@ -18,6 +22,7 @@ set(SOURCE_FOLDERS
     ${CMAKE_CURRENT_SOURCE_DIR}/cluster
     ${CMAKE_CURRENT_SOURCE_DIR}/defs
     ${CMAKE_CURRENT_SOURCE_DIR}/map
+    ${CMAKE_CURRENT_SOURCE_DIR}/server
     ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
 )
 
