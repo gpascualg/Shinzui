@@ -30,104 +30,63 @@ Cell<E>* Map<E>::addTo(const Offset&& offset, E e)
 }
 
 template <typename E>
-Cell<E>* Map<E>::getOrCreate(int16_t q, int16_t r, bool siblings, uint8_t* createCount)
+Cell<E>* Map<E>::get(int16_t q, int16_t r)
 {
-    return getOrCreate(Offset(q, r), siblings, createCount);
+    return get(Offset(q, r));
 }
 
 template <typename E>
-Cell<E>* Map<E>::getOrCreate(const Offset&& offset, bool siblings, uint8_t* createCount)
+Cell<E>* Map<E>::get(const Offset& offset)
 {
     auto it = _cells.find(offset.hash());
 
     if (it == _cells.end())
     {
-        auto result = _cells.emplace(offset.hash(), new Cell<E>(std::move(offset)));
-        it = result.first;
-
-        if (createCount)
-        {
-            *createCount = *createCount + 1;
-        }
-    }
-
-    if (siblings)
-    {
-        LOG(LOG_CELLS, "Creating siblings");
-        setSiblings((*it).second);
+        return nullptr;
     }
 
     return (*it).second;
 }
 
-enum Siblings
+template <typename E>
+Cell<E>* Map<E>::getOrCreate(int16_t q, int16_t r, bool siblings)
 {
-    ZERO_MINUS  = 0,
-    PLUS_MINUS  = 1,
-    PLUS_ZERO   = 2,
-    ZERO_PLUS   = 3,
-    MINUS_PLUS  = 4,
-    MINUS_ZERO  = 5
-};
-
-struct SiblingGetter
-{
-    Siblings idx;
-    Siblings reciprocal;
-    int8_t dx;
-    int8_t dy;
-};
-
-SiblingGetter siblingGetters[6] = {
-    {ZERO_MINUS,    ZERO_PLUS,  +0, -1},
-    {PLUS_MINUS,    MINUS_PLUS, +1, -1},
-    {PLUS_ZERO,     MINUS_ZERO, +1, +0},
-    {ZERO_PLUS,     ZERO_MINUS, +0, +1},
-    {MINUS_PLUS,    PLUS_MINUS, -1, +1},
-    {MINUS_ZERO,    PLUS_ZERO,  -1, +0}
-};
+    return getOrCreate(Offset(q, r), siblings);
+}
 
 template <typename E>
-void Map<E>::setSiblings(Cell<E>* cell)
+Cell<E>* Map<E>::getOrCreate(const Offset& offset, bool siblings)
 {
-    if (cell->_siblingCount < 6)
+    auto cell = get(offset);
+
+    if (!cell)
     {
-        const Offset& offset = cell->offset();
-        int16_t q = offset.q();
-        int16_t r = offset.r();
-
-        uint8_t count = 0;
-
-        for (auto& getter : siblingGetters)
-        {
-            auto sibling = getOrCreate(q + getter.dx, r + getter.dy, false, &count);
-
-            bool cellCountChanges = sibling->_siblings[getter.reciprocal] == nullptr;
-            cell->_siblings[getter.idx] = sibling;
-            sibling->_siblings[getter.reciprocal] = cell;
-
-            // Update sibling count
-            if (cellCountChanges && sibling->_siblingCount < 6)
-            {
-                ++sibling->_siblingCount;
-            }
-        }
-
-        cell->_siblingCount = count;
-        if (count == 6)
-        {
-            cell->addUnconnected();
-        }
-        else
-        {
-            // Add cell as connected, search in siblings
-            cell->addConnected();
-
-            // Add siblings too
-            for (auto& sibling : cell->_siblings)
-            {
-                sibling->addConnected(cell);
-            }
-        }
+        auto result = _cells.emplace(offset.hash(), new Cell<E>(this, std::move(offset)));
+        cell = (*result.first).second;
     }
+
+    if (siblings)
+    {
+        LOG(LOG_CELLS, "Creating siblings");
+        auto siblings = createSiblings(cell);
+    }
+
+    return cell;
+}
+
+template <typename E>
+std::vector<Cell<E>*> Map<E>::createSiblings(Cell<E>* cell)
+{
+    const Offset& offset = cell->offset();
+    int16_t q = offset.q();
+    int16_t r = offset.r();
+
+    return {
+        getOrCreate(q + 0, r - 1, false),
+        getOrCreate(q + 1, r - 1, false),
+        getOrCreate(q + 1, r + 0, false),
+        getOrCreate(q + 0, r + 1, false),
+        getOrCreate(q - 1, r + 1, false),
+        getOrCreate(q - 1, r + 0, false),
+    };
 }

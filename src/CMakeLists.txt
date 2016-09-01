@@ -1,7 +1,5 @@
 project(Shinzui)
 
-set(CLUSTER_TYPE map_based)
-
 option(SHINZUI_USE_SYSTEM_BOOST "Use system installed Boost libraries" OFF)
 
 if (SHINZUI_USE_SYSTEM_BOOST)
@@ -17,7 +15,7 @@ endif()
 
 set(SOURCE_FOLDERS
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/cluster/${CLUSTER_TYPE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cluster
     ${CMAKE_CURRENT_SOURCE_DIR}/defs
     ${CMAKE_CURRENT_SOURCE_DIR}/map
     ${CMAKE_CURRENT_SOURCE_DIR}/threadpool

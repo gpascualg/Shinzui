@@ -132,9 +132,9 @@ endfunction()
 
 function(ResetAllTargets)
     foreach(target ${ALL_TARGETS})
-        set(${${ARG_TARGET}_DEPENDENCIES} "" CACHE INTERNAL "")
-        set(${ARG_TARGET}_SOURCES "" CACHE INTERNAL "")
-        set(${ARG_TARGET}_INCLUDE_DIRECTORIES "" CACHE INTERNAL "")
+        set(${${target}_DEPENDENCIES} "" CACHE INTERNAL "")
+        set(${target}_SOURCES "" CACHE INTERNAL "")
+        set(${target}_INCLUDE_DIRECTORIES "" CACHE INTERNAL "")
     endforeach()
 
     set(ALL_TARGETS "" CACHE INTERNAL "")

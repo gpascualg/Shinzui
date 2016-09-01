@@ -4,6 +4,7 @@ project(Shinzui)
 # -[ Macros and functions
 include(cmake/Configure.cmake)
 include(cmake/Macros.cmake)
+ResetAllTargets()
 
 # -[ Configuration
 option(SHINZUI_USE_SYSTEM_BOOST "Use system installed Boost libraries" OFF)

@@ -19,8 +19,9 @@ class Cell : public ClusterElement<Cell<E>*, 6>
     friend class Map<E>;
 
 public:
-    explicit Cell(const Offset&& offset) :
-        _offset(std::move(offset))
+    explicit Cell(Map<E>* map, const Offset&& offset) :
+        _offset(std::move(offset)),
+        _map(map)
     {
         int b;
         LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s(), b);
@@ -36,9 +37,13 @@ public:
     {
         return _offset;
     }
+    
+    std::vector<Cell<E>*> upperHalfSiblings(Cell<E>* cell);
+    std::vector<Cell<E>*> lowerHalfSiblings(Cell<E>* cell);
 
 private:
     const Offset _offset;
 
+    Map<E>* _map;
     std::map<uint32_t /*id*/, E> _data;
 };

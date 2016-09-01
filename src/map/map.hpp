@@ -3,6 +3,7 @@
 #include "common.hpp"
 
 #include <inttypes.h>
+#include <vector>
 #include <unordered_map>
 
 template <typename E> class Cell;
@@ -18,10 +19,13 @@ public:
     Cell<E>* addTo(int16_t q, int16_t r, E e);
     Cell<E>* addTo(const Offset&& offset, E e);
 
-    Cell<E>* getOrCreate(int16_t q, int16_t r, bool siblings = false, uint8_t* createCount = nullptr);
-    Cell<E>* getOrCreate(const Offset&& offset, bool siblings = false, uint8_t* createCount = nullptr);
+    Cell<E>* get(int16_t q, int16_t r);
+    Cell<E>* get(const Offset& offset);
 
-    void setSiblings(Cell<E>* cell);
+    Cell<E>* getOrCreate(int16_t q, int16_t r, bool siblings = true);
+    Cell<E>* getOrCreate(const Offset& offset, bool siblings = true);
+
+    std::vector<Cell<E>*> createSiblings(Cell<E>* cell);
 
     inline int size() { return _cells.size(); }
 
