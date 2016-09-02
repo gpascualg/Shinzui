@@ -15,27 +15,42 @@ Cluster<E>::Cluster()
 {}
 
 template <typename E>
+Cluster<E>::~Cluster()
+{
+    for (auto& cluster : _uniqueClusters)
+    {
+        delete cluster;
+    }
+
+    for (auto& map : _cache)
+    {
+        map.second.clear();
+    }
+
+    _uniqueClusters.clear();
+    _cache.clear();
+}
+
+template <typename E>
 void Cluster<E>::update(uint64_t elapsed)
 {
     LOG(LOG_CLUSTERS, "... %d", _uniqueClusters.size());
     for (auto& cluster : _uniqueClusters)
     {
         LOG(LOG_CLUSTERS, "-] Updating cluster " FMT_PTR " = %d", (uintptr_t)cluster, cluster->size());
-        for (auto& center : *cluster)
-        {
-            // Propagate updates
-            propagate(center, [cluster, elapsed](E node) -> bool {
-                if (node->_cluster == cluster)
-                {
-                    node->update(elapsed);
-                    return true;
-                }
-                LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);
-                return false;
-            });
 
-            // TODO: Optimize cluster center
-        }
+        // Propagate updates
+        propagate(cluster->center, [cluster, elapsed](E node) -> bool {
+            if (node->_cluster == cluster)
+            {
+                node->update(elapsed);
+                return true;
+            }
+            LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);
+            return false;
+        });
+
+        // TODO: Optimize cluster center
     }
 
     ++_fetchCurrent;
@@ -97,23 +112,8 @@ void Cluster<E>::add(E node, std::vector<E>& siblings)
     if (nonNullSiblings.empty())
     {
         // Create cluster if it can be created
-        if (_numClusters < MaxClusters)
-        {
-            _uniqueClusters.emplace_back(new std::vector<E> { (E)node });
-            node->_cluster = _uniqueClusters.back();
-        }
-        else
-        {
-            auto uniqueCluster = *(_uniqueClusters.begin() + (int)(rand() / (float)RAND_MAX * MaxClusters));
-            uniqueCluster->emplace_back((E)node);
-            node->_cluster = uniqueCluster;
-        }
-
-        // Setup neighbours cluster
-        for (auto sibling : siblings)
-        {
-            sibling->_cluster = node->_cluster;
-        }
+        _uniqueClusters.emplace_back(new ClusterCenter<E> { (E)node });
+        node->_cluster = _uniqueClusters.back();
     }
     else
     {
@@ -136,33 +136,32 @@ void Cluster<E>::add(E node, std::vector<E>& siblings)
                     _uniqueClusters.erase(it);
 
                     // Update cluster references
-                    for (auto node : *currentCluster)
-                    {
-                        propagate(node, [firstCluster, currentCluster](auto node) -> bool {
-                            if (node && node->_cluster == currentCluster)
-                            {
-                                node->_cluster = firstCluster;
-                                return true;
-                            }
+                    propagate(currentCluster->center, [firstCluster, currentCluster](auto node) -> bool {
+                        if (node && node->_cluster == currentCluster)
+                        {
+                            node->_cluster = firstCluster;
+                            return true;
+                        }
 
-                            return false;
-                        });
-                    }
+                        return false;
+                    });
+
+                    // Delete cluster center
+                    delete currentCluster;
                 }
             }
         }
 
         // Setup neighbours cluster
         node->_cluster = firstCluster;
-        for (auto sibling : siblings)
-        {
-            sibling->_cluster = firstCluster;
-        }
     }
 
-    // Invalidate the cache
-    for (auto cluster : *node->_cluster)
+    // Setup neighbours cluster and invalidate cache
+    E center = node->_cluster->center;
+    for (auto sibling : siblings)
     {
-        _cache[cluster].erase(node->offset().distance(cluster->offset()));
+        sibling->_cluster = node->_cluster;
+        _cache[center].erase(sibling->offset().distance(center->offset()));
     }
+    _cache[center].erase(node->offset().distance(center->offset()));
 }

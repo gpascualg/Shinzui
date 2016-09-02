@@ -14,6 +14,12 @@ template <typename E> class Cluster;
 static int updateCount = 0;
 
 template <typename E>
+struct ClusterCenter
+{
+    E center;
+};
+
+template <typename E>
 class ClusterElement
 {
     friend class Cluster<E>;
@@ -34,6 +40,5 @@ public:
     virtual std::vector<E> ring(uint16_t radius = 1) = 0;
 
 private:
-    uint8_t _fetchLast = 0;
-    std::vector<E>* _cluster = nullptr;
+    ClusterCenter<E>* _cluster = nullptr;
 };

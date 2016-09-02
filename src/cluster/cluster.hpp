@@ -9,6 +9,9 @@
 template <typename E>
 class ClusterElement;
 
+template <typename E>
+class ClusterCenter;
+
 
 // Could we generalize this? :(
 constexpr uint32_t MaxClusters = 12;
@@ -33,6 +36,7 @@ public:
 
 private:
     Cluster();
+    virtual ~Cluster();
 
     uint16_t propagate(E center, std::function<bool(E)> fnc);
 
@@ -42,7 +46,7 @@ private:
     uint32_t _numClusters = 0;
     uint32_t _fetchCurrent = 0;
 
-    std::vector<std::vector<E>*> _uniqueClusters;
+    std::vector<ClusterCenter<E>*> _uniqueClusters;
     std::unordered_map<E, std::unordered_map<uint16_t, std::vector<E>>> _cache;
 };
 
