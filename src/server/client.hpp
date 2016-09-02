@@ -1,37 +1,30 @@
 #pragma once
 
+#include "boost/asio/asio_forward.hpp"
+
 #include <inttypes.h>
+#include <array>
 #include <cstddef>
-
-
-// Boost forward declarations
-namespace boost {
-	namespace asio {
-		template <typename Protocol>
-		class stream_socket_service;
-
-		template <typename Protocol, typename StreamSocketService>
-		class basic_stream_socket;
-
-		namespace ip {
-			class tcp;
-		}
-	}
-
-	namespace system {
-		class error_code;
-	}
-}
-
+#include <functional>
 
 class Client
 {
-public:
-	void start();
+	using ReadFunction = std::function<void(Client*, const boost::system::error_code*, size_t)>;
 
-	void handle_write(const boost::system::error_code* error, size_t bytes_transferred);
+public:
+	Client(boost::asio::io_service* io_service, ReadFunction readFunction);
+	virtual ~Client();
+
+	void scheduleRead(uint16_t bytesToRead, bool reset = false);
+
+	inline uint8_t readPhase() { return _readTimes; }
+	inline boost::asio::SocketForward* socket() { return _socket; }
 
 private:
-	// boost::asio::ip::tcp::socket = ...
-	boost::asio::basic_stream_socket<boost::asio::ip::tcp, boost::asio::stream_socket_service<boost::asio::ip::tcp> >* _socket;
+	boost::asio::SocketForward* _socket;
+	ReadFunction _readFunction;
+
+	char* _data = nullptr;
+	uint16_t _totalRead = 0;
+	uint8_t _readTimes = 0;
 };
