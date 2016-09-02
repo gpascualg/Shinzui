@@ -15,7 +15,7 @@ Cluster<E>::Cluster()
 {}
 
 template <typename E>
-void Cluster<E>::update()
+void Cluster<E>::update(uint64_t elapsed)
 {
     LOG(LOG_CLUSTERS, "... %d", _uniqueClusters.size());
     for (auto& cluster : _uniqueClusters)
@@ -24,10 +24,10 @@ void Cluster<E>::update()
         for (auto& center : *cluster)
         {
             // Propagate updates
-            propagate(center, [cluster](E node) -> bool {
+            propagate(center, [cluster, elapsed](E node) -> bool {
                 if (node->_cluster == cluster)
                 {
-                    node->update();
+                    node->update(elapsed);
                     return true;
                 }
                 LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);

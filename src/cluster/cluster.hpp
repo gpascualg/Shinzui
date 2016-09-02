@@ -29,7 +29,7 @@ public:
     }
 
     void add(E node, std::vector<E>& siblings);
-    void update();
+    void update(uint64_t elapsed);
 
 private:
     Cluster();

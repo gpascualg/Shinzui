@@ -44,9 +44,9 @@ public:
 
     std::vector<Cell<E>*> ring(uint16_t radius = 1) override;
 
-    void update() override
+    void update(uint64_t elapsed) override
     {
-        ClusterElement<Cell<E>*>::update();
+        ClusterElement<Cell<E>*>::update(elapsed);
         LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
     }
 

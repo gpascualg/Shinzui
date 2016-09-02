@@ -22,7 +22,7 @@ public:
     ClusterElement()
     {}
 
-    virtual void update()
+    virtual void update(uint64_t elapsed)
     {
         LOG(LOG_CLUSTERS, "\t-] Updating " FMT_PTR, (uintptr_t)this);
         ++updateCount;
