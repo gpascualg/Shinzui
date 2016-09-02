@@ -1,7 +1,11 @@
 #pragma once
 
+#include <inttypes.h>
+#include <cstddef>
+
+
 // Boost forward declarations
-namespace boost { 
+namespace boost {
 	namespace asio {
 		template <typename Protocol>
 		class stream_socket_service;
@@ -13,7 +17,7 @@ namespace boost {
 			class tcp;
 		}
 	}
-	
+
 	namespace system {
 		class error_code;
 	}

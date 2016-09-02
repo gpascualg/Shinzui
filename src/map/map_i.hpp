@@ -1,6 +1,10 @@
 #include "map.hpp"
 #include "cell.hpp"
 #include "debug.hpp"
+#include "cluster.hpp"
+
+#include <algorithm>
+#include <iterator>
 
 
 template <typename E>
@@ -10,13 +14,13 @@ Map<E>::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
 {}
 
 template <typename E>
-Cell<E>* Map<E>::addTo2D(int16_t x, int16_t y, E e)
+Cell<E>* Map<E>::addTo2D(int32_t x, int32_t y, E e)
 {
     return addTo(offsetOf(x, y), e);
 }
 
 template <typename E>
-Cell<E>* Map<E>::addTo(int16_t q, int16_t r, E e)
+Cell<E>* Map<E>::addTo(int32_t q, int32_t r, E e)
 {
     return addTo(Offset(q, r), e);
 }
@@ -30,7 +34,7 @@ Cell<E>* Map<E>::addTo(const Offset&& offset, E e)
 }
 
 template <typename E>
-Cell<E>* Map<E>::get(int16_t q, int16_t r)
+Cell<E>* Map<E>::get(int32_t q, int32_t r)
 {
     return get(Offset(q, r));
 }
@@ -49,9 +53,15 @@ Cell<E>* Map<E>::get(const Offset& offset)
 }
 
 template <typename E>
-Cell<E>* Map<E>::getOrCreate(int16_t q, int16_t r, bool siblings)
+Cell<E>* Map<E>::getOrCreate(int32_t q, int32_t r, bool siblings)
 {
     return getOrCreate(Offset(q, r), siblings);
+}
+
+template <template <typename, typename> class V, typename E, typename A, typename T>
+inline typename std::iterator_traits<typename V<E, A>::iterator>::difference_type count(V<E, A>&& v, T&& t)
+{
+    return std::count(v.begin(), v.end(), t);
 }
 
 template <typename E>
@@ -68,7 +78,9 @@ Cell<E>* Map<E>::getOrCreate(const Offset& offset, bool siblings)
     if (siblings)
     {
         LOG(LOG_CELLS, "Creating siblings");
+
         auto siblings = createSiblings(cell);
+        Cluster<Cell<E>*>::get()->add(cell, siblings);
     }
 
     return cell;
@@ -78,8 +90,8 @@ template <typename E>
 std::vector<Cell<E>*> Map<E>::createSiblings(Cell<E>* cell)
 {
     const Offset& offset = cell->offset();
-    int16_t q = offset.q();
-    int16_t r = offset.r();
+    int32_t q = offset.q();
+    int32_t r = offset.r();
 
     return {
         getOrCreate(q + 0, r - 1, false),

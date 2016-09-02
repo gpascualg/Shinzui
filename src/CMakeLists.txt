@@ -1,10 +1,11 @@
-project(Shinzui)
-
-option(SHINZUI_USE_SYSTEM_BOOST "Use system installed Boost libraries" OFF)
-
 if (SHINZUI_USE_SYSTEM_BOOST)
     find_package(Boost 1.62 REQUIRED)
     set(BOOST_DEPENDENCIES "")
+
+    AddDependency(
+        TARGET Shinzui
+        DEPENDENCY Boost
+    )
 else()
     set(BOOST_DEPENDENCIES
         # Lockfree dependencies
@@ -37,6 +38,7 @@ endforeach()
 BuildNow(
     TARGET Shinzui
     BOOST_DEPENDENCIES ${BOOST_DEPENDENCIES}
+    DEFINES SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
     STATIC_LIB ON
     OUTPUT_NAME Shinzui
 )

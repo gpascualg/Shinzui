@@ -1,8 +1,13 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <map>
 #include <vector>
+#include <unordered_map>
+
+template <typename E>
+class ClusterElement;
 
 
 // Could we generalize this? :(
@@ -11,15 +16,7 @@ constexpr uint32_t MaxClusters = 12;
 template <typename E>
 class Cluster
 {
-    template <typename E2, uint32_t NSiblings>
-    friend class ClusterElement;
-
-    /*
-    static_assert(
-        std::is_base_of<ClusterElement, E>::value,
-        "E must be a descendant of ClusterElement"
-    );
-   */
+    friend class ClusterElement<E>;
 
 public:
     static Cluster<E>* get()
@@ -31,10 +28,13 @@ public:
         return _instance;
     }
 
+    void add(E node, std::vector<E>& siblings);
     void update();
 
 private:
     Cluster();
+
+    uint16_t propagate(E center, std::function<bool(E)> fnc);
 
 private:
     static Cluster<E>* _instance;
@@ -42,7 +42,8 @@ private:
     uint32_t _numClusters = 0;
     uint32_t _fetchCurrent = 0;
 
-    std::vector<std::vector<E>*> _clusters;
+    std::vector<std::vector<E>*> _uniqueClusters;
+    std::unordered_map<E, std::unordered_map<uint16_t, std::vector<E>>> _cache;
 };
 
 

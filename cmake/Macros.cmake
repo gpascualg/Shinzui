@@ -24,7 +24,7 @@ function(RequireBoost)
         TEST_COMMAND ""
         UPDATE_COMMAND ""
     )
-    
+
     set_target_properties(Boost_${ARG_MODULE} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     add_dependencies(${ARG_TARGET} Boost_${ARG_MODULE})
 
@@ -82,7 +82,7 @@ function(BuildNow)
         ARG
         "EXECUTABLE;STATIC_LIB;"
         "TARGET;BUILD_FUNC;OUTPUT_NAME;"
-        "BOOST_DEPENDENCIES"
+        "BOOST_DEPENDENCIES;DEFINES"
         ${ARGN}
     )
 
@@ -122,6 +122,12 @@ function(BuildNow)
             )
         endif()
     endif()
+
+    foreach (def ${ARG_DEFINES})
+        set_target_properties(${ARG_TARGET} PROPERTIES
+            COMPILE_DEFINITIONS ${def}
+        )
+    endforeach()
 
     set_target_properties(${ARG_TARGET} PROPERTIES
         OUTPUT_NAME ${ARG_OUTPUT_NAME}
