@@ -1,0 +1,13 @@
+cache:
+  mount:
+    - build
+
+build:
+  image: gcc:latest
+  commands:
+    - mkdir -p build
+    - cd build
+    - apt-get update
+    - apt-get -y install cmake
+    - cmake ..
+    - make
