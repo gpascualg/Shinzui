@@ -37,4 +37,4 @@ private:
     std::unordered_map<uint64_t /*hash*/, Cell<E>*> _cells;
 };
 
-#include "map_i.hpp"
+#include "detail/map.hpp"

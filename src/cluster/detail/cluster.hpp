@@ -1,3 +1,5 @@
+#pragma once
+
 #include "cluster.hpp"
 #include "offset.hpp"
 #include "debug.hpp"
@@ -37,7 +39,7 @@ void Cluster<E>::update(uint64_t elapsed)
     LOG(LOG_CLUSTERS, "... %d", _uniqueClusters.size());
     for (auto& cluster : _uniqueClusters)
     {
-        LOG(LOG_CLUSTERS, "-] Updating cluster " FMT_PTR " = %d", (uintptr_t)cluster, cluster->size());
+        LOG(LOG_CLUSTERS, "-] Updating cluster " FMT_PTR, (uintptr_t)cluster);
 
         // Propagate updates
         propagate(cluster->center, [cluster, elapsed](E node) -> bool {
@@ -71,17 +73,7 @@ uint16_t Cluster<E>::propagate(E center, std::function<bool(E)> fnc)
         ++radius;
         callCount = 0;
 
-        std::vector<E> nodes;
-        if (_cache.find(center) != _cache.end() && _cache[center].find(radius) != _cache[center].end())
-        {
-            nodes = _cache[center][radius];
-        }
-        else
-        {
-            nodes = center->ring(radius);
-            _cache[center][radius] = nodes;
-        }
-
+        std::vector<E>& nodes = getRing(center, radius);
         for (auto node : nodes)
         {
             if (node)
@@ -95,6 +87,26 @@ uint16_t Cluster<E>::propagate(E center, std::function<bool(E)> fnc)
     while (callCount > 0);
 
     return radius;
+}
+
+template <typename E>
+std::vector<E>& Cluster<E>::getRing(E center, uint16_t radius, bool invalidate, bool recreate)
+{
+    std::vector<E> nodes;
+    if (invalidate || _cache.find(center) == _cache.end() || _cache[center].find(radius) == _cache[center].end())
+    {
+        if (recreate)
+        {
+            _cache[center][radius] = center->ring(radius);
+        }
+        else
+        {
+            _cache[center].erase(radius);
+            return _placeHolder;
+        }
+    }
+
+    return _cache[center][radius];
 }
 
 template <typename E>
@@ -156,12 +168,14 @@ void Cluster<E>::add(E node, std::vector<E>& siblings)
         node->_cluster = firstCluster;
     }
 
-    // Setup neighbours cluster and invalidate cache
+    // Setup neighbours cluster and invalidate ring cache
     E center = node->_cluster->center;
     for (auto sibling : siblings)
     {
         sibling->_cluster = node->_cluster;
-        _cache[center].erase(sibling->offset().distance(center->offset()));
+        // TODO: We should recreate ring on the end, not now nor at next update
+        getRing(center, sibling->offset().distance(center->offset()), true, false);
     }
-    _cache[center].erase(node->offset().distance(center->offset()));
+    // TODO: We should recreate ring on the end, not now
+    getRing(center, node->offset().distance(center->offset()), true, false);
 }

@@ -39,6 +39,7 @@ private:
     virtual ~Cluster();
 
     uint16_t propagate(E center, std::function<bool(E)> fnc);
+    std::vector<E>& getRing(E center, uint16_t radius, bool invalidate = false, bool recreate = true);
 
 private:
     static Cluster<E>* _instance;
@@ -48,7 +49,8 @@ private:
 
     std::vector<ClusterCenter<E>*> _uniqueClusters;
     std::unordered_map<E, std::unordered_map<uint16_t, std::vector<E>>> _cache;
+    std::vector<E> _placeHolder;
 };
 
 
-#include "cluster_i.hpp"
+#include "detail/cluster.hpp"

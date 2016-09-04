@@ -62,3 +62,14 @@ constexpr uint8_t cellSize = 9;
 		return Offset(x / slopeX, y / cellSize);
 	}
 #endif
+
+// Directions
+struct Direction
+{
+    int32_t q;
+    int32_t r;
+};
+Direction directions[] = {
+    {+1, -1}, {+1, +0}, {+0, +1},
+    {-1, +1}, {-1, +0}, {+0, -1}
+};

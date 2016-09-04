@@ -1,3 +1,5 @@
+#pragma once
+
 #include "map.hpp"
 #include "cell.hpp"
 #include "debug.hpp"
@@ -68,19 +70,19 @@ template <typename E>
 Cell<E>* Map<E>::getOrCreate(const Offset& offset, bool siblings)
 {
     auto cell = get(offset);
-
     if (!cell)
     {
         auto result = _cells.emplace(offset.hash(), new Cell<E>(this, std::move(offset)));
         cell = (*result.first).second;
     }
 
-    if (siblings)
+    if (siblings && !cell->_siblingsDone)
     {
         LOG(LOG_CELLS, "Creating siblings");
 
         auto siblings = createSiblings(cell);
         Cluster<Cell<E>*>::get()->add(cell, siblings);
+        cell->_siblingsDone = true;
     }
 
     return cell;
