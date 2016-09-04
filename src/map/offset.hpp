@@ -69,7 +69,7 @@ struct Direction
     int32_t q;
     int32_t r;
 };
-Direction directions[] = {
+static Direction directions[] = {
     {+1, -1}, {+1, +0}, {+0, +1},
     {-1, +1}, {-1, +0}, {+0, -1}
 };

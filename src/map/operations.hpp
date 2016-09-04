@@ -5,6 +5,8 @@
 #include <inttypes.h>
 
 
+class MapAwareEntity;
+
 enum class MapOperationType
 {
     ADD_ENTITY_CREATE,
@@ -12,12 +14,11 @@ enum class MapOperationType
     DESTROY
 };
 
-template <typename E>
 struct MapOperation
 {
     MapOperationType type;
     const Offset offset;
-    E entity;
+    MapAwareEntity* entity;
 };
 
 #include "detail/operations.hpp"

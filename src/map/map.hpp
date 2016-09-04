@@ -1,17 +1,17 @@
 #pragma once
 
 #include "offset.hpp"
-#include <boost/lockfree/queue.hpp>
+#include "boost/lockfree/lockfree_forward.hpp"
 
 #include <inttypes.h>
 #include <vector>
 #include <unordered_map>
 
 
-template <typename E> class Cell;
-template <typename E> struct MapOperation;
+class Cell;
+struct MapOperation;
+class MapAwareEntity;
 
-template <typename E>
 class Map
 {
 public:
@@ -19,17 +19,24 @@ public:
 
     void runScheduledOperations();
 
-    Cell<E>* addTo2D(int32_t x, int32_t y, E e);
-    Cell<E>* addTo(int32_t q, int32_t r, E e);
-    Cell<E>* addTo(const Offset&& offset, E e);
+    // Schedules an ADD (and maybe CREATE) operations
+    void addTo2D(int32_t x, int32_t y, MapAwareEntity* e);
+    void addTo(int32_t q, int32_t r, MapAwareEntity* e);
+    void addTo(const Offset&& offset, MapAwareEntity* e);
 
-    Cell<E>* get(int32_t q, int32_t r);
-    Cell<E>* get(const Offset& offset);
+    // NOT thread-safe
+    // Gets a cell from the map
+    Cell* get(int32_t q, int32_t r);
+    Cell* get(const Offset& offset);
 
-    Cell<E>* getOrCreate(int32_t q, int32_t r, bool siblings = true);
-    Cell<E>* getOrCreate(const Offset& offset, bool siblings = true);
+    // NOT thread-safe
+    // Gets or creates a cell from the map
+    Cell* getOrCreate(int32_t q, int32_t r, bool siblings = true);
+    Cell* getOrCreate(const Offset& offset, bool siblings = true);
 
-    std::vector<Cell<E>*> createSiblings(Cell<E>* cell);
+    // NOT thread-safe
+    // Creates siblings for a cell
+    std::vector<Cell*> createSiblings(Cell* cell);
 
     inline int size() { return _cells.size(); }
 
@@ -39,8 +46,6 @@ private:
     uint32_t _dx;
     uint32_t _dy;
 
-    std::unordered_map<uint64_t /*hash*/, Cell<E>*> _cells;
-    boost::lockfree::queue<MapOperation<E>*> _scheduledOperations;
+    std::unordered_map<uint64_t /*hash*/, Cell*> _cells;
+    boost::lockfree::queue<MapOperation*>* _scheduledOperations;
 };
-
-#include "detail/map.hpp"

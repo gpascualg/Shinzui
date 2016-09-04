@@ -1,25 +1,25 @@
-#pragma once
-
-#include "../map.hpp"
+#include "map.hpp"
 #include "cell.hpp"
 #include "debug.hpp"
 #include "cluster.hpp"
 #include "operations.hpp"
+#include "map_aware_entity.hpp"
 
 #include <algorithm>
 #include <iterator>
+#include <boost/lockfree/queue.hpp>
 
-
-template <typename E>
-Map<E>::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
+Map::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
     _x(x), _y(y),
     _dx(dx), _dy(dy)
-{}
-
-template <typename E>
-void Map<E>::runScheduledOperations()
 {
-    for (auto operation : _scheduledOperations)
+    _scheduledOperations = new boost::lockfree::queue<MapOperation*>();
+}
+
+void Map::runScheduledOperations()
+{
+    MapOperation* operation;
+    while (_scheduledOperations->pop(operation))
     {
         switch (operation->type) {
             case MapOperationType::ADD_ENTITY_CREATE:
@@ -31,36 +31,31 @@ void Map<E>::runScheduledOperations()
     }
 }
 
-template <typename E>
-Cell<E>* Map<E>::addTo2D(int32_t x, int32_t y, E e)
+void Map::addTo2D(int32_t x, int32_t y, MapAwareEntity* e)
 {
-    return addTo(offsetOf(x, y), e);
+    addTo(offsetOf(x, y), e);
 }
 
-template <typename E>
-Cell<E>* Map<E>::addTo(int32_t q, int32_t r, E e)
+void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e)
 {
-    return addTo(Offset(q, r), e);
+    addTo(Offset(q, r), e);
 }
 
-template <typename E>
-Cell<E>* Map<E>::addTo(const Offset&& offset, E e)
+void Map::addTo(const Offset&& offset, MapAwareEntity* e)
 {
-    _scheduledOperations.push(new MapOperation<E> {
+    _scheduledOperations->push(new MapOperation {
         MapOperationType::ADD_ENTITY_CREATE,
         offset,
         e
     });
 }
 
-template <typename E>
-Cell<E>* Map<E>::get(int32_t q, int32_t r)
+Cell* Map::get(int32_t q, int32_t r)
 {
     return get(Offset(q, r));
 }
 
-template <typename E>
-Cell<E>* Map<E>::get(const Offset& offset)
+Cell* Map::get(const Offset& offset)
 {
     auto it = _cells.find(offset.hash());
 
@@ -72,25 +67,17 @@ Cell<E>* Map<E>::get(const Offset& offset)
     return (*it).second;
 }
 
-template <typename E>
-Cell<E>* Map<E>::getOrCreate(int32_t q, int32_t r, bool siblings)
+Cell* Map::getOrCreate(int32_t q, int32_t r, bool siblings)
 {
     return getOrCreate(Offset(q, r), siblings);
 }
 
-template <template <typename, typename> class V, typename E, typename A, typename T>
-inline typename std::iterator_traits<typename V<E, A>::iterator>::difference_type count(V<E, A>&& v, T&& t)
-{
-    return std::count(v.begin(), v.end(), t);
-}
-
-template <typename E>
-Cell<E>* Map<E>::getOrCreate(const Offset& offset, bool siblings)
+Cell* Map::getOrCreate(const Offset& offset, bool siblings)
 {
     auto cell = get(offset);
     if (!cell)
     {
-        auto result = _cells.emplace(offset.hash(), new Cell<E>(this, std::move(offset)));
+        auto result = _cells.emplace(offset.hash(), new Cell(this, std::move(offset)));
         cell = (*result.first).second;
     }
 
@@ -99,15 +86,14 @@ Cell<E>* Map<E>::getOrCreate(const Offset& offset, bool siblings)
         LOG(LOG_CELLS, "Creating siblings");
 
         auto siblings = createSiblings(cell);
-        Cluster<Cell<E>*>::get()->add(cell, siblings);
+        Cluster<Cell*>::get()->add(cell, siblings);
         cell->_siblingsDone = true;
     }
 
     return cell;
 }
 
-template <typename E>
-std::vector<Cell<E>*> Map<E>::createSiblings(Cell<E>* cell)
+std::vector<Cell*> Map::createSiblings(Cell* cell)
 {
     const Offset& offset = cell->offset();
     int32_t q = offset.q();
