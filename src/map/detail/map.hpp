@@ -1,9 +1,10 @@
 #pragma once
 
-#include "map.hpp"
+#include "../map.hpp"
 #include "cell.hpp"
 #include "debug.hpp"
 #include "cluster.hpp"
+#include "operations.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -14,6 +15,21 @@ Map<E>::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
     _x(x), _y(y),
     _dx(dx), _dy(dy)
 {}
+
+template <typename E>
+void Map<E>::runScheduledOperations()
+{
+    for (auto operation : _scheduledOperations)
+    {
+        switch (operation->type) {
+            case MapOperationType::ADD_ENTITY_CREATE:
+                auto cell = getOrCreate(std::move(operation->offset), true);
+                cell->_data.emplace(operation->entity->id(), operation->entity);
+                break;
+
+        }
+    }
+}
 
 template <typename E>
 Cell<E>* Map<E>::addTo2D(int32_t x, int32_t y, E e)
@@ -30,9 +46,11 @@ Cell<E>* Map<E>::addTo(int32_t q, int32_t r, E e)
 template <typename E>
 Cell<E>* Map<E>::addTo(const Offset&& offset, E e)
 {
-    auto cell = getOrCreate(std::move(offset), true);
-    // cell->add(e);
-    return cell;
+    _scheduledOperations.push(new MapOperation<E> {
+        MapOperationType::ADD_ENTITY_CREATE,
+        offset,
+        e
+    });
 }
 
 template <typename E>

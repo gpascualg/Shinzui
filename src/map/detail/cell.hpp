@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../cell.hpp"
+#include "../map.hpp"
 #include "offset.hpp"
 #include "cluster_element.hpp"
 #include "debug.hpp"

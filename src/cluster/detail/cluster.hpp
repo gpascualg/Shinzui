@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cluster.hpp"
+#include "../cluster.hpp"
 #include "offset.hpp"
 #include "debug.hpp"
 #include "common.hpp"

@@ -1,18 +1,23 @@
 #pragma once
 
 #include "offset.hpp"
+#include <boost/lockfree/queue.hpp>
 
 #include <inttypes.h>
 #include <vector>
 #include <unordered_map>
 
+
 template <typename E> class Cell;
+template <typename E> struct MapOperation;
 
 template <typename E>
 class Map
 {
 public:
     Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy);
+
+    void runScheduledOperations();
 
     Cell<E>* addTo2D(int32_t x, int32_t y, E e);
     Cell<E>* addTo(int32_t q, int32_t r, E e);
@@ -35,6 +40,7 @@ private:
     uint32_t _dy;
 
     std::unordered_map<uint64_t /*hash*/, Cell<E>*> _cells;
+    boost::lockfree::queue<MapOperation<E>*> _scheduledOperations;
 };
 
 #include "detail/map.hpp"
