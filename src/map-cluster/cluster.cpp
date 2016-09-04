@@ -1,23 +1,19 @@
-#pragma once
-
-#include "../cluster.hpp"
+#include "cluster.hpp"
 #include "offset.hpp"
 #include "debug.hpp"
 #include "common.hpp"
+#include "cluster_element.hpp"
+#include "cell.hpp"
 
 #include <algorithm>
 
 
-template <typename E>
-Cluster<E>* Cluster<E>::_instance = nullptr;
+Cluster* Cluster::_instance = nullptr;
 
-
-template <typename E>
-Cluster<E>::Cluster()
+Cluster::Cluster()
 {}
 
-template <typename E>
-Cluster<E>::~Cluster()
+Cluster::~Cluster()
 {
     for (auto& cluster : _uniqueClusters)
     {
@@ -33,8 +29,7 @@ Cluster<E>::~Cluster()
     _cache.clear();
 }
 
-template <typename E>
-void Cluster<E>::update(uint64_t elapsed)
+void Cluster::update(uint64_t elapsed)
 {
     LOG(LOG_CLUSTERS, "... %d", _uniqueClusters.size());
     for (auto& cluster : _uniqueClusters)
@@ -42,7 +37,7 @@ void Cluster<E>::update(uint64_t elapsed)
         LOG(LOG_CLUSTERS, "-] Updating cluster " FMT_PTR, (uintptr_t)cluster);
 
         // Propagate updates
-        propagate(cluster->center, [cluster, elapsed](E node) -> bool {
+        propagate(cluster->center, [cluster, elapsed](Cell* node) -> bool {
             if (node->_cluster == cluster)
             {
                 node->update(elapsed);
@@ -58,8 +53,8 @@ void Cluster<E>::update(uint64_t elapsed)
     ++_fetchCurrent;
 }
 
-template <typename E>
-uint16_t Cluster<E>::propagate(E center, std::function<bool(E)> fnc)
+
+uint16_t Cluster::propagate(Cell* center, std::function<bool(Cell*)> fnc)
 {
     uint32_t callCount = 0;
     uint16_t radius = 0;
@@ -73,7 +68,7 @@ uint16_t Cluster<E>::propagate(E center, std::function<bool(E)> fnc)
         ++radius;
         callCount = 0;
 
-        std::vector<E>& nodes = getRing(center, radius);
+        std::vector<Cell*>& nodes = getRing(center, radius);
         for (auto node : nodes)
         {
             if (node)
@@ -89,10 +84,9 @@ uint16_t Cluster<E>::propagate(E center, std::function<bool(E)> fnc)
     return radius;
 }
 
-template <typename E>
-std::vector<E>& Cluster<E>::getRing(E center, uint16_t radius, bool invalidate, bool recreate)
+
+std::vector<Cell*>& Cluster::getRing(Cell* center, uint16_t radius, bool invalidate, bool recreate)
 {
-    std::vector<E> nodes;
     if (invalidate || _cache.find(center) == _cache.end() || _cache[center].find(radius) == _cache[center].end())
     {
         if (recreate)
@@ -109,12 +103,12 @@ std::vector<E>& Cluster<E>::getRing(E center, uint16_t radius, bool invalidate, 
     return _cache[center][radius];
 }
 
-template <typename E>
-void Cluster<E>::add(E node, std::vector<E>& siblings)
+
+void Cluster::add(Cell* node, std::vector<Cell*>& siblings)
 {
     // Find if there is any nonNullSibling cluster
-    std::vector<E> nonNullSiblings(siblings.size());
-    auto lastInserted = std::copy_if(siblings.begin(), siblings.end(), nonNullSiblings.begin(), [this](E s) {
+    std::vector<Cell*> nonNullSiblings(siblings.size());
+    auto lastInserted = std::copy_if(siblings.begin(), siblings.end(), nonNullSiblings.begin(), [this](Cell* s) {
         return s->_cluster != nullptr;
     });
     nonNullSiblings.resize(std::distance(nonNullSiblings.begin(), lastInserted));
@@ -124,7 +118,7 @@ void Cluster<E>::add(E node, std::vector<E>& siblings)
     if (nonNullSiblings.empty())
     {
         // Create cluster if it can be created
-        _uniqueClusters.emplace_back(new ClusterCenter<E> { (E)node });
+        _uniqueClusters.emplace_back(new ClusterCenter { node });
         node->_cluster = _uniqueClusters.back();
     }
     else
@@ -169,7 +163,7 @@ void Cluster<E>::add(E node, std::vector<E>& siblings)
     }
 
     // Setup neighbours cluster and invalidate ring cache
-    E center = node->_cluster->center;
+    Cell* center = node->_cluster->center;
     for (auto sibling : siblings)
     {
         sibling->_cluster = node->_cluster;

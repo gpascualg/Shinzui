@@ -13,7 +13,7 @@ Map::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
     _x(x), _y(y),
     _dx(dx), _dy(dy)
 {
-    _scheduledOperations = new boost::lockfree::queue<MapOperation*>();
+    _scheduledOperations = new boost::lockfree::queue<MapOperation*>(2048);
 }
 
 void Map::runScheduledOperations()
@@ -21,12 +21,34 @@ void Map::runScheduledOperations()
     MapOperation* operation;
     while (_scheduledOperations->pop(operation))
     {
+        Cell* cell = nullptr;
+
         switch (operation->type) {
             case MapOperationType::ADD_ENTITY_CREATE:
-                auto cell = getOrCreate(std::move(operation->offset), true);
-                cell->_data.emplace(operation->entity->id(), operation->entity);
+                cell = getOrCreate(std::move(operation->offset), true);
+                if (cell)
+                {
+                    cell->_data.emplace(operation->entity->id(), operation->entity);
+                    operation->entity->onAdded(cell);
+                }
                 break;
 
+            case MapOperationType::REMOVE_ENTITY:
+                cell = get(std::move(operation->offset));
+                if (cell)
+                {
+                    cell->_data.erase(operation->entity->id());
+                    operation->entity->onRemoved(cell);
+                }
+                break;
+
+            case MapOperationType::DESTROY:
+                // TODO: Not implemented yet
+                break;
+
+            default:
+                // TODO Unkown operation error
+                break;
         }
     }
 }
@@ -86,7 +108,7 @@ Cell* Map::getOrCreate(const Offset& offset, bool siblings)
         LOG(LOG_CELLS, "Creating siblings");
 
         auto siblings = createSiblings(cell);
-        Cluster<Cell*>::get()->add(cell, siblings);
+        Cluster::get()->add(cell, siblings);
         cell->_siblingsDone = true;
     }
 

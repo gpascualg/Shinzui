@@ -16,6 +16,7 @@ class Map
 {
 public:
     Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy);
+    Map(const Map& map) = default;
 
     void runScheduledOperations();
 

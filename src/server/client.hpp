@@ -13,6 +13,7 @@ class Client
 
 public:
 	Client(boost::asio::io_service* io_service, ReadFunction readFunction);
+	Client(const Client& client) = delete;
 	virtual ~Client();
 
 	void scheduleRead(uint16_t bytesToRead, bool reset = false);

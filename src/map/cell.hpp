@@ -1,27 +1,31 @@
 #pragma once
 
 #include "offset.hpp"
-#include "cluster_element.hpp"
+#include "common.hpp"
 #include "debug.hpp"
 
 #include <array>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 
+class Cluster;
+class ClusterCenter;
 class Map;
 class Cell;
 class MapAwareEntity;
 
 static int cellCount = 0;
+static int updateCount = 0;
 
-class Cell : public ClusterElement<Cell*>
+
+class Cell
 {
     friend class Map;
+    friend class Cluster;
 
 public:
     explicit Cell(Map* map, const Offset&& offset) :
-        ClusterElement<Cell*>(),
         _offset(std::move(offset)),
         _map(map)
     {
@@ -43,12 +47,12 @@ public:
     std::vector<Cell*> upperHalfSiblings(uint16_t deviation = 1);
     std::vector<Cell*> lowerHalfSiblings(uint16_t deviation = 1);
 
-    std::vector<Cell*> ring(uint16_t radius = 1) override;
+    std::vector<Cell*> ring(uint16_t radius = 1);
 
-    void update(uint64_t elapsed) override
+    void update(uint64_t elapsed)
     {
-        ClusterElement<Cell*>::update(elapsed);
         LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
+        ++updateCount;
     }
 
 private:
@@ -56,5 +60,7 @@ private:
 
     Map* _map;
     bool _siblingsDone = false;
-    std::map<uint32_t /*id*/, MapAwareEntity*> _data;
+    std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _data;
+
+    ClusterCenter* _cluster = nullptr;
 };
