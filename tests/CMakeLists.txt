@@ -8,11 +8,19 @@ if (SHINZUI_BUILD_TESTS)
         INC_PATH "include"
     )
 
-    AddToSources(
-        TARGET ShinzuiTests
-        SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}
-        GLOB_SEARCH ".hpp;.cpp"
+    set(SOURCE_FOLDERS
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/map
+        ${CMAKE_CURRENT_SOURCE_DIR}/offset
     )
+
+    foreach(folder ${SOURCE_FOLDERS})
+        AddToSources(
+            TARGET ShinzuiTests
+            SRC_PATH ${folder}
+            GLOB_SEARCH ".hpp;.cpp"
+        )
+    endforeach()
 
     AddDependency(
         TARGET ShinzuiTests

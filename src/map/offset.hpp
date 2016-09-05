@@ -22,8 +22,8 @@ public:
         union HashConverter
         {
             struct {
-                uint32_t low;
                 uint32_t high;
+                uint32_t low;
             } b32;
             uint64_t b64;
         };
