@@ -14,7 +14,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         REQUIRE(map.scheduledSize() == 0);
 
         WHEN("one entity is added to the map") {
-            map.addTo2D(0, 0, new Entity());
+            Entity e;
+            map.addTo2D(0, 0, &e);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
@@ -22,12 +23,13 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
             }
 
             THEN("entity is not flagged as added") {
-                REQUIRE(!hasBeenAdded);
+                REQUIRE(!e.hasBeenAdded);
             }
         }
 
         WHEN("one entity is added to the map using hex coordinates") {
-            map.addTo(0, 0, new Entity());
+            Entity e;
+            map.addTo(0, 0, &e);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
@@ -35,14 +37,15 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
             }
 
             THEN("entity is not flagged as added") {
-                REQUIRE(!hasBeenAdded);
+                REQUIRE(!e.hasBeenAdded);
             }
         }
     }
 
     GIVEN("A map with one add operation pending") {
         Map map(0, 0, 200, 50);
-        map.addTo2D(0, 0, new Entity());
+        Entity e;
+        map.addTo2D(0, 0, &e);
 
         REQUIRE(map.size() == 0);
         REQUIRE(map.scheduledSize() == 1);
@@ -60,7 +63,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
             }
 
             THEN("entity is flagged as added") {
-                REQUIRE(hasBeenAdded);
+                REQUIRE(e.hasBeenAdded);
             }
         }
     }

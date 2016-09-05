@@ -6,9 +6,6 @@
 
 class Cell;
 
-
-static bool hasBeenAdded = false;
-static bool hasBeenRemoved = false;
 static uint32_t gID = 0;
 class Entity : public MapAwareEntity
 {
@@ -17,6 +14,9 @@ public:
 
     void onAdded(Cell* cell) { hasBeenAdded = true; }
     void onRemoved(Cell* cell) { hasBeenRemoved = true; }
+
+    bool hasBeenAdded = false;
+    bool hasBeenRemoved = false;
 
 private:
     uint32_t _id = gID++;
