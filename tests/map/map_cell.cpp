@@ -8,7 +8,7 @@
 
 SCENARIO("Map cells can be fetched once created", "[map]") {
     GIVEN("A map with one cell and its siblings") {
-        Map map(0, 0, 200, 50);
+        Map map;
         map.addTo2D(0, 0, new Entity());
         map.runScheduledOperations();
 

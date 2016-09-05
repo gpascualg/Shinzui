@@ -15,6 +15,9 @@ else()
 
         # Asio dependencies
         asio system date_time smart_ptr bind regex
+
+        # Pool dependencies
+        pool integer
     )
 
     foreach (dep ${BOOST_DEPENDENCIES})

@@ -2,6 +2,7 @@
 
 #include "offset.hpp"
 #include "boost/lockfree/lockfree_forward.hpp"
+#include "boost/pool/pool_forward.hpp"
 
 #include <inttypes.h>
 #include <vector>
@@ -9,9 +10,11 @@
 
 
 class Cell;
+class CellAllocator;
 class Cluster;
-struct MapOperation;
+class Map;
 class MapAwareEntity;
+struct MapOperation;
 
 #if BUILD_TESTS==ON
     #include <boost/lockfree/queue.hpp>
@@ -56,11 +59,12 @@ class MapAwareEntity;
     using QueueWithSize<T> = boost::lockfree::queue<T>;
 #endif
 
+
 class Map
 {
 public:
-    Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy);
-    Map(const Map& map) = default;
+    Map(boost::object_pool<Cell>* cellAllocator = nullptr);
+    Map(const Map& map) = delete;
     virtual ~Map();
 
     void runScheduledOperations();
@@ -92,12 +96,8 @@ public:
 #endif
 
 private:
+    boost::object_pool<Cell>* _cellAllocator;
     Cluster* _cluster;
-
-    int32_t _x;
-    int32_t _y;
-    uint32_t _dx;
-    uint32_t _dy;
 
     std::unordered_map<uint64_t /*hash*/, Cell*> _cells;
     QueueWithSize<MapOperation*>* _scheduledOperations;

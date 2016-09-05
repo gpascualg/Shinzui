@@ -8,7 +8,7 @@
 
 SCENARIO("Map cells can be created and eliminated", "[map]") {
     GIVEN("An empty map") {
-        Map map(0, 0, 200, 50);
+        Map map;
 
         REQUIRE(map.size() == 0);
         REQUIRE(map.scheduledSize() == 0);
@@ -43,7 +43,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with one add operation pending") {
-        Map map(0, 0, 200, 50);
+        Map map;
         Entity e;
         map.addTo2D(0, 0, &e);
 
@@ -69,7 +69,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with one cell") {
-        Map map(0, 0, 200, 50);
+        Map map;
         map.addTo2D(0, 0, new Entity());
         map.runScheduledOperations();
 
@@ -86,7 +86,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with two cells and one pending which should merge") {
-        Map map(0, 0, 200, 50);
+        Map map;
         map.addTo(0, 0, new Entity());
         map.addTo(4, 0, new Entity());
         map.runScheduledOperations();

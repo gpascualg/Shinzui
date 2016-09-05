@@ -25,7 +25,7 @@ class Cell
     friend class Cluster;
 
 public:
-    explicit Cell(Map* map, const Offset&& offset) :
+    explicit Cell(Map* map, const Offset& offset) :
         _offset(std::move(offset)),
         _map(map)
     {

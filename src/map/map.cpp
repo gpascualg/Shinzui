@@ -8,17 +8,20 @@
 #include <algorithm>
 #include <iterator>
 #include <boost/lockfree/queue.hpp>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/object_pool.hpp>
 
-Map::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
-    _x(x), _y(y),
-    _dx(dx), _dy(dy)
+
+Map::Map(boost::object_pool<Cell>* cellAllocator)
 {
+    _cellAllocator = cellAllocator ? cellAllocator : new boost::object_pool<Cell>(2048);
     _cluster = new Cluster();
     _scheduledOperations = new QueueWithSize<MapOperation*>(2048);
 }
 
 Map::~Map()
 {
+    delete _cellAllocator;
     delete _cluster;
     delete _scheduledOperations;
 }
@@ -106,7 +109,7 @@ Cell* Map::getOrCreate(const Offset& offset, bool siblings)
     auto cell = get(offset);
     if (!cell)
     {
-        auto result = _cells.emplace(offset.hash(), new Cell(this, std::move(offset)));
+        auto result = _cells.emplace(offset.hash(), _cellAllocator->construct(this, offset));
         cell = (*result.first).second;
     }
 

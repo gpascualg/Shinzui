@@ -41,6 +41,7 @@ void Cluster::update(uint64_t elapsed)
                 node->update(elapsed);
                 return true;
             }
+            // TODO: This else should be a merge operation! One cluster has found another one! :D
             LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);
             return false;
         });
@@ -104,6 +105,8 @@ std::vector<Cell*>& Cluster::getRing(Cell* center, uint16_t radius, bool invalid
 
 void Cluster::add(Cell* node, std::vector<Cell*>& siblings)
 {
+    // TODO: Once merging is detected on update, all this logic could be removed
+
     // Find if there is any nonNullSibling cluster
     // Find also if the ring at radius 2 has any cell, in that case, merge
     std::vector<Cell*> nonNullSiblings(6 + 12);
