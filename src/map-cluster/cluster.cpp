@@ -105,10 +105,18 @@ std::vector<Cell*>& Cluster::getRing(Cell* center, uint16_t radius, bool invalid
 void Cluster::add(Cell* node, std::vector<Cell*>& siblings)
 {
     // Find if there is any nonNullSibling cluster
-    std::vector<Cell*> nonNullSiblings(siblings.size());
+    // Find also if the ring at radius 2 has any cell, in that case, merge
+    std::vector<Cell*> nonNullSiblings(6 + 12);
+    // Siblings
     auto lastInserted = std::copy_if(siblings.begin(), siblings.end(), nonNullSiblings.begin(), [this](Cell* s) {
-        return s->_cluster != nullptr;
+        return s && s->_cluster != nullptr;
     });
+    // Radius 2
+    auto radius2 = node->ring(2);
+    lastInserted = std::copy_if(radius2.begin(), radius2.end(), lastInserted, [this](Cell* s){
+        return s && s->_cluster != nullptr;
+    });
+    // Resize
     nonNullSiblings.resize(std::distance(nonNullSiblings.begin(), lastInserted));
 
     // It's a new node

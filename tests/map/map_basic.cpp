@@ -88,7 +88,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     GIVEN("A map with two cells and one pending which should merge") {
         Map map(0, 0, 200, 50);
         map.addTo(0, 0, new Entity());
-        map.addTo(3, 0, new Entity());
+        map.addTo(4, 0, new Entity());
         map.runScheduledOperations();
 
         // TODO: Make its own test
