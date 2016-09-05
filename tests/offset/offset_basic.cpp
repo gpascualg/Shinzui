@@ -13,9 +13,9 @@ SCENARIO("Offset can be created and manipulated", "[offset]") {
                 std::unordered_map<uint64_t, uint8_t> hashes;
 
                 // Not whole range
-                for (int16_t y = -3267; y < 3276; ++y)
+                for (int16_t y = -326; y < 327; ++y)
                 {
-                    for (int16_t x = -3267; x < 3276; ++x)
+                    for (int16_t x = -326; x < 327; ++x)
                     {
                         const Offset offset(x, y);
                         if (hashes.find(offset.hash()) != hashes.end())

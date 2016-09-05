@@ -49,6 +49,13 @@ foreach(folder ${SOURCE_FOLDERS})
     )
 endforeach()
 
+if (UNIX AND SHINZUI_COVERAGE)
+    AddDependency(
+        TARGET Shinzui
+        DEPENDENCY gcov
+    )
+endif()
+
 BuildNow(
     TARGET Shinzui
     DEFINES ${DEFINES}

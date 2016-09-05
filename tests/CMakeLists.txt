@@ -33,4 +33,14 @@ if (SHINZUI_BUILD_TESTS)
         EXECUTABLE ON
         OUTPUT_NAME ShinzuiTests
     )
+
+    if (UNIX AND SHINZUI_COVERAGE)
+        include(Coverage)
+
+        SETUP_TARGET_FOR_COVERAGE(
+            ShinzuiCoverage
+            ShinzuiTests
+            coverage
+        )
+    endif()
 endif()
