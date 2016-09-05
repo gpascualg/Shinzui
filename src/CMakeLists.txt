@@ -16,7 +16,21 @@ else()
         # Asio dependencies
         asio system date_time smart_ptr bind regex
     )
+
+    foreach (dep ${BOOST_DEPENDENCIES})
+        RequireExternal(
+            TARGET Shinzui
+            EXCLUDE ON
+            MODULE "boostorg/${dep}:develop"
+            INC_PATH "include"
+        )
+    endforeach()
 endif()
+
+set(DEFINES
+    BUILD_TESTS=${SHINZUI_BUILD_TESTS}
+    SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
+)
 
 set(SOURCE_FOLDERS
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -37,8 +51,7 @@ endforeach()
 
 BuildNow(
     TARGET Shinzui
-    BOOST_DEPENDENCIES ${BOOST_DEPENDENCIES}
-    DEFINES SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
+    DEFINES ${DEFINES}
     STATIC_LIB ON
     OUTPUT_NAME Shinzui
 )

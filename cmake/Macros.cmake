@@ -1,11 +1,11 @@
 include(CMakeParseArguments)
 include(ExternalProject)
 
-function(RequireBoost)
+function(RequireExternal)
     cmake_parse_arguments(
         ARG
-        ""
-        "TARGET;MODULE;WHERE"
+        "EXCLUDE"
+        "TARGET;MODULE;INC_PATH"
         ""
         ${ARGN}
     )
@@ -14,9 +14,17 @@ function(RequireBoost)
         message(FATAL_ERROR "Boost module not specified")
     endif()
 
-    ExternalProject_Add(Boost_${ARG_MODULE}
-        GIT_REPOSITORY https://github.com/boostorg/${ARG_MODULE}
-        GIT_TAG develop
+    string(REGEX MATCH "^([a-z]|[A-Z]|_|-|[0-9])+[^/]" GITHUB_USER ${ARG_MODULE})
+    string(REGEX MATCH "/(([a-z]|[A-Z]|_|-|[0-9])+[^:])" GITHUB_REPO ${ARG_MODULE})
+    set(GITHUB_REPO ${CMAKE_MATCH_1})
+    string(REGEX MATCH ":(([a-z]|[A-Z]|_|-|[0-9])+$)" GITHUB_TAG ${ARG_MODULE})
+    set(GITHUB_TAG ${CMAKE_MATCH_1})
+
+    message("Requires ${GITHUB_USER}/${GITHUB_REPO} at branch ${GITHUB_TAG}")
+
+    ExternalProject_Add(${GITHUB_USER}_${GITHUB_REPO}
+        GIT_REPOSITORY https://github.com/${GITHUB_USER}/${GITHUB_REPO}
+        GIT_TAG ${GITHUB_TAB}
         PREFIX ${CMAKE_BINARY_DIR}/third_party
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
@@ -25,25 +33,43 @@ function(RequireBoost)
         UPDATE_COMMAND ""
     )
 
-    set_target_properties(Boost_${ARG_MODULE} PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    add_dependencies(${ARG_TARGET} Boost_${ARG_MODULE})
+    if (ARG_EXCLUDE)
+        set_target_properties(${GITHUB_USER}_${GITHUB_REPO} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    endif()
 
-    AddToSources(
+    if (NOT ARG_INC_PATH)
+        set(ARG_INC_PATH "include")
+    endif()
+
+    AddDependency(
         TARGET ${ARG_TARGET}
-        INC_PATH ${CMAKE_BINARY_DIR}/third_party/src/Boost_${ARG_MODULE}/include
+        FORCE_DEPENDENCY ON
+        DEPENDENCY ${GITHUB_USER}_${GITHUB_REPO}
+        INC_PATH ${CMAKE_BINARY_DIR}/third_party/src/${GITHUB_USER}_${GITHUB_REPO}/${ARG_INC_PATH}
     )
 endfunction()
 
 function(AddDependency)
     cmake_parse_arguments(
         ARG
-        ""
-        "TARGET;DEPENDENCY"
+        "FORCE_DEPENDENCY"
+        "TARGET;DEPENDENCY;INC_PATH"
         ""
         ${ARGN}
     )
 
-    set(${ARG_TARGET}_DEPENDENCIES ${${ARG_TARGET}_DEPENDENCIES} ${ARG_DEPENDENCY} CACHE INTERNAL "")
+    if (NOT ARG_FORCE_DEPENDENCY)
+        set(${ARG_TARGET}_DEPENDENCIES ${${ARG_TARGET}_DEPENDENCIES} ${ARG_DEPENDENCY} CACHE INTERNAL "")
+    else()
+        set(${ARG_TARGET}_FORCE_DEPENDENCIES ${${ARG_TARGET}_FORCE_DEPENDENCIES} ${ARG_DEPENDENCY} CACHE INTERNAL "")
+    endif()
+
+    if (ARG_INC_PATH)
+        AddToSources(
+            TARGET ${ARG_TARGET}
+            INC_PATH ${ARG_INC_PATH}
+        )
+    endif()
 endfunction()
 
 function(AddToSources)
@@ -82,7 +108,7 @@ function(BuildNow)
         ARG
         "EXECUTABLE;STATIC_LIB;"
         "TARGET;BUILD_FUNC;OUTPUT_NAME;"
-        "BOOST_DEPENDENCIES;DEFINES"
+        "DEPENDENCIES;DEFINES"
         ${ARGN}
     )
 
@@ -92,8 +118,8 @@ function(BuildNow)
         add_library(${ARG_TARGET} STATIC ${${ARG_TARGET}_SOURCES})
     endif()
 
-    foreach(dep ${ARG_BOOST_DEPENDENCIES})
-        RequireBoost(
+    foreach(dep ${ARG_DEPENDENCIES})
+        RequireExternal(
             TARGET ${ARG_TARGET}
             MODULE ${dep}
         )
@@ -111,23 +137,21 @@ function(BuildNow)
         )
     endforeach()
 
+    foreach (dep ${${ARG_TARGET}_FORCE_DEPENDENCIES})
+        add_dependencies(${ARG_TARGET} ${dep})
+    endforeach()
+
     if (UNIX)
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-            set_target_properties(${ARG_TARGET} PROPERTIES
-                COMPILE_DEFINITIONS DEBUG
-            )
+            set(ARG_DEFINES ${ARG_DEFINES} DEBUG)
         else()
-            set_target_properties(${ARG_TARGET} PROPERTIES
-                COMPILE_DEFINITIONS NDEBUG
-            )
+            set(ARG_DEFINES ${ARG_DEFINES} NDEBUG)
         endif()
     endif()
 
-    foreach (def ${ARG_DEFINES})
-        set_target_properties(${ARG_TARGET} PROPERTIES
-            COMPILE_DEFINITIONS ${def}
-        )
-    endforeach()
+    set_target_properties(${ARG_TARGET} PROPERTIES
+        COMPILE_DEFINITIONS "${ARG_DEFINES}"
+    )
 
     set_target_properties(${ARG_TARGET} PROPERTIES
         OUTPUT_NAME ${ARG_OUTPUT_NAME}
@@ -138,7 +162,8 @@ endfunction()
 
 function(ResetAllTargets)
     foreach(target ${ALL_TARGETS})
-        set(${${target}_DEPENDENCIES} "" CACHE INTERNAL "")
+        set(${target}_DEPENDENCIES "" CACHE INTERNAL "")
+        set(${target}_FORCE_DEPENDENCIES "" CACHE INTERNAL "")
         set(${target}_SOURCES "" CACHE INTERNAL "")
         set(${target}_INCLUDE_DIRECTORIES "" CACHE INTERNAL "")
     endforeach()

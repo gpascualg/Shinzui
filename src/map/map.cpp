@@ -13,7 +13,7 @@ Map::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
     _x(x), _y(y),
     _dx(dx), _dy(dy)
 {
-    _scheduledOperations = new boost::lockfree::queue<MapOperation*>(2048);
+    _scheduledOperations = new QueueWithSize<MapOperation*>(2048);
 }
 
 void Map::runScheduledOperations()

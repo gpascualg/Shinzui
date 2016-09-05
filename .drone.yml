@@ -11,3 +11,4 @@ build:
     - apt-get -y install cmake
     - cmake ..
     - make
+    - tests/ShinzuiTests

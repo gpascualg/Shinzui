@@ -12,6 +12,49 @@ class Cell;
 struct MapOperation;
 class MapAwareEntity;
 
+#if BUILD_TESTS==ON
+    #include <boost/lockfree/queue.hpp>
+    #include <atomic>
+
+    template <typename T>
+    class QueueWithSize
+    {
+    public:
+        QueueWithSize(uint32_t capacity):
+            _queue(capacity),
+            _counter{ 0 }
+        {}
+
+        bool push(T const & t)
+        {
+            if (_queue.push(t))
+            {
+                ++_counter;
+                return true;
+            }
+            return false;
+        }
+
+        bool pop(T& t)
+        {
+            if (_queue.pop(t))
+            {
+                --_counter;
+                return true;
+            }
+            return false;
+        }
+
+        inline uint32_t size() { return _counter; }
+
+    private:
+        boost::lockfree::queue<T> _queue;
+        std::atomic<uint32_t> _counter;
+    };
+#else
+    using QueueWithSize<T> = boost::lockfree::queue<T>;
+#endif
+
 class Map
 {
 public:
@@ -39,7 +82,11 @@ public:
     // Creates siblings for a cell
     std::vector<Cell*> createSiblings(Cell* cell);
 
-    inline int size() { return _cells.size(); }
+    inline uint32_t size() { return _cells.size(); }
+
+#if BUILD_TESTS==ON
+    inline uint32_t scheduledSize() { return _scheduledOperations->size(); }
+#endif
 
 private:
     int32_t _x;
@@ -48,5 +95,5 @@ private:
     uint32_t _dy;
 
     std::unordered_map<uint64_t /*hash*/, Cell*> _cells;
-    boost::lockfree::queue<MapOperation*>* _scheduledOperations;
+    QueueWithSize<MapOperation*>* _scheduledOperations;
 };
