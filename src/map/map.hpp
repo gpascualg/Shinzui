@@ -9,6 +9,7 @@
 
 
 class Cell;
+class Cluster;
 struct MapOperation;
 class MapAwareEntity;
 
@@ -60,6 +61,7 @@ class Map
 public:
     Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy);
     Map(const Map& map) = default;
+    virtual ~Map();
 
     void runScheduledOperations();
 
@@ -82,6 +84,7 @@ public:
     // Creates siblings for a cell
     std::vector<Cell*> createSiblings(Cell* cell);
 
+    inline Cluster* cluster() { return _cluster; }
     inline uint32_t size() { return _cells.size(); }
 
 #if BUILD_TESTS==ON
@@ -89,6 +92,8 @@ public:
 #endif
 
 private:
+    Cluster* _cluster;
+
     int32_t _x;
     int32_t _y;
     uint32_t _dx;

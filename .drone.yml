@@ -1,7 +1,3 @@
-cache:
-  mount:
-    - build
-
 build:
   image: gcc:latest
   commands:
@@ -12,6 +8,10 @@ build:
     - cmake -DSHINZUI_BUILD_TESTS=ON -DSHINZUI_COVERAGE=ON ..
     - make ShinzuiCoverage
     - cp coverage.info.cleaned ../lcov.info
+
+cache:
+  mount:
+    - build
 
 publish:
   coverage:

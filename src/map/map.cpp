@@ -13,7 +13,14 @@ Map::Map(int32_t x, int32_t y, uint32_t dx, uint32_t dy) :
     _x(x), _y(y),
     _dx(dx), _dy(dy)
 {
+    _cluster = new Cluster();
     _scheduledOperations = new QueueWithSize<MapOperation*>(2048);
+}
+
+Map::~Map()
+{
+    delete _cluster;
+    delete _scheduledOperations;
 }
 
 void Map::runScheduledOperations()
@@ -108,7 +115,7 @@ Cell* Map::getOrCreate(const Offset& offset, bool siblings)
         LOG(LOG_CELLS, "Creating siblings");
 
         auto siblings = createSiblings(cell);
-        Cluster::get()->add(cell, siblings);
+        _cluster->add(cell, siblings);
         cell->_siblingsDone = true;
     }
 

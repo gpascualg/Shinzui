@@ -9,33 +9,28 @@
 
 class ClusterCenter;
 class Cell;
+class Map;
 
 
 class Cluster
 {
+    friend class Map;
+
 public:
-    static Cluster* get()
-    {
-        if (!_instance)
-        {
-            _instance = new Cluster();
-        }
-        return _instance;
-    }
+    virtual ~Cluster();
 
     void add(Cell* node, std::vector<Cell*>& siblings);
     void update(uint64_t elapsed);
 
+    inline uint32_t size() { return _uniqueClusters.size(); }
+
 private:
     Cluster();
-    virtual ~Cluster();
 
     uint16_t propagate(Cell* center, std::function<bool(Cell*)> fnc);
     std::vector<Cell*>& getRing(Cell* center, uint16_t radius, bool invalidate = false, bool recreate = true);
 
 private:
-    static Cluster* _instance;
-
     uint32_t _numClusters = 0;
     uint32_t _fetchCurrent = 0;
 

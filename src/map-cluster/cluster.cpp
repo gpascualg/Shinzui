@@ -8,8 +8,6 @@
 #include <algorithm>
 
 
-Cluster* Cluster::_instance = nullptr;
-
 Cluster::Cluster()
 {}
 
