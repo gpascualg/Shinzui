@@ -1,5 +1,7 @@
 #pragma once
 
+#include "queue_with_size.hpp"
+
 #include <array>
 #include <functional>
 #include <map>
@@ -8,6 +10,7 @@
 
 
 class ClusterCenter;
+class ClusterOperation;
 class Cell;
 class Map;
 
@@ -21,6 +24,7 @@ public:
 
     void add(Cell* node, std::vector<Cell*>& siblings);
     void update(uint64_t elapsed);
+    void runScheduledOperations();
 
     inline uint32_t size() { return _uniqueClusters.size(); }
 
@@ -33,6 +37,8 @@ private:
 private:
     uint32_t _numClusters = 0;
     uint32_t _fetchCurrent = 0;
+
+    QueueWithSize<ClusterOperation*>* _scheduledOperations;
 
     std::vector<ClusterCenter*> _uniqueClusters;
     std::unordered_map<Cell*, std::unordered_map<uint16_t, std::vector<Cell*>>> _cache;

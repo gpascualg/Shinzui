@@ -93,6 +93,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         // TODO: Make its own test
         map.cluster()->update(0);
+        map.cluster()->runScheduledOperations();
 
         map.addTo(2, 0, new Entity());
 
@@ -102,6 +103,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         WHEN("scheduled operations are ran") {
             map.runScheduledOperations();
+            map.cluster()->update(0);
+            map.cluster()->runScheduledOperations();
 
             THEN("only one cluster should remain") {
                 REQUIRE(map.cluster()->size() == 1);

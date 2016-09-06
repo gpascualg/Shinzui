@@ -2,7 +2,7 @@
 #include "cell.hpp"
 #include "debug.hpp"
 #include "cluster.hpp"
-#include "operations.hpp"
+#include "map_operation.hpp"
 #include "map_aware_entity.hpp"
 
 #include <algorithm>
@@ -60,6 +60,8 @@ void Map::runScheduledOperations()
                 // TODO Unkown operation error
                 break;
         }
+
+        delete operation;
     }
 }
 

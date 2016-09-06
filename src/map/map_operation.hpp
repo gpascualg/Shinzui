@@ -20,5 +20,3 @@ struct MapOperation
     const Offset offset;
     MapAwareEntity* entity;
 };
-
-#include "detail/operations.hpp"
