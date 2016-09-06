@@ -15,4 +15,5 @@ class Cell;
 struct ClusterCenter
 {
     Cell* center;
+    bool mergeSignaled = false;
 };

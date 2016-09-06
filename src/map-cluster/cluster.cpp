@@ -2,7 +2,7 @@
 #include "offset.hpp"
 #include "debug.hpp"
 #include "common.hpp"
-#include "cluster_element.hpp"
+#include "cluster_center.hpp"
 #include "cluster_operation.hpp"
 #include "cell.hpp"
 
@@ -50,21 +50,29 @@ void Cluster::update(uint64_t elapsed)
             {
                 LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);
 
-                if (cluster < node->_cluster)
+                // TODO: Do more in depth tests into this
+                if (!node->_cluster->mergeSignaled && !cluster->mergeSignaled)
                 {
-                    _scheduledOperations->push(new ClusterOperation {
-                        ClusterOperationType::MERGE,
-                        cluster,
-                        node->_cluster
-                    });
-                }
-                else
-                {
-                    _scheduledOperations->push(new ClusterOperation {
-                        ClusterOperationType::MERGE,
-                        node->_cluster,
-                        cluster
-                    });
+                    if (!node->_cluster->mergeSignaled)
+                    {
+                        _scheduledOperations->push(new ClusterOperation {
+                            ClusterOperationType::MERGE,
+                            node->_cluster,
+                            cluster
+                        });
+
+                        cluster->mergeSignaled = true;
+                    }
+                    else
+                    {
+                        _scheduledOperations->push(new ClusterOperation {
+                            ClusterOperationType::MERGE,
+                            cluster,
+                            node->_cluster
+                        });
+
+                        node->_cluster->mergeSignaled = true;
+                    }
                 }
             }
 
@@ -91,13 +99,13 @@ void Cluster::runScheduledOperations()
                 auto iterator1 = std::find(_uniqueClusters.begin(), _uniqueClusters.end(), cluster1);
                 auto iterator2 = std::find(_uniqueClusters.begin(), _uniqueClusters.end(), cluster2);
 
-                printf(FMT_PTR "\t" FMT_PTR "\n", cluster1, cluster2);
+                LOG(LOG_CLUSTERS, FMT_PTR "\t" FMT_PTR "\n", (uintptr_t)cluster1, (uintptr_t)cluster2);
 
                 if (iterator1 != _uniqueClusters.end() && iterator2 != _uniqueClusters.end())
                 {
                     auto center1 = cluster1->center;
                     auto center2 = cluster2->center;
-                    printf("\t>in (%lu)\n", _uniqueClusters.size());
+                    LOG(LOG_CLUSTERS, "\t>in (%u)\n", (uint32_t)_uniqueClusters.size());
 
                     // Move all from cluster 2 to cluster 1s
                     propagate(center2, [cluster2, cluster1](Cell* node) -> bool {
@@ -112,13 +120,14 @@ void Cluster::runScheduledOperations()
 
                     // Remove cluster 2
                     _uniqueClusters.erase(iterator2);
-                    printf("\t<out (%lu)\n", _uniqueClusters.size());
+                    LOG(LOG_CLUSTERS, "\t<out (%u)\n", (uint32_t)_uniqueClusters.size());
                 }
 
                 break;
             }
 
             case ClusterOperationType::RING_INVALIDATION:
+                getRing(operation->cluster1->center, operation->radius, true, true);
                 break;
 
             default:

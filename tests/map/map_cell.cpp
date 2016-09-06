@@ -9,8 +9,11 @@
 SCENARIO("Map cells can be fetched once created", "[map]") {
     GIVEN("A map with one cell and its siblings") {
         Map map;
-        map.addTo2D(0, 0, new Entity());
+        map.addTo(0, 0, new Entity());
         map.runScheduledOperations();
+
+        map.cluster()->update(0);
+        map.cluster()->runScheduledOperations();
 
         REQUIRE(map.size() == 7);
         REQUIRE(map.scheduledSize() == 0);

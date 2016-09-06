@@ -1,7 +1,7 @@
 #include "cell.hpp"
 #include "map.hpp"
 #include "offset.hpp"
-#include "cluster_element.hpp"
+#include "cluster_center.hpp"
 #include "map_aware_entity.hpp"
 #include "debug.hpp"
 
