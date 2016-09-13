@@ -11,8 +11,10 @@ class Client;
 class Server
 {
 public:
-    Server();
+    Server(uint16_t port);
     virtual ~Server();
+
+    void updateIO();
 
     void startAccept();
     virtual void handleAccept(Client* client, const boost::system::error_code& error);
