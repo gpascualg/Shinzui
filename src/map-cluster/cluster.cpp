@@ -9,6 +9,7 @@
 #include <algorithm>
 
 
+
 Cluster::Cluster()
 {
     _scheduledOperations = new QueueWithSize<ClusterOperation*>(2048);
@@ -127,7 +128,10 @@ void Cluster::runScheduledOperations()
             }
 
             case ClusterOperationType::RING_INVALIDATION:
-                getRing(operation->cluster1->center, operation->radius, true, true);
+                // We are not recreating clusters now because:
+                //   a) Would trigger one rebuilt per ring invalidation
+                //   b) Does not take profit of threading, whereas `update` does
+                getRing(operation->cluster1->center, operation->radius, true, false);
                 break;
 
             default:

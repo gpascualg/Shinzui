@@ -13,6 +13,8 @@ option(SHINZUI_USE_SYSTEM_BOOST "Use system installed Boost libraries" OFF)
 option(SHINZUI_BUILD_TESTS "Build Shinzui unit tests" ON)
 option(SHINZUI_COVERAGE "Build test coverage" OFF)
 option(SHINZUI_DEBUG "Build in debug mode" OFF)
+option(SHINZUI_LINT "Enable lint for Shinzui" OFF)
+
 
 # -[ Build type
 set(BUILD_TYPE_STR "Choose the type of

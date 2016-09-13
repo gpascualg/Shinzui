@@ -66,3 +66,8 @@ BuildNow(
     STATIC_LIB ON
     OUTPUT_NAME Shinzui
 )
+
+if (SHINZUI_LINT)
+    include(Lint)
+    setup_target_for_lint(ShinzuiLint "${Shinzui_SOURCES}")
+endif()
