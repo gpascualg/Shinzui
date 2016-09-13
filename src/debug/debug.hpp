@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #define LOG_NOTHING     0x0000000000000000
@@ -10,12 +12,12 @@
 
 
 // Expand is a trick for MSVC __VA_ARGS__ to work :(
-#define EXPAND(x)				x
+#define EXPAND(x)               x
 #define LOG_HELPER(fmt, ...)    EXPAND(printf(fmt "\n%s", __VA_ARGS__))
 #define LOG_ALWAYS(...)         EXPAND(LOG_HELPER(__VA_ARGS__, ""))
 
 #if !defined(NDEBUG) && BUILD_TESTS != ON
-    #define LOG(lvl, ...)       ((lvl & LOG_LEVEL) && EXPAND(LOG_HELPER(__VA_ARGS__, "")))
+    #define LOG(lvl, ...)       ((lvl & LOG_LEVEL) && EXPAND(LOG_HELPER(__VA_ARGS__, "")))  // NOLINT
 #else
     #define LOG(lvl, ...)
 #endif

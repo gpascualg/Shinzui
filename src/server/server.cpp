@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "server.hpp"
 #include "client.hpp"
 
@@ -28,13 +30,15 @@ void Server::updateIO()
 
 void Server::startAccept()
 {
-    Client* client = new Client(_service, [this](auto client, const auto error, auto size) {
+    Client* client = new Client(_service, [this](auto client, const auto error, auto size)
+    {
         this->handleRead(client, error, size);
-    });
+    });  // NOLINT(whitespace/braces)
 
-    _acceptor->async_accept(*client->socket(), [this, client](const auto error) {
+    _acceptor->async_accept(*client->socket(), [this, client](const auto error)
+    {
         this->handleAccept(client, error);
-    });
+    });  // NOLINT(whitespace/braces)
 }
 
 void Server::handleAccept(Client* client, const boost::system::error_code& error)

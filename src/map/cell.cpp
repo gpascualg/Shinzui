@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "cell.hpp"
 #include "map.hpp"
 #include "offset.hpp"
@@ -11,7 +13,7 @@
 
 std::vector<Cell*> Cell::upperHalfSiblings(uint16_t deviation)
 {
-    return {
+    return {  // NOLINT(whitespace/braces)
         _map->get(_offset.q() + 0 * deviation, _offset.r() - 1 * deviation),
         _map->get(_offset.q() + 1 * deviation, _offset.r() - 1 * deviation),
         _map->get(_offset.q() + 1 * deviation, _offset.r() + 0 * deviation)
@@ -20,7 +22,7 @@ std::vector<Cell*> Cell::upperHalfSiblings(uint16_t deviation)
 
 std::vector<Cell*> Cell::lowerHalfSiblings(uint16_t deviation)
 {
-    return {
+    return {  // NOLINT(whitespace/braces)
         _map->get(_offset.q() + 0 * deviation, _offset.r() + 1 * deviation),
         _map->get(_offset.q() - 1 * deviation, _offset.r() + 1 * deviation),
         _map->get(_offset.q() - 1 * deviation, _offset.r() + 0 * deviation)
@@ -30,7 +32,7 @@ std::vector<Cell*> Cell::lowerHalfSiblings(uint16_t deviation)
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
     std::vector<Cell*> results;
-    //results.resize(radius * 6, nullptr);
+    // results.resize(radius * 6, nullptr);
 
     int32_t q = _offset.q() + directions[4].q * radius;
     int32_t r = _offset.r() + directions[4].r * radius;

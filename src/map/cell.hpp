@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "offset.hpp"
@@ -7,6 +9,7 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
+#include <utility>
 
 
 class Cluster;
@@ -43,7 +46,7 @@ public:
         return _offset;
     }
 
-    // TODO: Accept rotation instead of upper/lower
+    // TODO(gpascualg): Accept rotation instead of upper/lower
     std::vector<Cell*> upperHalfSiblings(uint16_t deviation = 1);
     std::vector<Cell*> lowerHalfSiblings(uint16_t deviation = 1);
 

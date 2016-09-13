@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "cluster.hpp"
 #include "offset.hpp"
 #include "debug.hpp"
@@ -7,7 +9,7 @@
 #include "cell.hpp"
 
 #include <algorithm>
-
+#include <vector>
 
 
 Cluster::Cluster()
@@ -41,7 +43,8 @@ void Cluster::update(uint64_t elapsed)
         LOG(LOG_CLUSTERS, "-] Updating cluster " FMT_PTR, (uintptr_t)cluster);
 
         // Propagate updates
-        propagate(cluster->center, [cluster, elapsed, this](Cell* node) -> bool {
+        propagate(cluster->center, [cluster, elapsed, this](Cell* node) -> bool
+        {
             if (node->_cluster == cluster)
             {
                 node->update(elapsed);
@@ -51,26 +54,27 @@ void Cluster::update(uint64_t elapsed)
             {
                 LOG(LOG_CLUSTERS, "Should be at cluster " FMT_PTR, (uintptr_t)node->_cluster);
 
-                // TODO: Do more in depth tests into this
+                // TODO(gpascualg): Do more in depth tests into this
                 if (!node->_cluster->mergeSignaled && !cluster->mergeSignaled)
                 {
+                    // TODO(gpascualg): this could be written much better
                     if (!node->_cluster->mergeSignaled)
                     {
-                        _scheduledOperations->push(new ClusterOperation {
+                        _scheduledOperations->push(new ClusterOperation {  // NOLINT(whitespace/braces)
                             ClusterOperationType::MERGE,
                             node->_cluster,
                             cluster
-                        });
+                        });  // NOLINT(whitespace/braces)
 
                         cluster->mergeSignaled = true;
                     }
                     else
                     {
-                        _scheduledOperations->push(new ClusterOperation {
+                        _scheduledOperations->push(new ClusterOperation {  // NOLINT(whitespace/braces)
                             ClusterOperationType::MERGE,
                             cluster,
                             node->_cluster
-                        });
+                        });  // NOLINT(whitespace/braces)
 
                         node->_cluster->mergeSignaled = true;
                     }
@@ -78,9 +82,9 @@ void Cluster::update(uint64_t elapsed)
             }
 
             return false;
-        });
+        });  // NOLINT(whitespace/braces)
 
-        // TODO: Optimize cluster center
+        // TODO(gpascualg): Optimize cluster center
     }
 
     ++_fetchCurrent;
@@ -109,7 +113,8 @@ void Cluster::runScheduledOperations()
                     LOG(LOG_CLUSTERS, "\t>in (%u)\n", (uint32_t)_uniqueClusters.size());
 
                     // Move all from cluster 2 to cluster 1s
-                    propagate(center2, [cluster2, cluster1](Cell* node) -> bool {
+                    propagate(center2, [cluster2, cluster1](Cell* node) -> bool
+                    {
                         if (node->_cluster == cluster2)
                         {
                             node->_cluster = cluster1;
@@ -117,7 +122,7 @@ void Cluster::runScheduledOperations()
                         }
 
                         return false;
-                    });
+                    });  // NOLINT(whitespace/braces)
 
                     // Remove cluster 2
                     _uniqueClusters.erase(iterator2);
@@ -135,7 +140,7 @@ void Cluster::runScheduledOperations()
                 break;
 
             default:
-                // TODO: Log unkown
+                // TODO(gpascualg): Log unkown
                 break;
         }
 
@@ -193,10 +198,10 @@ std::vector<Cell*>& Cluster::getRing(Cell* center, uint16_t radius, bool invalid
 }
 
 
-void Cluster::add(Cell* node, std::vector<Cell*>& siblings)
+void Cluster::add(Cell* node, std::vector<Cell*> const& siblings)
 {
     // Create a cluster and assign the node
-    _uniqueClusters.emplace_back(new ClusterCenter { node });
+    _uniqueClusters.emplace_back(new ClusterCenter { node });  // NOLINT(whitespace/braces)
     node->_cluster = _uniqueClusters.back();
 
     // Setup neighbours cluster
@@ -209,11 +214,12 @@ void Cluster::add(Cell* node, std::vector<Cell*>& siblings)
     // Create ring invalidation operations
     for (auto k : {-1, 0, 1})
     {
-        _scheduledOperations->push(new ClusterOperation {
+        _scheduledOperations->push(new ClusterOperation
+        {
             ClusterOperationType::RING_INVALIDATION,
             node->_cluster,
             nullptr,
             node->offset().distance(center->offset()) + k
-        });
+        });  // NOLINT(whitespace/braces)
     }
 }

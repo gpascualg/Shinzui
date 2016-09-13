@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "boost/asio/asio_forward.hpp"
@@ -11,7 +13,7 @@ class Client;
 class Server
 {
 public:
-    Server(uint16_t port);
+    explicit Server(uint16_t port);
     virtual ~Server();
 
     void updateIO();

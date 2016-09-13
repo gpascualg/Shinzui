@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "offset.hpp"
@@ -21,7 +23,7 @@ struct MapOperation;
 class Map
 {
 public:
-    Map(boost::object_pool<Cell>* cellAllocator = nullptr);
+    explicit Map(boost::object_pool<Cell>* cellAllocator = nullptr);
     Map(const Map& map) = delete;
     virtual ~Map();
 
@@ -49,7 +51,7 @@ public:
     inline Cluster* cluster() { return _cluster; }
     inline uint32_t size() { return _cells.size(); }
 
-#if BUILD_TESTS==ON
+#if BUILD_TESTS == ON
     inline uint32_t scheduledSize() { return _scheduledOperations->size(); }
 #endif
 

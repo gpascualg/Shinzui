@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include <inttypes.h>

@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #define _USE_MATH_DEFINES
@@ -21,14 +23,16 @@ public:
     {
         union HashConverter
         {
-            struct {
+            struct
+            {
                 uint32_t high;
                 uint32_t low;
-            } b32;
+            }
+            b32;
             uint64_t b64;
         };
 
-        return (HashConverter {{(uint32_t)r(), (uint32_t)q()}}).b64;
+        return (HashConverter { { (uint32_t)r(), (uint32_t)q() } }).b64;  // NOLINT(whitespace/braces)
     }
 
     int distance(const Offset& offset) const
@@ -48,19 +52,19 @@ private:
 constexpr uint8_t cellSize = 9;
 
 #if defined(_WIN32) || defined(__clang__)
-	const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
+    const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
-	const Offset offsetOf(int32_t x, int32_t y)
-	{
-		return Offset(x / slopeX, y / cellSize);
-	}
+    const Offset offsetOf(int32_t x, int32_t y)
+    {
+        return Offset(x / slopeX, y / cellSize);
+    }
 #else
-	constexpr double slopeX = cos(15 * M_PI / 180.0) * cellSize;
+    constexpr double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
-	constexpr Offset offsetOf(int32_t x, int32_t y)
-	{
-		return Offset(x / slopeX, y / cellSize);
-	}
+    constexpr Offset offsetOf(int32_t x, int32_t y)
+    {
+        return Offset(x / slopeX, y / cellSize);
+    }
 #endif
 
 // Directions
@@ -69,7 +73,9 @@ struct Direction
     int32_t q;
     int32_t r;
 };
-static Direction directions[] = {
+
+static Direction directions[] =
+{
     {+1, -1}, {+1, +0}, {+0, +1},
     {-1, +1}, {-1, +0}, {+0, -1}
 };

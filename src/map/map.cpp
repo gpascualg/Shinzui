@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "map.hpp"
 #include "cell.hpp"
 #include "debug.hpp"
@@ -7,6 +9,8 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
+#include <vector>
 #include <boost/lockfree/queue.hpp>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/object_pool.hpp>
@@ -33,7 +37,8 @@ void Map::runScheduledOperations()
     {
         Cell* cell = nullptr;
 
-        switch (operation->type) {
+        switch (operation->type)
+        {
             case MapOperationType::ADD_ENTITY_CREATE:
                 cell = getOrCreate(std::move(operation->offset), true);
                 if (cell)
@@ -53,11 +58,11 @@ void Map::runScheduledOperations()
                 break;
 
             case MapOperationType::DESTROY:
-                // TODO: Not implemented yet
+                // TODO(gpascualg): Not implemented yet
                 break;
 
             default:
-                // TODO Unkown operation error
+                // TODO(gpascualg): Unkown operation error
                 break;
         }
 
@@ -77,11 +82,11 @@ void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e)
 
 void Map::addTo(const Offset&& offset, MapAwareEntity* e)
 {
-    _scheduledOperations->push(new MapOperation {
+    _scheduledOperations->push(new MapOperation {  // NOLINT(whitespace/braces)
         MapOperationType::ADD_ENTITY_CREATE,
         offset,
         e
-    });
+    });  // NOLINT(whitespace/braces)
 }
 
 Cell* Map::get(int32_t q, int32_t r)
@@ -133,7 +138,7 @@ std::vector<Cell*> Map::createSiblings(Cell* cell)
     int32_t q = offset.q();
     int32_t r = offset.r();
 
-    return {
+    return {  // NOLINT(whitespace/braces)
         getOrCreate(q + 0, r - 1, false),
         getOrCreate(q + 1, r - 1, false),
         getOrCreate(q + 1, r + 0, false),

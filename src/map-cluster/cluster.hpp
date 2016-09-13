@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "queue_with_size.hpp"
@@ -22,7 +24,7 @@ class Cluster
 public:
     virtual ~Cluster();
 
-    void add(Cell* node, std::vector<Cell*>& siblings);
+    void add(Cell* node, std::vector<Cell*> const& siblings);
     void update(uint64_t elapsed);
     void runScheduledOperations();
 

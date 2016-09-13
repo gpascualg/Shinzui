@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "boost/asio/asio_forward.hpp"
@@ -9,23 +11,23 @@
 
 class Client
 {
-	using ReadFunction = std::function<void(Client*, const boost::system::error_code*, size_t)>;
+    using ReadFunction = std::function<void(Client*, const boost::system::error_code*, size_t)>;
 
 public:
-	Client(boost::asio::io_service* io_service, ReadFunction readFunction);
-	Client(const Client& client) = delete;
-	virtual ~Client();
+    Client(boost::asio::io_service* io_service, ReadFunction readFunction);
+    Client(const Client& client) = delete;
+    virtual ~Client();
 
-	void scheduleRead(uint16_t bytesToRead, bool reset = false);
+    void scheduleRead(uint16_t bytesToRead, bool reset = false);
 
-	inline uint8_t readPhase() { return _readTimes; }
-	inline boost::asio::SocketForward* socket() { return _socket; }
+    inline uint8_t readPhase() { return _readTimes; }
+    inline boost::asio::SocketForward* socket() { return _socket; }
 
 private:
-	boost::asio::SocketForward* _socket;
-	ReadFunction _readFunction;
+    boost::asio::SocketForward* _socket;
+    ReadFunction _readFunction;
 
-	char* _data = nullptr;
-	uint16_t _totalRead = 0;
-	uint8_t _readTimes = 0;
+    char* _data = nullptr;
+    uint16_t _totalRead = 0;
+    uint8_t _readTimes = 0;
 };

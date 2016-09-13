@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
 #include "boost/lockfree/lockfree_forward.hpp"
@@ -5,7 +7,7 @@
 #include <inttypes.h>
 
 
-#if BUILD_TESTS==ON
+#if BUILD_TESTS == ON
     #include <boost/lockfree/queue.hpp>
     #include <atomic>
 
@@ -13,7 +15,7 @@
     class QueueWithSize
     {
     public:
-        QueueWithSize(uint32_t capacity):
+        explicit QueueWithSize(uint32_t capacity):
             _queue(capacity),
             _counter{ 0 }
         {}
@@ -28,7 +30,7 @@
             return false;
         }
 
-        bool pop(T& t)
+        bool pop(T& t)  // NOLINT(runtime/references)
         {
             if (_queue.pop(t))
             {
