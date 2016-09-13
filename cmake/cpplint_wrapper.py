@@ -180,9 +180,9 @@ def CheckEmptyBlockBody(fn, filename, clean_lines, linenum, error):
 
 def main():
     args = sys.argv[1:]
-    real = []
+    real = [sys.argv[0]]
     for arg in args:
-	real += arg.split(':')
+        real += arg.split(':')
 
     sys.argv = real
     cpplint.main()
