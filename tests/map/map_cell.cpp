@@ -32,10 +32,6 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
                 for (auto i : {0, 1, 2})
                 {
                     REQUIRE(upper[i] != nullptr);
-                }
-
-                for (auto i : {0, 1, 2})
-                {
                     REQUIRE(lower[i] != nullptr);
                 }
             }
@@ -43,7 +39,8 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
             THEN("cell has a ring with radius 1") {
                 auto ring = cell->ring(1);
 
-                for (auto i : {0, 1, 2, 3, 4, 5, 6})
+                REQUIRE(ring.size() == 6);
+                for (int i = 0; i < 6; ++i)
                 {
                     REQUIRE(ring[i] != nullptr);
                 }
@@ -52,7 +49,8 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
             THEN("cell has not a ring with radius 2") {
                 auto ring = cell->ring(2);
 
-                for (auto i : {0, 1, 2, 3, 4, 5, 6})
+                REQUIRE(ring.size() == 12);
+                for (int i = 0; i < 12; ++i)
                 {
                     REQUIRE(ring[i] == nullptr);
                 }
