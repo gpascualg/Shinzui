@@ -3,6 +3,7 @@
 #pragma once
 
 #include "boost/asio/asio_forward.hpp"
+#include "boost/pool/pool_forward.hpp"
 
 #include <inttypes.h>
 #include <cstddef>
@@ -13,7 +14,7 @@ class Client;
 class Server
 {
 public:
-    explicit Server(uint16_t port);
+    explicit Server(uint16_t port, boost::object_pool<Client>* pool = nullptr);
     virtual ~Server();
 
     void updateIO();
@@ -26,4 +27,6 @@ private:
     boost::asio::io_service* _service;
     boost::asio::SocketForward* _socket;
     boost::asio::AcceptorForward* _acceptor;
+
+    boost::object_pool<Client>* _pool;
 };

@@ -4,13 +4,16 @@
 #include "client.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/pool/object_pool.hpp>
 
 
 using tcp = boost::asio::ip::tcp;
 
 
-Server::Server(uint16_t port)
+Server::Server(uint16_t port, boost::object_pool<Client>* pool)
 {
+    _pool = pool ? pool : new boost::object_pool<Client>(2048);
+
     _service = new boost::asio::io_service;
     _acceptor = new tcp::acceptor(*_service, tcp::endpoint(tcp::v4(), port));
     _socket = new tcp::socket(*_service);
@@ -30,7 +33,7 @@ void Server::updateIO()
 
 void Server::startAccept()
 {
-    Client* client = new Client(_service, [this](auto client, const auto error, auto size)
+    Client* client = _pool->construct(_service, [this](auto client, const auto error, auto size)
     {
         this->handleRead(client, error, size);
     });  // NOLINT(whitespace/braces)

@@ -36,6 +36,9 @@ public:
         ++cellCount;
     }
 
+    virtual ~Cell()
+    {}
+
     inline const uint64_t hash() const
     {
         return _offset.hash();

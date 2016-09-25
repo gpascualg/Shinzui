@@ -10,6 +10,9 @@ class Cell;
 class MapAwareEntity
 {
 public:
+    virtual ~MapAwareEntity()
+    {}
+
     virtual uint32_t id() = 0;
 
     virtual void onAdded(Cell* cell) = 0;

@@ -57,27 +57,13 @@ void Cluster::update(uint64_t elapsed)
                 // TODO(gpascualg): Do more in depth tests into this
                 if (!node->_cluster->mergeSignaled && !cluster->mergeSignaled)
                 {
-                    // TODO(gpascualg): this could be written much better
-                    if (!node->_cluster->mergeSignaled)
-                    {
-                        _scheduledOperations->push(new ClusterOperation {  // NOLINT(whitespace/braces)
-                            ClusterOperationType::MERGE,
-                            node->_cluster,
-                            cluster
-                        });  // NOLINT(whitespace/braces)
+                    _scheduledOperations->push(new ClusterOperation {  // NOLINT(whitespace/braces)
+                        ClusterOperationType::MERGE,
+                        node->_cluster,
+                        cluster
+                    });  // NOLINT(whitespace/braces)
 
-                        cluster->mergeSignaled = true;
-                    }
-                    else
-                    {
-                        _scheduledOperations->push(new ClusterOperation {  // NOLINT(whitespace/braces)
-                            ClusterOperationType::MERGE,
-                            cluster,
-                            node->_cluster
-                        });  // NOLINT(whitespace/braces)
-
-                        node->_cluster->mergeSignaled = true;
-                    }
+                    cluster->mergeSignaled = true;
                 }
             }
 
