@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 project(Shinzui)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-utils)
 
 # -[ Macros and functions
 include(Configure)
 include(Macros)
+include(External)
 ResetAllTargets()
 
 # -[ Configuration

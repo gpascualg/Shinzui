@@ -1,3 +1,5 @@
+CreateTarget(TARGET Shinzui)
+
 if (SHINZUI_USE_SYSTEM_BOOST)
     find_package(Boost 1.62 REQUIRED)
     set(BOOST_DEPENDENCIES "")
@@ -23,51 +25,56 @@ else()
     foreach (dep ${BOOST_DEPENDENCIES})
         RequireExternal(
             TARGET Shinzui
-            EXCLUDE ON
+            EXCLUDE
+            SKIP_BUILD
+            SKIP_LINK
             MODULE "boostorg/${dep}:develop"
             INC_PATH "include"
         )
     endforeach()
 endif()
 
-set(DEFINES
-    BUILD_TESTS=${SHINZUI_BUILD_TESTS}
-    SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
-)
-
-set(SOURCE_FOLDERS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/debug
-    ${CMAKE_CURRENT_SOURCE_DIR}/defs
-    ${CMAKE_CURRENT_SOURCE_DIR}/map
-    ${CMAKE_CURRENT_SOURCE_DIR}/map-cluster
-    ${CMAKE_CURRENT_SOURCE_DIR}/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
-)
-
-foreach(folder ${SOURCE_FOLDERS})
-    AddToSources(
-        TARGET Shinzui
-        SRC_PATH ${folder}
-        GLOB_SEARCH ".hpp;.cpp"
+ResolveExternal(TARGET Shinzui)
+if (Shinzui_IS_RESOLVED)
+    set(DEFINES
+        BUILD_TESTS=${SHINZUI_BUILD_TESTS}
+        SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
     )
-endforeach()
 
-if (UNIX AND SHINZUI_COVERAGE)
-    AddDependency(
-        TARGET Shinzui
-        DEPENDENCY gcov
+    set(SOURCE_FOLDERS
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/debug
+        ${CMAKE_CURRENT_SOURCE_DIR}/defs
+        ${CMAKE_CURRENT_SOURCE_DIR}/map
+        ${CMAKE_CURRENT_SOURCE_DIR}/map-cluster
+        ${CMAKE_CURRENT_SOURCE_DIR}/server
+        ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
     )
-endif()
 
-BuildNow(
-    TARGET Shinzui
-    DEFINES ${DEFINES}
-    STATIC_LIB ON
-    OUTPUT_NAME Shinzui
-)
+    foreach(folder ${SOURCE_FOLDERS})
+        AddToSources(
+            TARGET Shinzui
+            SRC_PATH ${folder}
+            GLOB_SEARCH ".hpp;.cpp"
+        )
+    endforeach()
 
-if (SHINZUI_LINT)
-    include(Lint)
-    setup_target_for_lint(ShinzuiLint "${Shinzui_SOURCES}")
+    if (UNIX AND SHINZUI_COVERAGE)
+        AddDependency(
+            TARGET Shinzui
+            DEPENDENCY gcov
+        )
+    endif()
+
+    BuildNow(
+        TARGET Shinzui
+        DEFINES ${DEFINES}
+        STATIC_LIB
+        OUTPUT_NAME Shinzui
+    )
+
+    if (SHINZUI_LINT)
+        include(Lint)
+        setup_target_for_lint(ShinzuiLint "${Shinzui_SOURCES}")
+    endif()
 endif()

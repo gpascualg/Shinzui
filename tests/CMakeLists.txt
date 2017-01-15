@@ -4,7 +4,8 @@ if (SHINZUI_BUILD_TESTS)
     RequireExternal(
         TARGET ShinzuiTests
         MODULE philsquared/Catch:master
-        EXCLUDE ON
+        EXCLUDE
+        SKIP_LINK
         INC_PATH "include"
     )
 
@@ -30,7 +31,7 @@ if (SHINZUI_BUILD_TESTS)
     BuildNow(
         TARGET ShinzuiTests
         DEFINES SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
-        EXECUTABLE ON
+        EXECUTABLE
         OUTPUT_NAME ShinzuiTests
     )
 
