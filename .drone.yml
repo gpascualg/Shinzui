@@ -9,7 +9,7 @@ pipeline:
     restore: true
     mount:
       - build
-    volumnes:
+    volumes:
       - /tmp/cache:/cache
       
   build:
