@@ -34,7 +34,7 @@ pipeline:
       - /tmp/cache:/cache
 
   publish:
-    image: drone-plugins/drone-coverage:release/0.5
+    image: drone-plugins/drone-coverage:0.5
     token: b57f6ae8c1396a429a703cbbe14979e8d53e64c9
     server: http://g-build-server.asuscomm.com:8001
     include: lcov.info
