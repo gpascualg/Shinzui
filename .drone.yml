@@ -1,4 +1,12 @@
 pipeline:
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./build
+    volumnes:
+      - /tmp/cache:/cache
+      
   build:
     image: gcc:latest
     commands:
@@ -11,10 +19,15 @@ pipeline:
       - make ShinzuiLint
       - make ShinzuiCoverage
       - cp coverage.info.cleaned ../lcov.info
+      - cd ..
 
-cache:
-  mount:
-    - build
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./build
+    volumes:
+      - /tmp/cache:/cache
 
 publish:
   coverage:
