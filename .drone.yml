@@ -35,8 +35,5 @@ pipeline:
 
   publish:
     image: plugins/coverage
-    token: b57f6ae8c1396a429a703cbbe14979e8d53e64c9
     server: http://g-build-server.asuscomm.com:8001
     pattern: lcov.info
-    github:
-      token: b57f6ae8c1396a429a703cbbe14979e8d53e64c9
