@@ -37,3 +37,6 @@ pipeline:
     image: plugins/coverage
     server: http://g-build-server.asuscomm.com:8001
     pattern: lcov.info
+    environment:
+      - GITHUB_TOKEN=7f45169aecbef333a40544ee8349b96560747252
+
