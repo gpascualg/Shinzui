@@ -8,7 +8,7 @@
 
 
 class Cell;
-class ClusterCenter;
+struct ClusterCenter;
 
 enum class ClusterOperationType
 {

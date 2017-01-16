@@ -8,6 +8,19 @@
 #include <math.h>
 #include <algorithm>
 
+#ifdef _MSC_VER
+union HashConverter
+{
+	struct
+	{
+		uint32_t high;
+		uint32_t low;
+	}
+	b32;
+	uint64_t b64;
+};
+#endif
+
 struct Offset
 {
 public:
@@ -21,6 +34,7 @@ public:
 
     constexpr uint64_t hash() const
     {
+#ifndef _MSC_VER
         union HashConverter
         {
             struct
@@ -31,11 +45,12 @@ public:
             b32;
             uint64_t b64;
         };
+#endif
 
         return (HashConverter { { (uint32_t)r(), (uint32_t)q() } }).b64;  // NOLINT(whitespace/braces)
     }
 
-    int distance(const Offset& offset) const
+    /*constexpr*/ int distance(const Offset& offset) const
     {
         int32_t dq = std::abs(q() - offset.q());
         int32_t dr = std::abs(r() - offset.r());
@@ -54,7 +69,7 @@ constexpr uint8_t cellSize = 9;
 #if defined(_WIN32) || defined(__clang__)
     const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
-    const Offset offsetOf(int32_t x, int32_t y)
+    inline const Offset offsetOf(int32_t x, int32_t y)
     {
         return Offset(x / slopeX, y / cellSize);
     }

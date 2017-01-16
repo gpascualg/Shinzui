@@ -13,7 +13,7 @@
 
 
 class Cluster;
-class ClusterCenter;
+struct ClusterCenter;
 class Map;
 class Cell;
 class MapAwareEntity;

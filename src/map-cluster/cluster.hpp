@@ -11,8 +11,8 @@
 #include <unordered_map>
 
 
-class ClusterCenter;
-class ClusterOperation;
+struct ClusterCenter;
+struct ClusterOperation;
 class Cell;
 class Map;
 

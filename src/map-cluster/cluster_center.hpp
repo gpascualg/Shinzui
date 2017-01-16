@@ -18,4 +18,8 @@ struct ClusterCenter
 {
     Cell* center;
     bool mergeSignaled = false;
+
+	constexpr ClusterCenter(Cell* ctr) :
+		center(ctr)
+	{}
 };
