@@ -20,6 +20,7 @@ public:
 
     void scheduleRead(uint16_t bytesToRead, bool reset = false);
 
+    inline char* data() { return _data; }
     inline uint8_t readPhase() { return _readTimes; }
     inline boost::asio::SocketForward* socket() { return _socket; }
 

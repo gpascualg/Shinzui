@@ -19,6 +19,10 @@ union HashConverter
     b32;
     uint64_t b64;
 };
+
+#undef max
+#undef min
+
 #endif
 
 struct Offset
