@@ -58,8 +58,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
                 REQUIRE(map.scheduledSize() == 0);
             }
 
-            THEN("7 cells are created, the original and 6 siblings") {
-                REQUIRE(map.size() == 7);
+            THEN("1 non-updating cell has been created") {
+                REQUIRE(map.size() == 1);
             }
 
             THEN("entity is flagged as added") {
@@ -73,14 +73,14 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.addTo2D(0, 0, new Entity());
         map.runScheduledOperations();
 
-        REQUIRE(map.size() == 7);
+        REQUIRE(map.size() == 1);
         REQUIRE(map.scheduledSize() == 0);
 
         WHEN("the cluster is ran") {
             map.cluster()->update(0);
 
-            THEN("cluster has size 1") {
-                REQUIRE(map.cluster()->size() == 1);
+            THEN("cluster has size 0, non-updating entity!") {
+                REQUIRE(map.cluster()->size() == 0);
             }
         }
     }
@@ -97,17 +97,17 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         map.addTo(2, 0, new Entity());
 
-        REQUIRE(map.size() == 14);
+        REQUIRE(map.size() == 2);
         REQUIRE(map.scheduledSize() == 1);
-        REQUIRE(map.cluster()->size() == 2);
+        REQUIRE(map.cluster()->size() == 0);
 
         WHEN("scheduled operations are ran") {
             map.runScheduledOperations();
             map.cluster()->update(0);
             map.cluster()->runScheduledOperations();
 
-            THEN("only one cluster should remain") {
-                REQUIRE(map.cluster()->size() == 1);
+            THEN("no clusters should remain") {
+                REQUIRE(map.cluster()->size() == 0);
             }
         }
     }

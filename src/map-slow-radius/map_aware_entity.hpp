@@ -18,15 +18,13 @@ public:
     virtual ~MapAwareEntity()
     {}
 
-    inline Cell* cell() { return _cell; }
     inline Client* client() { return _client; }
     virtual uint32_t id() = 0;
 
     virtual void update(uint64_t elapsed) = 0;
-    virtual void onAdded(Cell* cell);
-    virtual void onRemoved(Cell* cell);
+    virtual void onAdded(Cell* cell) = 0;
+    virtual void onRemoved(Cell* cell) = 0;
 
 protected:
     Client* _client;
-    Cell* _cell;
 };

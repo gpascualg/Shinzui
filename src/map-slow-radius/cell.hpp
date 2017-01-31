@@ -27,9 +27,7 @@ class Cell
 public:
     explicit Cell(Map* map, const Offset& offset) :
         _offset(std::move(offset)),
-        _map(map),
-        _clusterId(0),
-        _lastUpdateKey(0)
+        _map(map)
     {
         LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
     }
@@ -37,20 +35,31 @@ public:
     virtual ~Cell()
     {}
 
-    inline const uint64_t hash() const { return _offset.hash(); }
-    inline const Offset& offset() const { return _offset; }
+    inline const uint64_t hash() const
+    {
+        return _offset.hash();
+    }
 
-    virtual void update(uint64_t elapsed, int updateKey);
+    inline const Offset& offset() const
+    {
+        return _offset;
+    }
+
+    // TODO(gpascualg): Accept rotation instead of upper/lower
+    std::vector<Cell*> upperHalfSiblings(uint16_t deviation = 1);
+    std::vector<Cell*> lowerHalfSiblings(uint16_t deviation = 1);
 
     std::vector<Cell*> ring(uint16_t radius = 1);
 
-protected:
+    void update(uint64_t elapsed);
+
+private:
     const Offset _offset;
 
     Map* _map;
-    uint64_t _clusterId;
-    int _lastUpdateKey;
+    bool _siblingsDone = false;
     std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _data;
     std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _playerData;
-};
 
+    ClusterCenter* _cluster = nullptr;
+};

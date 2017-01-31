@@ -41,8 +41,8 @@ public:
 
     // NOT thread-safe
     // Gets or creates a cell from the map
-    Cell* getOrCreate(int32_t q, int32_t r);
-    Cell* getOrCreate(const Offset& offset);
+    Cell* getOrCreate(int32_t q, int32_t r, bool siblings = true);
+    Cell* getOrCreate(const Offset& offset, bool siblings = true);
 
     // NOT thread-safe
     // Creates siblings for a cell

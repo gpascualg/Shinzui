@@ -11,6 +11,24 @@
 #include <vector>
 #include <map>
 
+std::vector<Cell*> Cell::upperHalfSiblings(uint16_t deviation)
+{
+    return {  // NOLINT(whitespace/braces)
+        _map->get(_offset.q() + 0 * deviation, _offset.r() - 1 * deviation),
+        _map->get(_offset.q() + 1 * deviation, _offset.r() - 1 * deviation),
+        _map->get(_offset.q() + 1 * deviation, _offset.r() + 0 * deviation)
+    };
+}
+
+std::vector<Cell*> Cell::lowerHalfSiblings(uint16_t deviation)
+{
+    return {  // NOLINT(whitespace/braces)
+        _map->get(_offset.q() + 0 * deviation, _offset.r() + 1 * deviation),
+        _map->get(_offset.q() - 1 * deviation, _offset.r() + 1 * deviation),
+        _map->get(_offset.q() - 1 * deviation, _offset.r() + 0 * deviation)
+    };
+}
+
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
     std::vector<Cell*> results;
@@ -34,14 +52,8 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
     return results;
 }
 
-void Cell::update(uint64_t elapsed, int updateKey)
+void Cell::update(uint64_t elapsed)
 {
-    if (updateKey == _lastUpdateKey)
-    {
-        return;
-    }
-    _lastUpdateKey = updateKey;
-
     LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
 
     // Update players

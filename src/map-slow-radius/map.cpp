@@ -40,17 +40,17 @@ void Map::runScheduledOperations()
         switch (operation->type)
         {
             case MapOperationType::ADD_ENTITY_CREATE:
-                cell = getOrCreate(std::move(operation->offset));
+                cell = getOrCreate(std::move(operation->offset), true);
                 if (cell)
                 {
-                    auto& data = cell->_data;
                     if (operation->entity->client())
                     {
-                        data = cell->_playerData;
-                        cluster()->add(operation->entity, createSiblings(cell));
+                        cell->_playerData.emplace(operation->entity->id(), operation->entity);
                     }
-
-                    data.emplace(operation->entity->id(), operation->entity);
+                    else
+                    {
+                        cell->_data.emplace(operation->entity->id(), operation->entity);
+                    }
                     operation->entity->onAdded(cell);
                 }
                 break;
@@ -59,13 +59,14 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    auto& data = cell->_data;
                     if (operation->entity->client())
                     {
-                        data = cell->_playerData;
+                        cell->_playerData.erase(operation->entity->id());
                     }
-                    
-                    data.erase(operation->entity->id());
+                    else
+                    {
+                        cell->_data.erase(operation->entity->id());
+                    }
                     operation->entity->onRemoved(cell);
                 }
                 break;
@@ -119,19 +120,27 @@ Cell* Map::get(const Offset& offset)
     return (*it).second;
 }
 
-Cell* Map::getOrCreate(int32_t q, int32_t r)
+Cell* Map::getOrCreate(int32_t q, int32_t r, bool siblings)
 {
-    return getOrCreate(Offset(q, r));
+    return getOrCreate(Offset(q, r), siblings);
 }
 
-Cell* Map::getOrCreate(const Offset& offset)
+Cell* Map::getOrCreate(const Offset& offset, bool siblings)
 {
     auto cell = get(offset);
     if (!cell)
     {
-        // Allocate cell
         auto result = _cells.emplace(offset.hash(), _cellAllocator->construct(this, offset));
         cell = (*result.first).second;
+    }
+
+    if (siblings && !cell->_siblingsDone)
+    {
+        LOG(LOG_CELLS, "Creating siblings");
+
+        auto siblings = createSiblings(cell);
+        _cluster->add(cell, siblings);
+        cell->_siblingsDone = true;
     }
 
     return cell;
@@ -144,11 +153,11 @@ std::vector<Cell*> Map::createSiblings(Cell* cell)
     int32_t r = offset.r();
 
     return {  // NOLINT(whitespace/braces)
-        getOrCreate(q + 0, r - 1),
-        getOrCreate(q + 1, r - 1),
-        getOrCreate(q + 1, r + 0),
-        getOrCreate(q + 0, r + 1),
-        getOrCreate(q - 1, r + 1),
-        getOrCreate(q - 1, r + 0),
+        getOrCreate(q + 0, r - 1, false),
+        getOrCreate(q + 1, r - 1, false),
+        getOrCreate(q + 1, r + 0, false),
+        getOrCreate(q + 0, r + 1, false),
+        getOrCreate(q - 1, r + 1, false),
+        getOrCreate(q - 1, r + 0, false),
     };
 }

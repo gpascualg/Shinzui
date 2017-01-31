@@ -15,7 +15,7 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        REQUIRE(map.size() == 7);
+        REQUIRE(map.size() == 1);
         REQUIRE(map.scheduledSize() == 0);
 
         WHEN("the main cell is required") {
@@ -25,24 +25,13 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
                 REQUIRE(cell != nullptr);
             }
 
-            THEN("cell has all 6 siblings") {
-                auto upper = cell->upperHalfSiblings(1);
-                auto lower = cell->lowerHalfSiblings(1);
-
-                for (auto i : {0, 1, 2})
-                {
-                    REQUIRE(upper[i] != nullptr);
-                    REQUIRE(lower[i] != nullptr);
-                }
-            }
-
             THEN("cell has a ring with radius 1") {
                 auto ring = cell->ring(1);
 
                 REQUIRE(ring.size() == 6);
                 for (int i = 0; i < 6; ++i)
                 {
-                    REQUIRE(ring[i] != nullptr);
+                    REQUIRE(ring[i] == nullptr);
                 }
             }
 
