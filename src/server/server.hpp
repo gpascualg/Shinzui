@@ -21,7 +21,7 @@ public:
 
     void startAccept();
     virtual void handleAccept(Client* client, const boost::system::error_code& error);
-    virtual void handleRead(Client* client, const boost::system::error_code* error, size_t size) = 0;
+    virtual void handleRead(Client* client, const boost::system::error_code& error, size_t size) = 0;
 
 private:
     boost::asio::io_service* _service;

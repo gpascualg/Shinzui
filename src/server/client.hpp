@@ -11,7 +11,7 @@
 
 class Client
 {
-    using ReadFunction = std::function<void(Client*, const boost::system::error_code*, size_t)>;
+    using ReadFunction = std::function<void(Client*, const boost::system::error_code&, size_t)>;
 
 public:
     Client(boost::asio::io_service* io_service, ReadFunction readFunction);
@@ -22,6 +22,7 @@ public:
 
     inline char* data() { return _data; }
     inline uint8_t readPhase() { return _readTimes; }
+    inline uint32_t totalRead() { return _totalRead; }
     inline boost::asio::SocketForward* socket() { return _socket; }
 
 private:
@@ -29,6 +30,6 @@ private:
     ReadFunction _readFunction;
 
     char* _data = nullptr;
-    uint16_t _totalRead = 0;
+    uint32_t _totalRead = 0;
     uint8_t _readTimes = 0;
 };

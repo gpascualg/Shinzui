@@ -36,7 +36,7 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
                 _totalRead += size;
             }
 
-            this->_readFunction(this, &error, size);
+            this->_readFunction(this, error, size);
         }
     );  // NOLINT(whitespace/parens)
 }
