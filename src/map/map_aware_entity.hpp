@@ -22,7 +22,7 @@ public:
     inline Client* client() { return _client; }
     virtual uint32_t id() = 0;
 
-    virtual void update(uint64_t elapsed) = 0;
+    virtual void update(uint64_t elapsed) {}
     virtual void onAdded(Cell* cell);
     virtual void onRemoved(Cell* cell);
 

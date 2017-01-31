@@ -43,6 +43,8 @@ void Map::runScheduledOperations()
                 cell = getOrCreate(std::move(operation->offset));
                 if (cell)
                 {
+                    operation->entity->onAdded(cell);
+
                     auto& data = cell->_data;
                     if (operation->entity->client())
                     {
@@ -51,7 +53,6 @@ void Map::runScheduledOperations()
                     }
 
                     data.emplace(operation->entity->id(), operation->entity);
-                    operation->entity->onAdded(cell);
                 }
                 break;
 

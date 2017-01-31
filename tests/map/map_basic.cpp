@@ -85,7 +85,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         }
     }
 
-    GIVEN("A map with two cells and one pending which should merge") {
+    GIVEN("A map with two cells and one pending") {
         Map map;
         map.addTo(0, 0, new Entity());
         map.addTo(4, 0, new Entity());
@@ -108,6 +108,33 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
             THEN("no clusters should remain") {
                 REQUIRE(map.cluster()->size() == 0);
+            }
+        }
+    }
+
+    GIVEN("A map with two cells and one pending which should merge") {
+        Map map;
+        map.addTo(0, 0, new Entity((Client*)1));
+        map.addTo(3, 0, new Entity((Client*)1));
+        map.runScheduledOperations();
+
+        // TODO: Make its own test
+        map.cluster()->update(0);
+        map.cluster()->runScheduledOperations();
+
+        map.addTo(1, 0, new Entity((Client*)1));
+
+        REQUIRE(map.size() == 14);
+        REQUIRE(map.scheduledSize() == 1);
+        REQUIRE(map.cluster()->size() == 2);
+
+        WHEN("scheduled operations are ran") {
+            map.runScheduledOperations();
+            map.cluster()->update(0);
+            map.cluster()->runScheduledOperations();
+
+            THEN("only one cluster should remain") {
+                REQUIRE(map.cluster()->size() == 1);
             }
         }
     }
