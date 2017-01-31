@@ -11,7 +11,7 @@ class Client;
 class MapAwareEntity
 {
 public:
-    MapAwareEntity(Client* client = nullptr) :
+    explicit MapAwareEntity(Client* client = nullptr) :
         _client(client)
     {}
 
