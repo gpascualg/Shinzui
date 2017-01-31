@@ -139,4 +139,84 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
             }
         }
     }
+
+    GIVEN("A map with entities") {
+        Map map;
+        auto e1 = new Entity((Client*)1);
+        auto e2 = new Entity();
+        e2->position().x = 3;
+        map.addTo(e1);
+        map.addTo(e2);
+        map.runScheduledOperations();
+
+        map.cluster()->update(0);
+        map.cluster()->runScheduledOperations();
+        
+        REQUIRE(map.size() == 7);
+        REQUIRE(map.scheduledSize() == 0);
+        REQUIRE(map.cluster()->size() == 1);
+
+        WHEN("one entity is removed") {
+            map.removeFrom(e1);
+
+            map.runScheduledOperations();
+            map.cluster()->update(0);
+            map.cluster()->runScheduledOperations();
+
+            THEN("only one entity should remain") {
+                REQUIRE(e1->cell() == nullptr);
+                REQUIRE(e2->cell() != nullptr);
+            }
+        }
+
+        WHEN("one entity is removed") {
+            map.removeFrom(e1);
+            map.removeFrom(e2);
+
+            map.runScheduledOperations();
+            map.cluster()->update(0);
+            map.cluster()->runScheduledOperations();
+
+            THEN("only one entity should remain") {
+                REQUIRE(e1->cell() == nullptr);
+                REQUIRE(e2->cell() == nullptr);
+            }
+        }
+    }
+
+    GIVEN("A map with entities") {
+        Map map;
+        auto e1 = new Entity((Client*)1);
+        auto e2 = new Entity((Client*)1);
+        e2->position().x = 50;
+
+        map.addTo(e1);
+        map.addTo(e2);
+        map.runScheduledOperations();
+
+        map.cluster()->update(0);
+        map.cluster()->runScheduledOperations();
+
+        REQUIRE(map.size() == 14);
+        REQUIRE(map.scheduledSize() == 0);
+        REQUIRE(map.cluster()->size() == 2);
+
+        WHEN("one entity is moved") {
+            e1->position().x = 50;
+            map.onMove(e1);
+
+            map.runScheduledOperations();
+            map.cluster()->update(0);
+            map.cluster()->runScheduledOperations();
+
+            THEN("both entities should have the same cell") {
+                REQUIRE(e1->cell() == e2->cell());
+            }
+
+            THEN("two clusters should remain") {
+                REQUIRE(map.cluster()->size() == 2);
+                // Cluster compaction would reduce it to 1
+            }
+        }
+    }
 }

@@ -65,6 +65,7 @@ void Map::runScheduledOperations()
                     if (operation->entity->client())
                     {
                         cell->_playerData.erase(operation->entity->id());
+                        cluster()->remove(operation->entity);
                     }
                     else
                     {
@@ -88,6 +89,21 @@ void Map::runScheduledOperations()
     }
 }
 
+void Map::onMove(MapAwareEntity* entity)
+{
+    Cell* cell = getOrCreate(offsetOf(entity->position().x, entity->position().y));
+    if (cell != entity->cell())
+    {
+        removeFrom(entity->cell(), entity);
+        addTo(cell, entity);
+    }
+}
+
+void Map::addTo(MapAwareEntity* e)
+{
+    addTo2D(e->position().x, e->position().y, e);
+}
+
 void Map::addTo2D(int32_t x, int32_t y, MapAwareEntity* e)
 {
     addTo(offsetOf(x, y), e);
@@ -103,6 +119,48 @@ void Map::addTo(const Offset&& offset, MapAwareEntity* e)
     _scheduledOperations->push(new MapOperation {  // NOLINT(whitespace/braces)
         MapOperationType::ADD_ENTITY_CREATE,
         offset,
+        e
+    });  // NOLINT(whitespace/braces)
+}
+
+void Map::addTo(Cell* cell, MapAwareEntity* e)
+{
+    _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
+        MapOperationType::ADD_ENTITY_CREATE,
+        cell->offset(),
+        e
+    });  // NOLINT(whitespace/braces)
+}
+
+void Map::removeFrom(MapAwareEntity* e)
+{
+    removeFrom2D(e->position().x, e->position().y, e);
+}
+
+void Map::removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e)
+{
+    removeFrom(offsetOf(x, y), e);
+}
+
+void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e)
+{
+    removeFrom(Offset(q, r), e);
+}
+
+void Map::removeFrom(const Offset&& offset, MapAwareEntity* e)
+{
+    _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
+        MapOperationType::REMOVE_ENTITY,
+        offset,
+        e
+    });  // NOLINT(whitespace/braces)
+}
+
+void Map::removeFrom(Cell* cell, MapAwareEntity* e)
+{
+    _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
+        MapOperationType::REMOVE_ENTITY,
+        cell->offset(),
         e
     });  // NOLINT(whitespace/braces)
 }

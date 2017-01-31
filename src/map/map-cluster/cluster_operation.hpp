@@ -12,14 +12,12 @@ struct ClusterCenter;
 
 enum class ClusterOperationType
 {
-    MERGE,
-    RING_INVALIDATION
+    DESTROY,
+    COMPACT
 };
 
 struct ClusterOperation
 {
     ClusterOperationType type;
-    ClusterCenter* cluster1;
-    ClusterCenter* cluster2;
-    int32_t radius;
+    uint64_t clusterId;
 };

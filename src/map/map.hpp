@@ -29,10 +29,22 @@ public:
 
     void runScheduledOperations();
 
+    // Automated add/remove
+    void onMove(MapAwareEntity* entity);
+
     // Schedules an ADD (and maybe CREATE) operations
+    void addTo(MapAwareEntity* e);
     void addTo2D(int32_t x, int32_t y, MapAwareEntity* e);
     void addTo(int32_t q, int32_t r, MapAwareEntity* e);
     void addTo(const Offset&& offset, MapAwareEntity* e);
+    void addTo(Cell* cell, MapAwareEntity* e);
+
+    // Schedules an REMOVE operation
+    void removeFrom(MapAwareEntity* e);
+    void removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e);
+    void removeFrom(int32_t q, int32_t r, MapAwareEntity* e);
+    void removeFrom(const Offset&& offset, MapAwareEntity* e);
+    void removeFrom(Cell* cell, MapAwareEntity* e);
 
     // NOT thread-safe
     // Gets a cell from the map

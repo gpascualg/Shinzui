@@ -105,3 +105,11 @@ void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
     _updaterEntities[uniqueClusterId].emplace_back(entity);
     _uniqueIdsList.emplace(uniqueClusterId);
 }
+
+void Cluster::remove(MapAwareEntity* entity)
+{
+    // Simply erase from the updaterEntities
+    auto clusterId = entity->cell()->_clusterId;
+    auto& entities = _updaterEntities[clusterId];
+    entities.erase(std::find(entities.begin(), entities.end(), entity));
+}
