@@ -12,8 +12,9 @@ class Entity : public MapAwareEntity
 public:
     uint32_t id() { return _id; }
 
-    void onAdded(Cell* cell) { hasBeenAdded = true; }
-    void onRemoved(Cell* cell) { hasBeenRemoved = true; }
+    void onAdded(Cell* cell) override { hasBeenAdded = true; }
+    void onRemoved(Cell* cell) override { hasBeenRemoved = true; }
+    void update(uint64_t elapsed) override {}
 
     bool hasBeenAdded = false;
     bool hasBeenRemoved = false;

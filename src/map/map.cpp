@@ -43,7 +43,14 @@ void Map::runScheduledOperations()
                 cell = getOrCreate(std::move(operation->offset), true);
                 if (cell)
                 {
-                    cell->_data.emplace(operation->entity->id(), operation->entity);
+                    if (operation->entity->client())
+                    {
+                        cell->_playerData.emplace(operation->entity->id(), operation->entity);
+                    }
+                    else
+                    {
+                        cell->_data.emplace(operation->entity->id(), operation->entity);
+                    }
                     operation->entity->onAdded(cell);
                 }
                 break;
@@ -52,7 +59,14 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    cell->_data.erase(operation->entity->id());
+                    if (operation->entity->client())
+                    {
+                        cell->_playerData.erase(operation->entity->id());
+                    }
+                    else
+                    {
+                        cell->_data.erase(operation->entity->id());
+                    }
                     operation->entity->onRemoved(cell);
                 }
                 break;

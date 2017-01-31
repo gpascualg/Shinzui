@@ -18,9 +18,6 @@ class Map;
 class Cell;
 class MapAwareEntity;
 
-static int cellCount = 0;
-static int updateCount = 0;
-
 
 class Cell
 {
@@ -33,7 +30,6 @@ public:
         _map(map)
     {
         LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
-        ++cellCount;
     }
 
     virtual ~Cell()
@@ -55,11 +51,7 @@ public:
 
     std::vector<Cell*> ring(uint16_t radius = 1);
 
-    void update(uint64_t elapsed)
-    {
-        LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
-        ++updateCount;
-    }
+    void update(uint64_t elapsed);
 
 private:
     const Offset _offset;
@@ -67,6 +59,7 @@ private:
     Map* _map;
     bool _siblingsDone = false;
     std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _data;
+    std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _playerData;
 
     ClusterCenter* _cluster = nullptr;
 };

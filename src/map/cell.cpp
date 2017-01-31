@@ -51,3 +51,20 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
 
     return results;
 }
+
+void Cell::update(uint64_t elapsed)
+{
+    LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
+
+    // Update players
+    for (auto pair : _playerData)
+    {
+        pair.second->update(elapsed);
+    }
+
+    // Update mobs
+    for (auto pair : _data)
+    {
+        pair.second->update(elapsed);
+    }
+}
