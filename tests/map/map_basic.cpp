@@ -123,9 +123,10 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.cluster()->runScheduledOperations();
 
         map.addTo(1, 0, new Entity((Client*)1));
+        map.addTo(1, 0, new Entity());
 
         REQUIRE(map.size() == 14);
-        REQUIRE(map.scheduledSize() == 1);
+        REQUIRE(map.scheduledSize() == 2);
         REQUIRE(map.cluster()->size() == 2);
 
         WHEN("scheduled operations are ran") {

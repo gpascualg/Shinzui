@@ -45,14 +45,15 @@ void Map::runScheduledOperations()
                 {
                     operation->entity->onAdded(cell);
 
-                    auto& data = cell->_data;
                     if (operation->entity->client())
                     {
-                        data = cell->_playerData;
+                        cell->_playerData.emplace(operation->entity->id(), operation->entity);
                         cluster()->add(operation->entity, createSiblings(cell));
                     }
-
-                    data.emplace(operation->entity->id(), operation->entity);
+                    else
+                    {
+                        cell->_data.emplace(operation->entity->id(), operation->entity);
+                    }
                 }
                 break;
 
@@ -63,10 +64,13 @@ void Map::runScheduledOperations()
                     auto& data = cell->_data;
                     if (operation->entity->client())
                     {
-                        data = cell->_playerData;
+                        cell->_playerData.erase(operation->entity->id());
+                    }
+                    else
+                    {
+                        cell->_data.erase(operation->entity->id());
                     }
 
-                    data.erase(operation->entity->id());
                     operation->entity->onRemoved(cell);
                 }
                 break;
