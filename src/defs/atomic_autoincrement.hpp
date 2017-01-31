@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include <atomic>
 
 

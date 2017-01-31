@@ -34,7 +34,7 @@ void Cluster::update(uint64_t elapsed)
     for (auto id : _uniqueIdsList)
     {
         // TODO(gpascualg): Launch thread per cluster
-        updateCluster(new UpdateStructure{ this, id, elapsed });
+        updateCluster(new UpdateStructure{ this, id, elapsed }); // NOLINT(whitespace/braces)
     }
 }
 
@@ -43,7 +43,9 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
     auto* cluster = updateStructure->cluster;
     auto id = updateStructure->id;
     auto elapsed = updateStructure->elapsed;
-    auto updateKey = rand();
+
+    // As long as they are different, race-conditions are of no importance
+    auto updateKey = rand(); // NOLINT(runtime/threadsafe_fn)
 
     // Get all old nodes
     for (auto subId : cluster->_uniqueClusters[id])

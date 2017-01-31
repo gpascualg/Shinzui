@@ -64,7 +64,7 @@ void Map::runScheduledOperations()
                     {
                         data = cell->_playerData;
                     }
-                    
+
                     data.erase(operation->entity->id());
                     operation->entity->onRemoved(cell);
                 }

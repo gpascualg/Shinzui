@@ -53,4 +53,3 @@ protected:
     std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _data;
     std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _playerData;
 };
-
