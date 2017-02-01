@@ -61,7 +61,6 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    auto& data = cell->_data;
                     if (operation->entity->client())
                     {
                         cell->_playerData.erase(operation->entity->id());

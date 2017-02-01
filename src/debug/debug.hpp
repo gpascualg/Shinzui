@@ -7,6 +7,7 @@
 #define LOG_DEBUG       0x0000000000000001
 #define LOG_CELLS       0x0000000000000002
 #define LOG_CLUSTERS    0x0000000000000004
+#define LOG_PACKETS     0x0000000000000008
 
 #define LOG_LEVEL       LOG_ALL
 
@@ -17,7 +18,9 @@
 #define LOG_ALWAYS(...)         EXPAND(LOG_HELPER(__VA_ARGS__, ""))
 
 #if !defined(NDEBUG) && BUILD_TESTS != ON
+    #define IF_LOG(lvl)         (lvl & LOG_LEVEL)
     #define LOG(lvl, ...)       ((lvl & LOG_LEVEL) && EXPAND(LOG_HELPER(__VA_ARGS__, "")))  // NOLINT
 #else
+    #define IF_LOG(lvl)         false
     #define LOG(lvl, ...)
 #endif
