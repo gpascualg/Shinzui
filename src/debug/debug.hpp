@@ -18,7 +18,7 @@
 #define LOG_ALWAYS(...)         EXPAND(LOG_HELPER(__VA_ARGS__, ""))
 
 #if !defined(NDEBUG) && BUILD_TESTS != ON
-    #define IF_LOG(lvl)         (lvl & LOG_LEVEL)
+    #define IF_LOG(lvl)         (lvl & LOG_LEVEL)  // NOLINT
     #define LOG(lvl, ...)       ((lvl & LOG_LEVEL) && EXPAND(LOG_HELPER(__VA_ARGS__, "")))  // NOLINT
 #else
     #define IF_LOG(lvl)         false
