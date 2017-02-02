@@ -51,12 +51,13 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
     );  // NOLINT(whitespace/parens)
 
     // Setup timeout!
-    _timer.async_wait([this] (const boost::system::error_code& error) {
-        if (!error)
+    _timer.async_wait([this] (const boost::system::error_code& error)
         {
-            close();
-        }
-    });  // NOLINT(whitespace/parens)
+            if (!error)
+            {
+                close();
+            }
+        });  // NOLINT(whitespace/parens)
 }
 
 void Client::close()

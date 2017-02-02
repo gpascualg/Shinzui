@@ -30,17 +30,18 @@ template <class TClient>
 void Server<TClient>::startAccept()
 {
     TClient* client = _pool.construct(&_service, [this](auto client, const auto error, auto size)
-    {
-        this->handleRead((TClient*)client, error, size);
-    }, [this](auto client)
-    {
-        this->_pool.destroy((TClient*)client);
-    });  // NOLINT(whitespace/braces)
+        {
+            this->handleRead(static_cast<TClient*>(client), error, size);
+        },
+        [this](auto client)
+        {
+            this->_pool.destroy(static_cast<TClient*>(client));
+        });  // NOLINT(whitespace/braces)
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
-    {
-        this->handleAccept((TClient*)client, error);
-    });  // NOLINT(whitespace/braces)
+        {
+            this->handleAccept(static_cast<TClient*>(client), error);
+        });  // NOLINT(whitespace/braces)
 }
 
 template <class TClient>

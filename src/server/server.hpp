@@ -21,7 +21,7 @@ public:
     void startAccept();
     virtual void handleAccept(TClient* client, const boost::system::error_code& error);
     virtual void handleRead(TClient* client, const boost::system::error_code& error, size_t size) = 0;
-    
+
 private:
     boost::asio::io_service _service;
     boost::asio::ip::tcp::socket _socket;
