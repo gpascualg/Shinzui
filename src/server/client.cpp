@@ -57,7 +57,7 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
             {
                 close();
             }
-        });  // NOLINT(whitespace/parens)
+        });  // NOLINT(whitespace/braces)
 }
 
 void Client::close()

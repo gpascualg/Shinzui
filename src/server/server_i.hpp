@@ -32,7 +32,7 @@ void Server<TClient>::startAccept()
     TClient* client = _pool.construct(&_service, [this](auto client, const auto error, auto size)
         {
             this->handleRead(static_cast<TClient*>(client), error, size);
-        },
+        },  // NOLINT(whitespace/braces)
         [this](auto client)
         {
             this->_pool.destroy(static_cast<TClient*>(client));
