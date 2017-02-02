@@ -29,7 +29,7 @@ public:
     inline uint8_t readPhase() { return _readTimes; }
     inline uint32_t totalRead() { return _totalRead; }
     inline boost::asio::ip::tcp::socket& socket() { return _socket; }
-    
+
     virtual void close();
 
 private:
