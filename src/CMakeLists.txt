@@ -34,6 +34,16 @@ else()
     endforeach()
 endif()
 
+# Require GLM
+RequireExternal(
+    TARGET Shinzui
+    EXCLUDE
+    SKIP_BUILD
+    SKIP_LINK
+    MODULE "g-truc/glm:0.9.8"
+    INC_PATH ""
+)
+
 ResolveExternal(TARGET Shinzui)
 if (Shinzui_IS_RESOLVED)
     set(DEFINES

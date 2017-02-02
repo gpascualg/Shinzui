@@ -2,31 +2,33 @@
 
 #pragma once
 
-#include "boost/asio/asio_forward.hpp"
-#include "boost/pool/pool_forward.hpp"
+#include <boost/asio.hpp>
+#include <boost/pool/object_pool.hpp>
 
 #include <inttypes.h>
 #include <cstddef>
 
 
-class Client;
-
+template <class TClient>
 class Server
 {
 public:
-    explicit Server(uint16_t port, boost::object_pool<Client>* pool = nullptr);
+    explicit Server(uint16_t port, int poolSize = 2048);
     virtual ~Server();
 
     void updateIO();
 
     void startAccept();
-    virtual void handleAccept(Client* client, const boost::system::error_code& error);
-    virtual void handleRead(Client* client, const boost::system::error_code& error, size_t size) = 0;
-
+    virtual void handleAccept(TClient* client, const boost::system::error_code& error);
+    virtual void handleRead(TClient* client, const boost::system::error_code& error, size_t size) = 0;
+    
 private:
-    boost::asio::io_service* _service;
-    boost::asio::SocketForward* _socket;
-    boost::asio::AcceptorForward* _acceptor;
+    boost::asio::io_service _service;
+    boost::asio::ip::tcp::socket _socket;
+    boost::asio::ip::tcp::acceptor _acceptor;
 
-    boost::object_pool<Client>* _pool;
+    boost::object_pool<TClient> _pool;
 };
+
+// Implementation details
+#include "server_i.hpp"

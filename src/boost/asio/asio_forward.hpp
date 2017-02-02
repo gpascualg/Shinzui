@@ -4,6 +4,12 @@
 
 // Boost forward declarations
 namespace boost {
+    /*
+    namespace posix_time {
+        class ptime;
+    }
+    */
+
 	namespace asio {
 		class io_service;
 
@@ -21,6 +27,18 @@ namespace boost {
 		template<typename Protocol, typename SocketAcceptorService>
 		class basic_socket_acceptor;
 
+        /*
+        template <typename Time>
+        struct time_traits;
+
+        template <typename TimeType, typename TimeTraits = boost::asio::time_traits<TimeType>>
+        class deadline_timer_service;
+
+        template <typename Time, typename TimeTraits, typename TimerService = deadline_timer_service<Time, TimeTraits>>
+        class basic_deadline_timer;
+
+        using deadline_timer = basic_deadline_timer<boost::posix_time::ptime>;
+        */
 
 		namespace ip {
 			class tcp;
