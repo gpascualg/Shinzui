@@ -11,6 +11,8 @@
 #include <type_traits>
 
 
+class Packet;
+
 class Client
 {
     using ReadFunction = std::function<void(Client*, const boost::system::error_code&, size_t)>;
@@ -25,9 +27,8 @@ public:
 
     void scheduleRead(uint16_t bytesToRead, bool reset = false);
 
-    inline char* data() { return _data; }
+    inline Packet* packet() { return _packet; }
     inline uint8_t readPhase() { return _readTimes; }
-    inline uint32_t totalRead() { return _totalRead; }
     inline boost::asio::ip::tcp::socket& socket() { return _socket; }
 
     virtual void close();
@@ -39,7 +40,6 @@ private:
     ReadFunction _readFunction;
     CloseFunction _closeFunction;
 
-    char* _data = nullptr;
-    uint32_t _totalRead = 0;
+    Packet* _packet;
     uint8_t _readTimes = 0;
 };

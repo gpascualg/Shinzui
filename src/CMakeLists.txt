@@ -58,6 +58,7 @@ if (Shinzui_IS_RESOLVED)
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/debug
         ${CMAKE_CURRENT_SOURCE_DIR}/defs
+        ${CMAKE_CURRENT_SOURCE_DIR}/io
         ${CMAKE_CURRENT_SOURCE_DIR}/map
         ${CMAKE_CURRENT_SOURCE_DIR}/map/map-cluster
         ${CMAKE_CURRENT_SOURCE_DIR}/server

@@ -36,12 +36,14 @@ void Server<TClient>::startAccept()
         [this](auto client)
         {
             this->_pool.destroy(static_cast<TClient*>(client));
-        });  // NOLINT(whitespace/braces)
+        }
+    );  // NOLINT(whitespace/parens)
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
         {
             this->handleAccept(static_cast<TClient*>(client), error);
-        });  // NOLINT(whitespace/braces)
+        }
+    );  // NOLINT(whitespace/parens)
 }
 
 template <class TClient>

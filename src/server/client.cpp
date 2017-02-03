@@ -3,6 +3,7 @@
 #include "client.hpp"
 #include "debug.hpp"
 #include "server.hpp"
+#include "packet.hpp"
 
 #include <boost/bind.hpp>
 
@@ -14,14 +15,16 @@ Client::Client(boost::asio::io_service* io_service, ReadFunction readFunction,
     _readFunction(readFunction),
     _closeFunction(closeFunction),
     _socket(*io_service),
-    _timer(*io_service, boost::posix_time::seconds(2))
+    _timer(*io_service)
 {
-    _data = new char[1024];
+    _packet = Packet::create();
+
+    LOG(LOG_DEBUG, "New client %p", this);
 }
 
 Client::~Client()
 {
-    delete[] _data;
+    _packet->destroy();
 }
 
 void Client::scheduleRead(uint16_t bytesToRead, bool reset)
@@ -33,38 +36,47 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
     if (reset)
     {
         _readTimes = 0;
-        _totalRead = 0;
+        _packet->reset();
     }
 
     // Start read
-    boost::asio::async_read(_socket, boost::asio::buffer(_data + _totalRead, bytesToRead),
+    boost::asio::async_read(_socket, _packet->recvBuffer(bytesToRead),
         [this](const boost::system::error_code& error, size_t size)
         {
-            if (!error)
+            if (error == boost::asio::error::eof)
+            {
+                LOG(LOG_DEBUG, "Closed: %" PRId64, time(NULL));
+                close();
+            }
+            else if (!error)
             {
                 ++_readTimes;
-                _totalRead += size;
+                _packet->addSize(size);
+                this->_readFunction(this, error, size);
             }
-
-            this->_readFunction(this, error, size);
+            // Note: boost::asio::error::operation_aborted when cancel()
         }
     );  // NOLINT(whitespace/parens)
 
     // Setup timeout!
+    _timer.expires_from_now(boost::posix_time::seconds(30));
     _timer.async_wait([this] (const boost::system::error_code& error)
         {
             if (!error)
             {
+                LOG(LOG_DEBUG, "Timeout: %" PRId64, time(NULL));
                 close();
             }
-        });  // NOLINT(whitespace/braces)
+        }
+    );  // NOLINT(whitespace/parens)
 }
 
 void Client::close()
 {
-    LOG(LOG_DEBUG, "Closed client %d", id());
+    LOG(LOG_DEBUG, "Closed client %" PRId64, id());
 
     _timer.cancel();
+    _socket.cancel();
     _socket.close();
     _closeFunction(this);
 }
