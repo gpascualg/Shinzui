@@ -15,7 +15,7 @@ class Packet
 
 public:
     virtual ~Packet();
-    
+
     static Packet* create()
     {
         auto packet = _pool.construct();
