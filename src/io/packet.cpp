@@ -8,3 +8,8 @@ Packet::Packet() :
     _size(0),
     _write(0)
 {}
+
+Packet::~Packet()
+{
+    reset();
+}

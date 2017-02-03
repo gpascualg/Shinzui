@@ -11,6 +11,7 @@ class Packet
     friend class boost::object_pool<Packet>;
 
 public:
+    virtual ~Packet();
     
     static Packet* create()
     {
