@@ -47,7 +47,7 @@ public:
         return v;
     }
 
-    inline void reset() { _read = _write = 0; }
+    inline void reset() { _read = _write = _size = 0; }
 
     inline uint16_t size() { return _size; }
     inline uint16_t read() { return _read; }
