@@ -1,9 +1,12 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
+#include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
 
 #include <inttypes.h>
-#include <boost/asio.hpp>
+#include <algorithm>
 
 
 class Packet
@@ -55,8 +58,8 @@ public:
     inline uint16_t written() { return _write; }
 
     inline uint8_t* data() { return _buffer; }
-    inline boost::asio::mutable_buffers_1 sendBuffer() { return boost::asio::buffer(_buffer, _write); };
-    inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); };
+    inline boost::asio::mutable_buffers_1 sendBuffer() { return boost::asio::buffer(_buffer, _write); }
+    inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }
 
     inline void destroy() { _pool.destroy(this); }
