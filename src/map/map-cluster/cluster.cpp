@@ -30,7 +30,6 @@ Cluster::~Cluster()
 void Cluster::update(uint64_t elapsed)
 {
     // Try to update unique clusters only
-    std::set<uint64_t> clusters;
     for (auto id : _uniqueIdsList)
     {
         // TODO(gpascualg): Launch thread per cluster

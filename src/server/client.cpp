@@ -52,7 +52,7 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
             {
                 ++_readTimes;
                 _packet->addSize(size);
-                this->_readFunction(this, error, size);
+                Server::get()->handleRead(this, error, size);
             }
             // Note: boost::asio::error::operation_aborted when cancel()
         }
@@ -78,5 +78,6 @@ void Client::close()
     _timer.cancel();
     _socket.cancel();
     _socket.close();
-    _closeFunction(this);
+
+    Server::get()->handleClose(this);
 }

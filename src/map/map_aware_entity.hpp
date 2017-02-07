@@ -19,6 +19,7 @@ class MapAwareEntity
 public:
     explicit MapAwareEntity(Client* client = nullptr) :
         _client(client),
+        _cell(nullptr),
         _position{0, 0}
     {}
 

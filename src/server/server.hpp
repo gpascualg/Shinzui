@@ -16,13 +16,18 @@ public:
     explicit Server(uint16_t port, int poolSize = 2048);
     virtual ~Server();
 
+    static Server* get() { return _instance; }
+
     void updateIO();
 
     void startAccept();
     virtual void handleAccept(TClient* client, const boost::system::error_code& error);
     virtual void handleRead(TClient* client, const boost::system::error_code& error, size_t size) = 0;
+    virtual void handleClose(TClient* client);
 
 private:
+    static Server<class T> _instance;
+
     boost::asio::io_service _service;
     boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::acceptor _acceptor;

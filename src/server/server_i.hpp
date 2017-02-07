@@ -7,6 +7,9 @@
 #include <boost/pool/object_pool.hpp>
 
 
+template <class <TClient>
+Server<TClient>* Server<TClient>::_instance = nullptr;
+
 template <class TClient>
 Server<TClient>::Server(uint16_t port, int poolSize) :
     _pool(poolSize),
@@ -14,6 +17,8 @@ Server<TClient>::Server(uint16_t port, int poolSize) :
     _acceptor(_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
     _socket(_service)
 {
+    assert(!_instance);
+    _instance = this;
 }
 
 template <class TClient>
@@ -53,3 +58,9 @@ void Server<TClient>::handleAccept(TClient* client, const boost::system::error_c
 
     startAccept();
 };
+
+template <class TClient>
+void Server<TClient>::handleClose(TClient* client)
+{
+    this->_pool.destroy(client);
+}
