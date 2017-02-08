@@ -25,6 +25,8 @@
     #define __func__ __FUNCTION__
     #define __FILENAME__ __FILE__ + BASE_DIR_LEN
 #else
+    #undef __func__
+    #define __func__ __FUNCTION__
     #define __FILENAME__ __FILE__
 #endif
 
