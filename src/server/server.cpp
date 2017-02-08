@@ -5,6 +5,8 @@
 #include "client.hpp"
 #include "atomic_autoincrement.hpp"
 
+#include <list>
+
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
 
