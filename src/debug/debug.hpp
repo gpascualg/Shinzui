@@ -13,7 +13,7 @@
 #define LOG_PACKET_RECV         0x0000000000000040
 #define LOG_PACKET_SEND         0x0000000000000080
 
-#define LOG_LEVEL       LOG_ALL & ~LOG_CLIENT_LIFECYCLE & ~LOG_PACKET_LIFECYCLE
+#define LOG_LEVEL       LOG_ALL
 
 #define STR(a) STR_(a)
 #define STR_(a) #a

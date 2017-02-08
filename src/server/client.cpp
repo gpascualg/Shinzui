@@ -18,7 +18,7 @@ Client::Client(boost::asio::io_service* io_service, uint64_t id) :
     _timer(*io_service)
 {
     _packet = Packet::create();
-    _entity = new MapAwareEntity(id, this);
+    _entity = Server::get()->newMapAwareEntity(id, this);
 
     LOG(LOG_CLIENT_LIFECYCLE, "New client %p", this);
 }
@@ -28,7 +28,7 @@ Client::~Client()
     LOG(LOG_CLIENT_LIFECYCLE, "Deleted client %" PRId64, id());
 
     _packet->destroy();
-    delete _entity;
+    Server::get()->destroyMapAwareEntity(_entity);
 }
 
 uint64_t Client::id()
@@ -38,7 +38,7 @@ uint64_t Client::id()
 
 bool Client::inMap()
 {
-    return _entity->cell();
+    return _entity->cell() != nullptr;
 }
 
 void Client::scheduleRead(uint16_t bytesToRead, bool reset)

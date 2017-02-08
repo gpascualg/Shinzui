@@ -1,9 +1,10 @@
 /* Copyright 2016 Guillem Pascual */
 
 #include "server.hpp"
-#include "debug.hpp"
-#include "client.hpp"
 #include "atomic_autoincrement.hpp"
+#include "client.hpp"
+#include "debug.hpp"
+#include "map_aware_entity.hpp"
 
 #include <list>
 
@@ -13,8 +14,7 @@
 
 Server* Server::_instance = nullptr;
 
-Server::Server(uint16_t port, int poolSize) :
-    _pool(poolSize),
+Server::Server(uint16_t port) :
     _service(),
     _acceptor(_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
     _socket(_service)
@@ -44,7 +44,7 @@ void Server::runScheduledOperations()
             }
             else
             {
-                _pool.destroy(client);
+                destroyClient(client);
             }
         }
     );  // NOLINT(whitespace/parens)
@@ -57,7 +57,7 @@ void Server::runScheduledOperations()
 
 void Server::startAccept()
 {
-    Client* client = _pool.construct(&_service, AtomicAutoIncrement<0>::get());
+    Client* client = newClient(&_service, AtomicAutoIncrement<0>::get());
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
         {
@@ -76,4 +76,24 @@ void Server::handleAccept(Client* client, const boost::system::error_code& error
 void Server::handleClose(Client* client)
 {
     _closeList.push(client);
+}
+
+Client* Server::newClient(boost::asio::io_service* service, uint64_t id)
+{
+    return new Client(service, id);
+}
+
+void Server::destroyClient(Client* client)
+{
+    delete client;
+}
+
+MapAwareEntity* Server::newMapAwareEntity(uint64_t id, Client* client)
+{
+    return new MapAwareEntity(id, client);
+}
+
+void Server::destroyMapAwareEntity(MapAwareEntity* entity)
+{
+    delete entity;
 }

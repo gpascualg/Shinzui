@@ -32,7 +32,7 @@ public:
     inline Packet* packet() { return _packet; }
     inline uint8_t readPhase() { return _readTimes; }
     inline boost::asio::ip::tcp::socket& socket() { return _socket; }
-
+    
     inline MapAwareEntity* entity() { return _entity; }
 
     virtual void close();

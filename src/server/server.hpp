@@ -11,11 +11,12 @@
 
 
 class Client;
+class MapAwareEntity;
 
 class Server
 {
 public:
-    explicit Server(uint16_t port, int poolSize = 2048);
+    explicit Server(uint16_t port);
     virtual ~Server();
 
     static Server* get() { return _instance; }
@@ -28,6 +29,12 @@ public:
     virtual void handleRead(Client* client, const boost::system::error_code& error, size_t size) = 0;
     virtual void handleClose(Client* client);
 
+    virtual Client* newClient(boost::asio::io_service* service, uint64_t id);
+    virtual void destroyClient(Client* client);
+
+    virtual MapAwareEntity* newMapAwareEntity(uint64_t id, Client* client);
+    virtual void destroyMapAwareEntity(MapAwareEntity* entity);
+
 private:
     static Server* _instance;
 
@@ -36,5 +43,4 @@ private:
     boost::asio::ip::tcp::acceptor _acceptor;
 
     boost::lockfree::queue<Client*, boost::lockfree::capacity<1024>> _closeList;
-    boost::object_pool<Client> _pool;
 };

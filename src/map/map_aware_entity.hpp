@@ -16,6 +16,8 @@ struct Position
 
 class MapAwareEntity
 {
+    friend class Map;
+
 public:
     explicit MapAwareEntity(uint64_t id, Client* client = nullptr);
     virtual ~MapAwareEntity();
@@ -28,6 +30,9 @@ public:
     virtual void update(uint64_t elapsed) {}
     virtual void onAdded(Cell* cell);
     virtual void onRemoved(Cell* cell);
+
+protected:
+    inline void cell(Cell* cell) { _cell = cell; }
 
 protected:
     Client* _client;
