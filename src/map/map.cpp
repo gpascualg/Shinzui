@@ -20,7 +20,7 @@ Map::Map(boost::object_pool<Cell>* cellAllocator)
 {
     _cellAllocator = cellAllocator ? cellAllocator : new boost::object_pool<Cell>(2048);
     _cluster = new Cluster();
-    _scheduledOperations = new QueueWithSize<MapOperation*>(2048);
+    _scheduledOperations = new boost::lockfree::queue<MapOperation*>(2048);
 }
 
 Map::~Map()
@@ -28,6 +28,13 @@ Map::~Map()
     delete _cellAllocator;
     delete _cluster;
     delete _scheduledOperations;
+}
+
+void Map::update(uint64_t elapsed)
+{
+    runScheduledOperations();
+    cluster()->update(elapsed);
+    cluster()->runScheduledOperations();
 }
 
 void Map::runScheduledOperations()
@@ -212,5 +219,21 @@ std::vector<Cell*> Map::createSiblings(Cell* cell)
         getOrCreate(q + 0, r + 1),
         getOrCreate(q - 1, r + 1),
         getOrCreate(q - 1, r + 0),
+    };
+}
+
+std::vector<Cell*> Map::getSiblings(Cell* cell)
+{
+    const Offset& offset = cell->offset();
+    int32_t q = offset.q();
+    int32_t r = offset.r();
+
+    return{  // NOLINT(whitespace/braces)
+        get(q + 0, r - 1),
+        get(q + 1, r - 1),
+        get(q + 1, r + 0),
+        get(q + 0, r + 1),
+        get(q - 1, r + 1),
+        get(q - 1, r + 0),
     };
 }

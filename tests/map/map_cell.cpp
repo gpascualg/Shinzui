@@ -9,7 +9,7 @@
 SCENARIO("Map cells can be fetched once created", "[map]") {
     GIVEN("A map with one cell and a non-updating entity") {
         Map map;
-        map.addTo(0, 0, new Entity());
+        map.addTo(0, 0, new Entity(0));
         map.runScheduledOperations();
 
         map.cluster()->update(0);
@@ -49,7 +49,7 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
 
     GIVEN("A map with one cell and an updating sibling") {
         Map map;
-        map.addTo(0, 0, new Entity((Client*)1));
+        map.addTo(0, 0, new Entity(0, (Client*)1));
         map.runScheduledOperations();
 
         map.cluster()->update(0);

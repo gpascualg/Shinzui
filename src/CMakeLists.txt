@@ -46,12 +46,13 @@ RequireExternal(
 
 ResolveExternal(TARGET Shinzui)
 if (Shinzui_IS_RESOLVED)
+    string(LENGTH ${CMAKE_SOURCE_DIR} BASE_DIR_LEN)
     set(DEFINES
         BUILD_TESTS=${SHINZUI_BUILD_TESTS}
-        SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
         BOOST_ERROR_CODE_HEADER_ONLY
         BOOST_SYSTEM_NO_DEPRECATED
         BOOST_ALL_NO_LIB
+        BASE_DIR_LEN=${BASE_DIR_LEN}
     )
 
     set(SOURCE_FOLDERS

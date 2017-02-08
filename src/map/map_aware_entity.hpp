@@ -17,19 +17,13 @@ struct Position
 class MapAwareEntity
 {
 public:
-    explicit MapAwareEntity(Client* client = nullptr) :
-        _client(client),
-        _cell(nullptr),
-        _position{0, 0}
-    {}
-
-    virtual ~MapAwareEntity()
-    {}
+    explicit MapAwareEntity(uint64_t id, Client* client = nullptr);
+    virtual ~MapAwareEntity();
 
     inline Cell* cell() { return _cell; }
     inline Client* client() { return _client; }
     inline Position& position() { return _position; }
-    virtual uint32_t id() = 0;
+    inline uint64_t id() { return _id; }
 
     virtual void update(uint64_t elapsed) {}
     virtual void onAdded(Cell* cell);
@@ -38,6 +32,7 @@ public:
 protected:
     Client* _client;
     Cell* _cell;
+    uint64_t _id;
 
     Position _position;
 };

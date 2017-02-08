@@ -7,16 +7,21 @@
 #include "debug.hpp"
 
 #include <array>
-#include <vector>
-#include <unordered_map>
+#include <list>
 #include <utility>
+#include <unordered_map>
+#include <vector>
+
+#include "intrusive.hpp"
+#include <boost/intrusive_ptr.hpp>
 
 
+class Cell;
 class Cluster;
 struct ClusterCenter;
 class Map;
-class Cell;
 class MapAwareEntity;
+class Packet;
 
 
 class Cell
@@ -25,22 +30,17 @@ class Cell
     friend class Cluster;
 
 public:
-    explicit Cell(Map* map, const Offset& offset) :
-        _offset(std::move(offset)),
-        _map(map),
-        _clusterId(0),
-        _lastUpdateKey(0)
-    {
-        LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
-    }
-
-    virtual ~Cell()
-    {}
+    explicit Cell(Map* map, const Offset& offset);
+    virtual ~Cell();
 
     inline const uint64_t hash() const { return _offset.hash(); }
     inline const Offset& offset() const { return _offset; }
+    inline Map* map() const { return _map; }
 
     virtual void update(uint64_t elapsed, int updateKey);
+    
+    void broadcast(boost::intrusive_ptr<Packet> packet, bool toNeighbours = false);
+    void clearBroadcast();
 
     std::vector<Cell*> ring(uint16_t radius = 1);
 
@@ -50,6 +50,9 @@ protected:
     Map* _map;
     uint64_t _clusterId;
     int _lastUpdateKey;
-    std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _data;
-    std::unordered_map<uint32_t /*id*/, MapAwareEntity*> _playerData;
+    std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _data;
+    std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _playerData;
+
+    // TODO(gpascualg): Use some lockfree structure?
+    std::list<boost::intrusive_ptr<Packet>> _broadcast;
 };

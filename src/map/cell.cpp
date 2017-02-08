@@ -1,15 +1,29 @@
 /* Copyright 2016 Guillem Pascual */
 
 #include "cell.hpp"
-#include "map.hpp"
-#include "offset.hpp"
+#include "client.hpp"
 #include "cluster_center.hpp"
-#include "map_aware_entity.hpp"
 #include "debug.hpp"
+#include "map.hpp"
+#include "map_aware_entity.hpp"
+#include "offset.hpp"
 
 #include <array>
 #include <vector>
 #include <map>
+
+
+Cell::Cell(Map* map, const Offset& offset) :
+    _offset(std::move(offset)),
+    _map(map),
+    _clusterId(0),
+    _lastUpdateKey(0)
+{
+    LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
+}
+
+Cell::~Cell()
+{}
 
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
@@ -42,12 +56,18 @@ void Cell::update(uint64_t elapsed, int updateKey)
     }
     _lastUpdateKey = updateKey;
 
-    LOG(LOG_CLUSTERS, "\t\t(%d, %d)", _offset.q(), _offset.r());
-
     // Update players
     for (auto pair : _playerData)
     {
-        pair.second->update(elapsed);
+        auto player = pair.second;
+        auto client = player->client();
+        player->update(elapsed);
+
+        // If there is any packet, broadcast it!
+        for (auto packet : _broadcast)
+        {
+            client->send(packet);
+        }
     }
 
     // Update mobs
@@ -55,4 +75,26 @@ void Cell::update(uint64_t elapsed, int updateKey)
     {
         pair.second->update(elapsed);
     }
+
+    // Clear all broadcasts (should already be done!)
+    // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
+    clearBroadcast();
+}
+
+void Cell::broadcast(boost::intrusive_ptr<Packet> packet, bool toNeighbours)
+{
+    _broadcast.push_back(packet);
+
+    if (toNeighbours)
+    {
+        for (auto* cell : _map->getSiblings(this))
+        {
+            cell->broadcast(packet);
+        }
+    }
+}
+
+void Cell::clearBroadcast()
+{
+    _broadcast.clear();
 }

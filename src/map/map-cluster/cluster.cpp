@@ -8,6 +8,7 @@
 #include "cluster_operation.hpp"
 #include "common.hpp"
 #include "debug.hpp"
+#include "map.hpp"
 #include "map_aware_entity.hpp"
 #include "offset.hpp"
 
@@ -59,9 +60,10 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
             entity->cell()->update(elapsed, updateKey);
 
             // Update neighbour cells in radius 1
-            for (auto* cell : entity->cell()->ring(1))
+            auto cell = entity->cell();
+            for (auto* sibling : cell->map()->getSiblings(cell))
             {
-                cell->update(elapsed, updateKey);
+                sibling->update(elapsed, updateKey);
             }
         }
     }
@@ -69,23 +71,33 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
 
 void Cluster::runScheduledOperations()
 {
-    // TODO(gpascualg): Unique IDs compation at _uniqueClusters, _updaterEntities level
+    // TODO(gpascualg): Unique IDs compaction at _uniqueClusters, _updaterEntities level
 }
 
 void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
 {
-    // Apply to current
-    uint64_t uniqueClusterId = AtomicAutoIncrement<1>::get();
-    entity->cell()->_clusterId = uniqueClusterId;
-    _uniqueClusters[uniqueClusterId].emplace_back(uniqueClusterId);
+    uint64_t uniqueClusterId = entity->cell()->_clusterId;
+
+    // Is the cell at a cluster already?
+    if (uniqueClusterId == 0)
+    {
+        // If not, assign a new cluster
+        uniqueClusterId = AtomicAutoIncrement<1>::get();
+        entity->cell()->_clusterId = uniqueClusterId;
+        _uniqueClusters[uniqueClusterId].emplace_back(uniqueClusterId);
+
+        LOG(LOG_CLUSTERS, "Create new cluster: %" PRId64, uniqueClusterId);
+    }
 
     // Are neighours in a cluster already? Assign them either way
     for (Cell* cell : siblings)
     {
-        // Get old id, if any (that is > 0)
+        // Get old id, if any (that is > 0) and different than current
         uint64_t oldId = cell->_clusterId;
-        if (oldId > 0)
+        if (oldId > 0 && oldId != uniqueClusterId)
         {
+            LOG(LOG_CLUSTERS, "\tMerged in %" PRId64 " <- %" PRId64, uniqueClusterId, oldId);
+
             // Remove unique Ids if any
             auto it = _uniqueIdsList.find(oldId);
             if (it != _uniqueIdsList.end())
@@ -94,6 +106,8 @@ void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
                 _uniqueClusters[uniqueClusterId].emplace_back(oldId);
                 _uniqueIdsList.erase(it);
             }
+
+            // TODO(gpascualg): What should we do with _updaterEntities[oldId]? - CRITICAL
         }
 
         // Setup current cell
@@ -107,8 +121,12 @@ void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
 
 void Cluster::remove(MapAwareEntity* entity)
 {
+    LOG(LOG_CLIENT_LIFECYCLE, "Removed updater entity %" PRId64, entity->id());
+
     // Simply erase from the updaterEntities
     auto clusterId = entity->cell()->_clusterId;
     auto& entities = _updaterEntities[clusterId];
+
+    // TODO(gpascualg): Find the entity in whichever cluster it is (see oldId above) - CRITICAL
     entities.erase(std::find(entities.begin(), entities.end(), entity));
 }

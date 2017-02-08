@@ -11,15 +11,15 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         Map map;
 
         REQUIRE(map.size() == 0);
-        REQUIRE(map.scheduledSize() == 0);
+        // REQUIRE(map.scheduledSize() == 0);
 
         WHEN("one entity is added to the map") {
-            Entity e;
+            Entity e(0);
             map.addTo2D(0, 0, &e);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
-                REQUIRE(map.scheduledSize() == 1);
+                // REQUIRE(map.scheduledSize() == 1);
             }
 
             THEN("entity is not flagged as added") {
@@ -28,12 +28,12 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         }
 
         WHEN("one entity is added to the map using hex coordinates") {
-            Entity e;
+            Entity e(0);
             map.addTo(0, 0, &e);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
-                REQUIRE(map.scheduledSize() == 1);
+                // REQUIRE(map.scheduledSize() == 1);
             }
 
             THEN("entity is not flagged as added") {
@@ -44,18 +44,18 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with one add operation pending") {
         Map map;
-        Entity e;
+        Entity e(0);
         map.addTo2D(0, 0, &e);
 
         REQUIRE(map.size() == 0);
-        REQUIRE(map.scheduledSize() == 1);
+        // REQUIRE(map.scheduledSize() == 1);
 
         WHEN("operations are ran") {
             map.runScheduledOperations();
 
             THEN("the numbers of cells increase and pending operations are 0") {
                 REQUIRE(map.size() > 0);
-                REQUIRE(map.scheduledSize() == 0);
+                // REQUIRE(map.scheduledSize() == 0);
             }
 
             THEN("1 non-updating cell has been created") {
@@ -70,11 +70,11 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with one cell") {
         Map map;
-        map.addTo2D(0, 0, new Entity());
+        map.addTo2D(0, 0, new Entity(0));
         map.runScheduledOperations();
 
         REQUIRE(map.size() == 1);
-        REQUIRE(map.scheduledSize() == 0);
+        // REQUIRE(map.scheduledSize() == 0);
 
         WHEN("the cluster is ran") {
             map.cluster()->update(0);
@@ -87,18 +87,18 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with two cells and one pending") {
         Map map;
-        map.addTo(0, 0, new Entity());
-        map.addTo(4, 0, new Entity());
+        map.addTo(0, 0, new Entity(0));
+        map.addTo(4, 0, new Entity(1));
         map.runScheduledOperations();
 
         // TODO: Make its own test
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        map.addTo(2, 0, new Entity());
+        map.addTo(2, 0, new Entity(2));
 
         REQUIRE(map.size() == 2);
-        REQUIRE(map.scheduledSize() == 1);
+        // REQUIRE(map.scheduledSize() == 1);
         REQUIRE(map.cluster()->size() == 0);
 
         WHEN("scheduled operations are ran") {
@@ -114,19 +114,19 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with two cells and one pending which should merge") {
         Map map;
-        map.addTo(0, 0, new Entity((Client*)1));
-        map.addTo(3, 0, new Entity((Client*)1));
+        map.addTo(0, 0, new Entity(0, (Client*)1));
+        map.addTo(3, 0, new Entity(1, (Client*)1));
         map.runScheduledOperations();
 
         // TODO: Make its own test
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        map.addTo(1, 0, new Entity((Client*)1));
-        map.addTo(1, 0, new Entity());
+        map.addTo(1, 0, new Entity(0, (Client*)1));
+        map.addTo(1, 0, new Entity(1));
 
         REQUIRE(map.size() == 14);
-        REQUIRE(map.scheduledSize() == 2);
+        // REQUIRE(map.scheduledSize() == 2);
         REQUIRE(map.cluster()->size() == 2);
 
         WHEN("scheduled operations are ran") {
@@ -142,8 +142,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with entities") {
         Map map;
-        auto e1 = new Entity((Client*)1);
-        auto e2 = new Entity();
+        auto e1 = new Entity(0, (Client*)1);
+        auto e2 = new Entity(1);
         e2->position().x = 3;
         map.addTo(e1);
         map.addTo(e2);
@@ -153,7 +153,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.cluster()->runScheduledOperations();
         
         REQUIRE(map.size() == 7);
-        REQUIRE(map.scheduledSize() == 0);
+        // REQUIRE(map.scheduledSize() == 0);
         REQUIRE(map.cluster()->size() == 1);
 
         WHEN("one entity is removed") {
@@ -186,8 +186,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with entities") {
         Map map;
-        auto e1 = new Entity((Client*)1);
-        auto e2 = new Entity((Client*)1);
+        auto e1 = new Entity(0, (Client*)1);
+        auto e2 = new Entity(1, (Client*)1);
         e2->position().x = 50;
 
         map.addTo(e1);
@@ -198,7 +198,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.cluster()->runScheduledOperations();
 
         REQUIRE(map.size() == 14);
-        REQUIRE(map.scheduledSize() == 0);
+        // REQUIRE(map.scheduledSize() == 0);
         REQUIRE(map.cluster()->size() == 2);
 
         WHEN("one entity is moved") {

@@ -12,6 +12,8 @@
 class Packet
 {
     friend class boost::object_pool<Packet>;
+    friend inline void intrusive_ptr_add_ref(Packet* x);
+    friend inline void intrusive_ptr_release(Packet* x);
 
 public:
     virtual ~Packet();
@@ -72,6 +74,7 @@ private:
     uint16_t _size;
     uint16_t _read;
     uint16_t _write;
+    uint16_t _refs;
 
     static boost::object_pool<Packet> _pool;
 };
