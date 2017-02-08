@@ -47,7 +47,7 @@ void Server::runScheduledOperations()
                 _pool.destroy(client);
             }
         }
-    );
+    );  // NOLINT(whitespace/parens)
 
     for (Client* client : pending)
     {

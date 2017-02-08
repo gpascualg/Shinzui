@@ -30,8 +30,10 @@
     #define __FILENAME__ __FILE__
 #endif
 
-#define LOG_HELPER(lvl, fmt, ...)    EXPAND(printf("[%.2X] %s:" STR(__LINE__) "(" __func__ ") > " fmt "\n%s", lvl, __FILENAME__, __VA_ARGS__))
-#define LOG_ALWAYS(...)         EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
+#define LOG_HELPER(lvl, fmt, ...) \
+    EXPAND(printf("[%.2X] %s:" STR(__LINE__) "(" __func__ ") > " fmt "\n%s", lvl, __FILENAME__, __VA_ARGS__))
+
+#define LOG_ALWAYS(...)             EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
 
 #define FORCE_DEBUG
 

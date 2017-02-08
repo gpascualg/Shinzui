@@ -38,7 +38,7 @@ public:
     inline Map* map() const { return _map; }
 
     virtual void update(uint64_t elapsed, int updateKey);
-    
+
     void broadcast(boost::intrusive_ptr<Packet> packet, bool toNeighbours = false);
     void clearBroadcast();
 

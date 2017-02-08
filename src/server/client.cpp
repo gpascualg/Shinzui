@@ -32,7 +32,7 @@ Client::~Client()
 }
 
 uint64_t Client::id()
-{ 
+{
     return _entity->id();
 }
 
@@ -92,7 +92,7 @@ void Client::send(boost::intrusive_ptr<Packet> packet)
         {
             LOG(LOG_PACKET_SEND, "\tPacket sent!");
         }
-    );
+    );  // NOLINT(whitespace/parens)
 }
 
 void Client::close()
