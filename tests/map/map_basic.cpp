@@ -15,7 +15,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         WHEN("one entity is added to the map") {
             Entity e(0);
-            map.addTo2D(0, 0, &e);
+            map.addTo2D(0, 0, &e, nullptr);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
@@ -29,7 +29,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         WHEN("one entity is added to the map using hex coordinates") {
             Entity e(0);
-            map.addTo(0, 0, &e);
+            map.addTo(0, 0, &e, nullptr);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
@@ -45,7 +45,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     GIVEN("A map with one add operation pending") {
         Map map;
         Entity e(0);
-        map.addTo2D(0, 0, &e);
+        map.addTo2D(0, 0, &e, nullptr);
 
         REQUIRE(map.size() == 0);
         // REQUIRE(map.scheduledSize() == 1);
@@ -70,7 +70,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with one cell") {
         Map map;
-        map.addTo2D(0, 0, new Entity(0));
+        map.addTo2D(0, 0, new Entity(0), nullptr);
         map.runScheduledOperations();
 
         REQUIRE(map.size() == 1);
@@ -87,15 +87,15 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with two cells and one pending") {
         Map map;
-        map.addTo(0, 0, new Entity(0));
-        map.addTo(4, 0, new Entity(1));
+        map.addTo(0, 0, new Entity(0), nullptr);
+        map.addTo(4, 0, new Entity(1), nullptr);
         map.runScheduledOperations();
 
         // TODO: Make its own test
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        map.addTo(2, 0, new Entity(2));
+        map.addTo(2, 0, new Entity(2), nullptr);
 
         REQUIRE(map.size() == 2);
         // REQUIRE(map.scheduledSize() == 1);
@@ -114,16 +114,16 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with two cells and one pending which should merge") {
         Map map;
-        map.addTo(0, 0, new Entity(0, (Client*)1));
-        map.addTo(3, 0, new Entity(1, (Client*)1));
+        map.addTo(0, 0, new Entity(0, (Client*)1), nullptr);
+        map.addTo(3, 0, new Entity(1, (Client*)1), nullptr);
         map.runScheduledOperations();
 
         // TODO: Make its own test
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        map.addTo(1, 0, new Entity(0, (Client*)1));
-        map.addTo(1, 0, new Entity(1));
+        map.addTo(1, 0, new Entity(0, (Client*)1), nullptr);
+        map.addTo(1, 0, new Entity(1), nullptr);
 
         REQUIRE(map.size() == 14);
         // REQUIRE(map.scheduledSize() == 2);
@@ -145,8 +145,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         auto e1 = new Entity(0, (Client*)1);
         auto e2 = new Entity(1);
         e2->position().x = 3;
-        map.addTo(e1);
-        map.addTo(e2);
+        map.addTo(e1, nullptr);
+        map.addTo(e2, nullptr);
         map.runScheduledOperations();
 
         map.cluster()->update(0);
@@ -157,7 +157,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         REQUIRE(map.cluster()->size() == 1);
 
         WHEN("one entity is removed") {
-            map.removeFrom(e1);
+            map.removeFrom(e1, nullptr);
 
             map.runScheduledOperations();
             map.cluster()->update(0);
@@ -170,8 +170,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         }
 
         WHEN("one entity is removed") {
-            map.removeFrom(e1);
-            map.removeFrom(e2);
+            map.removeFrom(e1, nullptr);
+            map.removeFrom(e2, nullptr);
 
             map.runScheduledOperations();
             map.cluster()->update(0);
@@ -190,8 +190,8 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         auto e2 = new Entity(1, (Client*)1);
         e2->position().x = 50;
 
-        map.addTo(e1);
-        map.addTo(e2);
+        map.addTo(e1, nullptr);
+        map.addTo(e2, nullptr);
         map.runScheduledOperations();
 
         map.cluster()->update(0);
