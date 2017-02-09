@@ -117,13 +117,16 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
     auto idx = directionIdxs(directionQ, directionR);
 
     get({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directionR })->broadcast(packet);  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directionR })  // NOLINT(whitespace/braces)
+        ->broadcast(packet);
 
     get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })->broadcast(packet);  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })  // NOLINT(whitespace/braces)
+        ->broadcast(packet);
 
     get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })->broadcast(packet);  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })  // NOLINT(whitespace/braces)
+        ->broadcast(packet);
 }
 
 void Map::onMove(MapAwareEntity* entity)
