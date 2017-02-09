@@ -14,12 +14,12 @@ MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
 MapAwareEntity::~MapAwareEntity()
 {}
 
-void MapAwareEntity::onAdded(Cell* cell)
+void MapAwareEntity::onAdded(Cell* cell, Cell* old)
 {
     _cell = cell;
 }
 
-void MapAwareEntity::onRemoved(Cell* cell)
+void MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 {
     _cell = nullptr;
 }

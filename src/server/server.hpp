@@ -11,6 +11,7 @@
 
 
 class Client;
+class Map;
 class MapAwareEntity;
 
 class Server
@@ -23,6 +24,8 @@ public:
 
     void updateIO();
     void runScheduledOperations();
+
+    inline Map* map() { return _map; }
 
     void startAccept();
     virtual void handleAccept(Client* client, const boost::system::error_code& error);
@@ -37,6 +40,8 @@ public:
 
 private:
     static Server* _instance;
+
+    Map* _map;
 
     boost::asio::io_service _service;
     boost::asio::ip::tcp::socket _socket;

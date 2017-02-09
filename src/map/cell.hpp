@@ -39,7 +39,7 @@ public:
 
     virtual void update(uint64_t elapsed, int updateKey);
 
-    void broadcast(boost::intrusive_ptr<Packet> packet, bool toNeighbours = false);
+    void broadcast(boost::intrusive_ptr<Packet> packet);
     void clearBroadcast();
 
     std::vector<Cell*> ring(uint16_t radius = 1);

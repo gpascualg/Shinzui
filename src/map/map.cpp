@@ -46,7 +46,7 @@ void Map::runScheduledOperations()
 
         switch (operation->type)
         {
-            case MapOperationType::ADD_ENTITY_CREATE:
+            case MapOperationType::ADD_ENTITY:
                 cell = getOrCreate(std::move(operation->offset));
                 if (cell)
                 {
@@ -62,7 +62,7 @@ void Map::runScheduledOperations()
                         cell->_data.emplace(operation->entity->id(), operation->entity);
                     }
 
-                    operation->entity->onAdded(cell);
+                    operation->entity->onAdded(cell, operation->param);
                 }
                 break;
 
@@ -80,7 +80,7 @@ void Map::runScheduledOperations()
                         cell->_data.erase(operation->entity->id());
                     }
 
-                    operation->entity->onRemoved(cell);
+                    operation->entity->onRemoved(cell, operation->param);
                 }
                 break;
 
@@ -97,79 +97,112 @@ void Map::runScheduledOperations()
     }
 }
 
+void Map::broadcastToSiblings(Cell* cell, boost::intrusive_ptr<Packet> packet)
+{
+    cell->broadcast(packet);
+
+    for (auto* sibling : getSiblings(cell))
+    {
+        sibling->broadcast(packet);
+    }
+}
+
+void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Packet> packet)
+{
+    auto offsetCell = cell->offset();
+    auto offsetExclude = exclude->offset();
+    auto directionQ = offsetCell.q() - offsetExclude.q();
+    auto directionR = offsetCell.r() - offsetExclude.r();
+
+    auto idx = directionIdxs(directionQ, directionR);
+    
+    get({ offsetCell.q() + directionQ + directionQ, 
+          offsetCell.r() + directionR + directionR })->broadcast(packet);
+
+    get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q, 
+          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })->broadcast(packet);
+
+    get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,
+          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })->broadcast(packet);
+}
+
 void Map::onMove(MapAwareEntity* entity)
 {
     Cell* cell = getOrCreate(offsetOf(entity->position().x, entity->position().y));
     if (cell != entity->cell())
     {
-        removeFrom(entity->cell(), entity);
-        addTo(cell, entity);
+        removeFrom(entity->cell(), entity, cell);
+        addTo(cell, entity, cell);
     }
 }
 
-void Map::addTo(MapAwareEntity* e)
+void Map::addTo(MapAwareEntity* e, Cell* old)
 {
-    addTo2D(e->position().x, e->position().y, e);
+    addTo2D(e->position().x, e->position().y, e, old);
 }
 
-void Map::addTo2D(int32_t x, int32_t y, MapAwareEntity* e)
+void Map::addTo2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* old)
 {
-    addTo(offsetOf(x, y), e);
+    addTo(offsetOf(x, y), e, old);
 }
 
-void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e)
+void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old)
 {
-    addTo(Offset(q, r), e);
+    addTo(Offset(q, r), e, old);
 }
 
-void Map::addTo(const Offset&& offset, MapAwareEntity* e)
+void Map::addTo(const Offset&& offset, MapAwareEntity* e, Cell* old)
 {
     _scheduledOperations->push(new MapOperation {  // NOLINT(whitespace/braces)
-        MapOperationType::ADD_ENTITY_CREATE,
+        MapOperationType::ADD_ENTITY,
         offset,
-        e
+        e,
+        old
     });  // NOLINT(whitespace/braces)
 }
 
-void Map::addTo(Cell* cell, MapAwareEntity* e)
+void Map::addTo(Cell* cell, MapAwareEntity* e, Cell* old)
 {
     _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
-        MapOperationType::ADD_ENTITY_CREATE,
+        MapOperationType::ADD_ENTITY,
         cell->offset(),
-        e
+        e,
+        old
     });  // NOLINT(whitespace/braces)
 }
 
-void Map::removeFrom(MapAwareEntity* e)
+void Map::removeFrom(MapAwareEntity* e, Cell* to)
 {
-    removeFrom2D(e->position().x, e->position().y, e);
+    removeFrom2D(e->position().x, e->position().y, e, to);
 }
 
-void Map::removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e)
+void Map::removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* to)
 {
-    removeFrom(offsetOf(x, y), e);
+    removeFrom(offsetOf(x, y), e, to);
 }
 
-void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e)
+void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e, Cell* to)
 {
-    removeFrom(Offset(q, r), e);
+    removeFrom(Offset(q, r), e, to);
 }
 
-void Map::removeFrom(const Offset&& offset, MapAwareEntity* e)
+void Map::removeFrom(const Offset&& offset, MapAwareEntity* e, Cell* to)
 {
     _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
         MapOperationType::REMOVE_ENTITY,
         offset,
-        e
+        e,
+        to
     });  // NOLINT(whitespace/braces)
 }
 
-void Map::removeFrom(Cell* cell, MapAwareEntity* e)
+void Map::removeFrom(Cell* cell, MapAwareEntity* e, Cell* to)
 {
     _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
         MapOperationType::REMOVE_ENTITY,
         cell->offset(),
-        e
+        e,
+        to
     });  // NOLINT(whitespace/braces)
 }
 

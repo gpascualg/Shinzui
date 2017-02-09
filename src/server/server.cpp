@@ -4,6 +4,7 @@
 #include "atomic_autoincrement.hpp"
 #include "client.hpp"
 #include "debug.hpp"
+#include "map.hpp"
 #include "map_aware_entity.hpp"
 
 #include <list>
@@ -21,10 +22,13 @@ Server::Server(uint16_t port) :
 {
     assert(!_instance);
     _instance = this;
+    _map = new Map();
 }
 
 Server::~Server()
-{}
+{
+    delete _map;
+}
 
 void Server::updateIO()
 {

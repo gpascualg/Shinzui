@@ -9,6 +9,12 @@
 #include <algorithm>
 
 
+union f2u
+{
+    float f;
+    uint32_t u;
+};
+
 class Packet
 {
     friend class boost::object_pool<Packet>;
@@ -36,6 +42,14 @@ public:
     {
         *reinterpret_cast<T*>(_buffer + _write) = v;
         _write += sizeof(T);
+        return *this;
+    }
+
+    template <>
+    Packet& operator<<(float v)
+    {
+        *reinterpret_cast<uint32_t*>(_buffer + _write) = f2u{ v }.u;
+        _write += sizeof(uint32_t);
         return *this;
     }
 

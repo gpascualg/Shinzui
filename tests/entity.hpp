@@ -14,8 +14,8 @@ public:
 
     uint32_t id() { return _id; }
 
-    void onAdded(Cell* cell) override { hasBeenAdded = true; MapAwareEntity::onAdded(cell); }
-    void onRemoved(Cell* cell) override { hasBeenRemoved = true; MapAwareEntity::onRemoved(cell);}
+    void onAdded(Cell* cell, Cell* old) override { hasBeenAdded = true; MapAwareEntity::onAdded(cell, old); }
+    void onRemoved(Cell* cell, Cell* to) override { hasBeenRemoved = true; MapAwareEntity::onRemoved(cell, to); }
     void update(uint64_t elapsed) override { MapAwareEntity::update(elapsed); }
 
     bool hasBeenAdded = false;

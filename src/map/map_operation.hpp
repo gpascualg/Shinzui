@@ -11,7 +11,7 @@ class MapAwareEntity;
 
 enum class MapOperationType
 {
-    ADD_ENTITY_CREATE,
+    ADD_ENTITY,
     REMOVE_ENTITY,
     DESTROY
 };
@@ -21,4 +21,5 @@ struct MapOperation
     MapOperationType type;
     const Offset offset;
     MapAwareEntity* entity;
+    Cell* param;
 };

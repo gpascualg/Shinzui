@@ -108,7 +108,7 @@ void Client::close()
     auto cell = entity()->cell();
     if (cell)
     {
-        cell->map()->removeFrom(cell, entity());
+        cell->map()->removeFrom(cell, entity(), nullptr);
     }
 
     // Recycle client

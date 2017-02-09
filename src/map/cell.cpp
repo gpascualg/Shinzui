@@ -82,17 +82,9 @@ void Cell::update(uint64_t elapsed, int updateKey)
     clearBroadcast();
 }
 
-void Cell::broadcast(boost::intrusive_ptr<Packet> packet, bool toNeighbours)
+void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
 {
     _broadcast.push_back(packet);
-
-    if (toNeighbours)
-    {
-        for (auto* cell : _map->getSiblings(this))
-        {
-            cell->broadcast(packet);
-        }
-    }
 }
 
 void Cell::clearBroadcast()

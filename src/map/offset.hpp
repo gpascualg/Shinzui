@@ -7,6 +7,8 @@
 #include <inttypes.h>
 #include <math.h>
 #include <algorithm>
+#include <unordered_map>
+
 
 #ifdef _MSC_VER
 union HashConverter
@@ -93,8 +95,29 @@ struct Direction
     int32_t r;
 };
 
+// Index to direction
 static Direction directions[] =
 {
     {+1, -1}, {+1, +0}, {+0, +1},
     {-1, +1}, {-1, +0}, {+0, -1}
 };
+
+struct pair_hash {
+    std::size_t operator () (const std::pair<int32_t, int32_t> &p) const {
+        return Offset(p.first, p.second).hash();
+    }
+};
+
+// Direction to index
+static inline int32_t directionIdxs(int32_t q, int32_t r)
+{
+    if (q == +1 && r == -1) return 0;
+    if (q == +1 && r == +0) return 1;
+    if (q == +0 && r == +1) return 2;
+    if (q == -1 && r == +1) return 3;
+    if (q == -1 && r == +0) return 4;
+    if (q == +0 && r == -1) return 5;
+    
+    return -1;
+}
+static constexpr int32_t MAX_DIR_IDX = 6;
