@@ -115,15 +115,15 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
     auto directionR = offsetCell.r() - offsetExclude.r();
 
     auto idx = directionIdxs(directionQ, directionR);
-    
-    get({ offsetCell.q() + directionQ + directionQ, 
-          offsetCell.r() + directionR + directionR })->broadcast(packet);
 
-    get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q, 
-          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })->broadcast(packet);
+    get({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directionR })->broadcast(packet);  // NOLINT(whitespace/braces)
 
-    get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,
-          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })->broadcast(packet);
+    get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })->broadcast(packet);  // NOLINT(whitespace/braces)
+
+    get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
+          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })->broadcast(packet);  // NOLINT(whitespace/braces)
 }
 
 void Map::onMove(MapAwareEntity* entity)

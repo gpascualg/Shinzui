@@ -47,7 +47,7 @@ public:
 
     Packet& operator<<(float v)
     {
-        *reinterpret_cast<uint32_t*>(_buffer + _write) = f2u{ v }.u;
+        *reinterpret_cast<uint32_t*>(_buffer + _write) = f2u{ v }.u;  // NOLINT(whitespace/braces)
         _write += sizeof(uint32_t);
         return *this;
     }
