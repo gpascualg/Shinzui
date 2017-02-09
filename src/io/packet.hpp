@@ -45,7 +45,6 @@ public:
         return *this;
     }
 
-    template <>
     Packet& operator<<(float v)
     {
         *reinterpret_cast<uint32_t*>(_buffer + _write) = f2u{ v }.u;
