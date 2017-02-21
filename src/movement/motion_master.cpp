@@ -5,6 +5,8 @@
 #include "map.hpp"
 #include "server.hpp"
 
+#include <utility>
+
 
 MotionMaster::MotionMaster(MapAwareEntity* owner) :
     _owner(owner),
