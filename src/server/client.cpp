@@ -65,7 +65,7 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
             else if (!error)
             {
                 ++_readTimes;
-                _packet->addSize(size);
+                _packet->addSize((uint16_t)size);
                 Server::get()->handleRead(this, error, size);
             }
             // Note: boost::asio::error::operation_aborted when cancel()

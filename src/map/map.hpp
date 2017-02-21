@@ -12,6 +12,7 @@
 
 #include "intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
+#include <glm/glm.hpp>
 
 
 class Cell;
@@ -41,14 +42,14 @@ public:
 
     // Schedules an ADD (and maybe CREATE) operations
     void addTo(MapAwareEntity* e, Cell* old);
-    void addTo2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* old);
+    void addTo2D(const glm::vec2& pos, MapAwareEntity* e, Cell* old);
     void addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old);
     void addTo(const Offset&& offset, MapAwareEntity* e, Cell* old);
     void addTo(Cell* cell, MapAwareEntity* e, Cell* old);
 
     // Schedules an REMOVE operation
     void removeFrom(MapAwareEntity* e, Cell* to);
-    void removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* to);
+    void removeFrom2D(const glm::vec2& pos, MapAwareEntity* e, Cell* to);
     void removeFrom(int32_t q, int32_t r, MapAwareEntity* e, Cell* to);
     void removeFrom(const Offset&& offset, MapAwareEntity* e, Cell* to);
     void removeFrom(Cell* cell, MapAwareEntity* e, Cell* to);

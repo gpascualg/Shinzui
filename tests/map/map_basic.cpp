@@ -4,6 +4,7 @@
 #include <cell.hpp>
 #include <cluster.hpp>
 #include <map.hpp>
+#include <motion_master.hpp>
 
 
 SCENARIO("Map cells can be created and eliminated", "[map]") {
@@ -15,7 +16,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         WHEN("one entity is added to the map") {
             Entity e(0);
-            map.addTo2D(0, 0, &e, nullptr);
+            map.addTo2D({ 0, 0 }, &e, nullptr);
 
             THEN("the number of cells remains constant but scheduled operations increase") {
                 REQUIRE(map.size() == 0);
@@ -45,7 +46,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     GIVEN("A map with one add operation pending") {
         Map map;
         Entity e(0);
-        map.addTo2D(0, 0, &e, nullptr);
+        map.addTo2D({ 0, 0 }, &e, nullptr);
 
         REQUIRE(map.size() == 0);
         // REQUIRE(map.scheduledSize() == 1);
@@ -70,7 +71,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
     GIVEN("A map with one cell") {
         Map map;
-        map.addTo2D(0, 0, new Entity(0), nullptr);
+        map.addTo2D({ 0, 0 }, new Entity(0), nullptr);
         map.runScheduledOperations();
 
         REQUIRE(map.size() == 1);
@@ -144,7 +145,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         Map map;
         auto e1 = new Entity(0, (Client*)1);
         auto e2 = new Entity(1);
-        e2->position().x = 3;
+        e2->motionMaster()->teleport({ 3,0 });
         map.addTo(e1, nullptr);
         map.addTo(e2, nullptr);
         map.runScheduledOperations();
@@ -188,7 +189,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         Map map;
         auto e1 = new Entity(0, (Client*)1);
         auto e2 = new Entity(1, (Client*)1);
-        e2->position().x = 50;
+        e2->motionMaster()->teleport({ 50, 0 });
 
         map.addTo(e1, nullptr);
         map.addTo(e2, nullptr);
@@ -202,7 +203,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         REQUIRE(map.cluster()->size() == 2);
 
         WHEN("one entity is moved") {
-            e1->position().x = 50;
+            e1->motionMaster()->teleport({ 50, 0 });
             map.onMove(e1);
 
             map.runScheduledOperations();

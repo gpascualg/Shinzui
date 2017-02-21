@@ -3,16 +3,13 @@
 #pragma once
 
 #include <inttypes.h>
+#include <glm/glm.hpp>
 
 
 class Cell;
 class Client;
+class MotionMaster;
 
-struct Position
-{
-    float x;
-    float y;
-};
 
 class MapAwareEntity
 {
@@ -24,10 +21,10 @@ public:
 
     inline Cell* cell() { return _cell; }
     inline Client* client() { return _client; }
-    inline Position& position() { return _position; }
+    inline MotionMaster* motionMaster() { return _motionMaster; }
     inline uint64_t id() { return _id; }
 
-    virtual void update(uint64_t elapsed) {}
+    virtual void update(uint64_t elapsed);
     virtual void onAdded(Cell* cell, Cell* old);
     virtual void onRemoved(Cell* cell, Cell* to);
 
@@ -35,9 +32,8 @@ protected:
     inline void cell(Cell* cell) { _cell = cell; }
 
 protected:
+    MotionMaster* _motionMaster;
     Client* _client;
     Cell* _cell;
     uint64_t _id;
-
-    Position _position;
 };

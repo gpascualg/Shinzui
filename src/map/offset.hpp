@@ -76,16 +76,26 @@ constexpr uint8_t cellSize = 9;
 #if defined(_WIN32) || defined(__clang__)
     const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
+    inline const Offset offsetOf(float x, float y)
+    {
+        return Offset((int32_t)x, (int32_t)y);
+    }
+
     inline const Offset offsetOf(int32_t x, int32_t y)
     {
-        return Offset(x / slopeX, y / cellSize);
+        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
     }
 #else
     constexpr double slopeX = cos(15 * M_PI / 180.0) * cellSize;
 
+    inline const Offset offsetOf(float x, float y)
+    {
+        return Offset((int32_t)x, (int32_t)y);
+    }
+
     constexpr Offset offsetOf(int32_t x, int32_t y)
     {
-        return Offset(x / slopeX, y / cellSize);
+        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
     }
 #endif
 
@@ -105,7 +115,7 @@ static Direction directions[] =
 
 struct pair_hash
 {
-    std::size_t operator () (const std::pair<int32_t, int32_t> &p) const
+    uint64_t operator () (const std::pair<int32_t, int32_t> &p) const
     {
         return Offset(p.first, p.second).hash();
     }

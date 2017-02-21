@@ -6,6 +6,7 @@
 #include "cluster.hpp"
 #include "map_operation.hpp"
 #include "map_aware_entity.hpp"
+#include "motion_master.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -131,7 +132,8 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
 
 void Map::onMove(MapAwareEntity* entity)
 {
-    Cell* cell = getOrCreate(offsetOf(entity->position().x, entity->position().y));
+    auto& pos = entity->motionMaster()->position();
+    Cell* cell = getOrCreate(offsetOf(pos.x, pos.y));
     if (cell != entity->cell())
     {
         removeFrom(entity->cell(), entity, cell);
@@ -141,12 +143,12 @@ void Map::onMove(MapAwareEntity* entity)
 
 void Map::addTo(MapAwareEntity* e, Cell* old)
 {
-    addTo2D(e->position().x, e->position().y, e, old);
+    addTo2D(e->motionMaster()->position(), e, old);
 }
 
-void Map::addTo2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* old)
+void Map::addTo2D(const glm::vec2& pos, MapAwareEntity* e, Cell* old)
 {
-    addTo(offsetOf(x, y), e, old);
+    addTo(offsetOf(pos.x, pos.y), e, old);
 }
 
 void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old)
@@ -176,12 +178,12 @@ void Map::addTo(Cell* cell, MapAwareEntity* e, Cell* old)
 
 void Map::removeFrom(MapAwareEntity* e, Cell* to)
 {
-    removeFrom2D(e->position().x, e->position().y, e, to);
+    removeFrom2D(e->motionMaster()->position(), e, to);
 }
 
-void Map::removeFrom2D(int32_t x, int32_t y, MapAwareEntity* e, Cell* to)
+void Map::removeFrom2D(const glm::vec2& pos, MapAwareEntity* e, Cell* to)
 {
-    removeFrom(offsetOf(x, y), e, to);
+    removeFrom(offsetOf(pos.x, pos.y), e, to);
 }
 
 void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e, Cell* to)

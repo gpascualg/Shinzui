@@ -35,8 +35,8 @@ SCENARIO("Offset can be created and manipulated", "[offset]") {
     }
 
     GIVEN("Some random 2D coordinates") {
-        int32_t x = rand() - RAND_MAX / 2.0;
-        int32_t y = rand() - RAND_MAX / 2.0;
+        int32_t x = (int32_t)(rand() - RAND_MAX / 2.0);
+        int32_t y = (int32_t)(rand() - RAND_MAX / 2.0);
 
         WHEN("the offset is created") {
             const Offset offset = offsetOf(x, y);

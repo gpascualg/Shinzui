@@ -12,8 +12,9 @@
 #define LOG_PACKET_LIFECYCLE    0x0000000000000020
 #define LOG_PACKET_RECV         0x0000000000000040
 #define LOG_PACKET_SEND         0x0000000000000080
+#define LOG_SERVER_LOOP         0x0000000000000100
 
-#define LOG_LEVEL       LOG_ALL
+#define LOG_LEVEL               LOG_ALL & ~LOG_SERVER_LOOP
 
 #define STR(a) STR_(a)
 #define STR_(a) #a
