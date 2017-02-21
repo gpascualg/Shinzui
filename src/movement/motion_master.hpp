@@ -1,5 +1,8 @@
+/* Copyright 2016 Guillem Pascual */
+
 #pragma once
 
+#include <utility>
 #include <glm/glm.hpp>
 
 class MapAwareEntity;
@@ -16,7 +19,7 @@ enum class MovementFlags
 class MotionMaster
 {
 public:
-    MotionMaster(MapAwareEntity* owner);
+    explicit MotionMaster(MapAwareEntity* owner);
 
     inline const glm::vec2& position() { return _position; }
     inline const glm::vec2& forward() { return _forward; }

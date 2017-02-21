@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "motion_master.hpp"
 #include "map_aware_entity.hpp"
 #include "map.hpp"
