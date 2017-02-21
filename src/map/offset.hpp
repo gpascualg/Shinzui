@@ -78,7 +78,7 @@ constexpr uint8_t cellSize = 9;
 
     inline const Offset offsetOf(float x, float y)
     {
-        return Offset((int32_t)x, (int32_t)y);
+        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
     }
 
     inline const Offset offsetOf(int32_t x, int32_t y)
@@ -90,7 +90,7 @@ constexpr uint8_t cellSize = 9;
 
     inline const Offset offsetOf(float x, float y)
     {
-        return Offset((int32_t)x, (int32_t)y);
+        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
     }
 
     constexpr Offset offsetOf(int32_t x, int32_t y)
