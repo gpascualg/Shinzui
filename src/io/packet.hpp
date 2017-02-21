@@ -30,6 +30,14 @@ public:
         return packet;
     }
 
+    static Packet* create(uint16_t opcode)
+    {
+        auto packet = _pool.construct();
+        *packet << opcode;
+        *packet << uint16_t{ 0x0000 };
+        return packet;
+    }
+
     static Packet* copy(Packet* from, uint16_t size)
     {
         auto packet = _pool.construct();
@@ -66,14 +74,26 @@ public:
         return v;
     }
 
+    float read()
+    {
+        float f;
+        uint32_t u = read<uint32_t>();
+        memcpy(&f, &u, sizeof(float));
+        return f;
+    }
+
     inline void reset() { _read = _write = _size = 0; }
 
     inline uint16_t size() { return _size; }
-    inline uint16_t read() { return _read; }
+    inline uint16_t totalRead() { return _read; }
     inline uint16_t written() { return _write; }
 
     inline uint8_t* data() { return _buffer; }
-    inline boost::asio::mutable_buffers_1 sendBuffer() { return boost::asio::buffer(_buffer, _write); }
+    inline boost::asio::mutable_buffers_1 sendBuffer()
+    { 
+        *reinterpret_cast<uint16_t*>(_buffer + sizeof(uint16_t)) = _write - sizeof(uint16_t) * 2;
+        return boost::asio::buffer(_buffer, _write); 
+    }
     inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }
 

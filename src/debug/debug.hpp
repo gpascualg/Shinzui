@@ -14,7 +14,7 @@
 #define LOG_PACKET_SEND         0x0000000000000080
 #define LOG_SERVER_LOOP         0x0000000000000100
 
-#define LOG_LEVEL               LOG_ALL & ~LOG_SERVER_LOOP
+#define LOG_LEVEL               LOG_ALL & ~LOG_PACKET_RECV & ~LOG_SERVER_LOOP
 
 #define STR(a) STR_(a)
 #define STR_(a) #a

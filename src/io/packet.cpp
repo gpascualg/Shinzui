@@ -15,5 +15,5 @@ Packet::Packet() :
 
 Packet::~Packet()
 {
-    LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed");
+    LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", *(uint16_t*)_buffer);
 }

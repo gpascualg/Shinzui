@@ -38,3 +38,18 @@ void MotionMaster::move(glm::vec2 forward)
     _forward = forward;
     _flags |= (uint8_t)MovementFlags::MOVING;
 }
+
+void MotionMaster::stop()
+{
+    _flags &= ~(uint8_t)MovementFlags::MOVING;
+}
+
+void MotionMaster::speed(float speed)
+{
+    _speed = speed;
+}
+
+void MotionMaster::forward(glm::vec2 forward)
+{
+    _forward = forward;
+}
