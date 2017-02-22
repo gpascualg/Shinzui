@@ -23,6 +23,8 @@ class MapAwareEntity;
 struct MapOperation;
 
 
+static inline void dummy(Cell* cell) {}
+
 class Map
 {
 public:
@@ -34,6 +36,22 @@ public:
     void runScheduledOperations();
 
     // Broadcast operations
+    template <template <typename, typename> typename T, class A, class C>
+    void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet, C& callback)
+    {
+        for (auto cell : cells)
+        {
+            cell->broadcast(packet);
+            callback(cell);
+        }
+    }
+
+    template <template <typename, typename> typename T, class A>
+    void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet)
+    {
+        broadcast(cells, packet, dummy);
+    }
+
     void broadcastToSiblings(Cell* cell, boost::intrusive_ptr<Packet> packet);
     void broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Packet> packet);
 
@@ -63,6 +81,9 @@ public:
     // Gets or creates a cell from the map
     Cell* getOrCreate(int32_t q, int32_t r);
     Cell* getOrCreate(const Offset& offset);
+
+    // NOT thread-safe
+    std::list<Cell*> getCellsExcluding(Cell* cell, Cell* exclude);
 
     // NOT thread-safe
     // Creates siblings for a cell

@@ -102,13 +102,17 @@ void Map::broadcastToSiblings(Cell* cell, boost::intrusive_ptr<Packet> packet)
 {
     cell->broadcast(packet);
 
-    for (auto* sibling : getSiblings(cell))
-    {
-        sibling->broadcast(packet);
-    }
+    auto cells = getSiblings(cell);
+    broadcast(cells, packet);
 }
 
 void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Packet> packet)
+{
+    auto cells = getCellsExcluding(cell, exclude);
+    broadcast(cells, packet);
+}
+
+std::list<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 {
     auto offsetCell = cell->offset();
     auto offsetExclude = exclude->offset();
@@ -117,17 +121,16 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
 
     auto idx = directionIdxs(directionQ, directionR);
 
-    get({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directionR })  // NOLINT(whitespace/braces)
-        ->broadcast(packet);
+    auto cell1 = get({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR + directionR });  // NOLINT(whitespace/braces)
 
-    get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r })  // NOLINT(whitespace/braces)
-        ->broadcast(packet);
+    auto cell2 = get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r });  // NOLINT(whitespace/braces)
 
-    get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-          offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r })  // NOLINT(whitespace/braces)
-        ->broadcast(packet);
+    auto cell3 = get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r });  // NOLINT(whitespace/braces)
+
+    return { cell1, cell2, cell3 };
 }
 
 void Map::onMove(MapAwareEntity* entity)

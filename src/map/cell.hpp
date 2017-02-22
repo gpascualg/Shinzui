@@ -23,6 +23,17 @@ class Map;
 class MapAwareEntity;
 class Packet;
 
+enum class RequestType
+{
+    SPAWN,
+    DESPAWN
+};
+
+struct Request
+{
+    MapAwareEntity* who;
+    RequestType type;
+};
 
 class Cell
 {
@@ -39,10 +50,14 @@ public:
 
     virtual void update(uint64_t elapsed, int updateKey);
 
+    void request(MapAwareEntity* who, RequestType type);
     void broadcast(boost::intrusive_ptr<Packet> packet);
-    void clearBroadcast();
+    void clearQueues();
 
     std::vector<Cell*> ring(uint16_t radius = 1);
+
+private:
+    void processRequests(MapAwareEntity* entity);
 
 protected:
     const Offset _offset;
@@ -53,6 +68,7 @@ protected:
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _data;
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _playerData;
 
-    // TODO(gpascualg): Use some lockfree structure?
+    // TODO(gpascualg): Use double lists to avoid locking and/or non-desired cleanups
     std::list<boost::intrusive_ptr<Packet>> _broadcast;
+    std::list<Request> _requests;
 };

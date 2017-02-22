@@ -69,17 +69,51 @@ void Cell::update(uint64_t elapsed, int updateKey)
         {
             client->send(packet);
         }
+
+        // Process map on spawn packets
+        processRequests(player);
     }
 
     // Update mobs
     for (auto pair : _data)
     {
-        pair.second->update(elapsed);
+        auto entity = pair.second;
+        entity->update(elapsed);
+
+        // Process on spawn packets
+        processRequests(entity);
     }
 
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
-    clearBroadcast();
+    clearQueues();
+}
+
+void Cell::processRequests(MapAwareEntity* entity)
+{
+    for (auto request : _requests)
+    {
+        if (request.who != entity)
+        {
+            if (request.type == RequestType::SPAWN)
+            {
+                // 0x0AAx are reserved packets
+                auto packet = Packet::create(0x0AA1);
+                request.who->client()->send(packet);
+            }
+            else if (request.type == RequestType::DESPAWN)
+            {
+                // 0x0AAx are reserved packets
+                auto packet = Packet::create(0x0AA2);
+                request.who->client()->send(packet);
+            }
+        }
+    }
+}
+
+void Cell::request(MapAwareEntity* who, RequestType type)
+{
+    _requests.push_back({ who, type });
 }
 
 void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
@@ -87,7 +121,8 @@ void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
     _broadcast.push_back(packet);
 }
 
-void Cell::clearBroadcast()
+void Cell::clearQueues()
 {
     _broadcast.clear();
+    _requests.clear();
 }

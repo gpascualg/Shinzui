@@ -3,6 +3,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include <list>
 #include <glm/glm.hpp>
 
 
@@ -25,8 +26,8 @@ public:
     inline uint64_t id() { return _id; }
 
     virtual void update(uint64_t elapsed);
-    virtual void onAdded(Cell* cell, Cell* old);
-    virtual void onRemoved(Cell* cell, Cell* to);
+    virtual std::list<Cell*> onAdded(Cell* cell, Cell* old);
+    virtual std::list<Cell*> onRemoved(Cell* cell, Cell* to);
 
 protected:
     inline void cell(Cell* cell) { _cell = cell; }
