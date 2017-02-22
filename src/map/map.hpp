@@ -7,6 +7,7 @@
 #include "boost/pool/pool_forward.hpp"
 
 #include <inttypes.h>
+#include <list>
 #include <vector>
 #include <unordered_map>
 
