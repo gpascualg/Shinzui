@@ -38,7 +38,7 @@ public:
 
     // Broadcast operations
     template <template <typename, typename> typename T, class A, class C>
-    void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet, C& callback)
+    void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet, C callback)
     {
         for (auto cell : cells)
         {
