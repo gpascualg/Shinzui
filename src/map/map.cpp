@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <list>
 #include <utility>
 #include <vector>
 #include <boost/lockfree/queue.hpp>
@@ -120,15 +121,17 @@ std::list<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
     auto directionR = offsetCell.r() - offsetExclude.r();
 
     auto idx = directionIdxs(directionQ, directionR);
+    auto i = (idx - 1) % MAX_DIR_IDX;
+    auto j = (idx + 1) % MAX_DIR_IDX;
 
     auto cell1 = get({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
         offsetCell.r() + directionR + directionR });  // NOLINT(whitespace/braces)
 
-    auto cell2 = get({ offsetCell.q() + directionQ + directions[(idx - 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[(idx - 1) % MAX_DIR_IDX].r });  // NOLINT(whitespace/braces)
+    auto cell2 = get({ offsetCell.q() + directionQ + directions[i].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR + directions[i].r });  // NOLINT(whitespace/braces)
 
-    auto cell3 = get({ offsetCell.q() + directionQ + directions[(idx + 1) % MAX_DIR_IDX].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[(idx + 1) % MAX_DIR_IDX].r });  // NOLINT(whitespace/braces)
+    auto cell3 = get({ offsetCell.q() + directionQ + directions[j].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR + directions[j].r });  // NOLINT(whitespace/braces)
 
     return { cell1, cell2, cell3 };
 }

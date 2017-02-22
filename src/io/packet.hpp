@@ -90,9 +90,9 @@ public:
 
     inline uint8_t* data() { return _buffer; }
     inline boost::asio::mutable_buffers_1 sendBuffer()
-    { 
+    {
         *reinterpret_cast<uint16_t*>(_buffer + sizeof(uint16_t)) = _write - sizeof(uint16_t) * 2;
-        return boost::asio::buffer(_buffer, _write); 
+        return boost::asio::buffer(_buffer, _write);
     }
     inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }

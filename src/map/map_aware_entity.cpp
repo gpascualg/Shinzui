@@ -7,6 +7,8 @@
 #include "motion_master.hpp"
 #include "server.hpp"
 
+#include <list>
+
 
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _client(client),
@@ -40,7 +42,7 @@ std::list<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
         {
             cell->request(this, RequestType::SPAWN);
         }
-    );
+    );  // NOLINT(whitespace/parens)
 
     return newCells;
 }
@@ -58,7 +60,7 @@ std::list<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
         {
             cell->request(this, RequestType::DESPAWN);
         }
-    );
+    );  // NOLINT(whitespace/parens)
 
     return newCells;
 }

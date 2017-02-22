@@ -113,7 +113,7 @@ void Cell::processRequests(MapAwareEntity* entity)
 
 void Cell::request(MapAwareEntity* who, RequestType type)
 {
-    _requests.push_back({ who, type });
+    _requests.push_back({ who, type });  // NOLINT(whitespace/braces)
 }
 
 void Cell::broadcast(boost::intrusive_ptr<Packet> packet)

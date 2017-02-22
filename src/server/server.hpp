@@ -26,7 +26,7 @@ public:
 
     void updateIO();
     void runScheduledOperations();
-    
+
     inline Map* map() { return _map; }
 
     void startAccept();
