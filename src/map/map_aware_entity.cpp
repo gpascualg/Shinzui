@@ -8,6 +8,7 @@
 #include "server.hpp"
 
 #include <list>
+#include <vector>
 
 
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
@@ -28,7 +29,7 @@ void MapAwareEntity::update(uint64_t elapsed)
     _motionMaster->update(elapsed);
 }
 
-std::list<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
+std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 {
     _cell = cell;
 
@@ -47,7 +48,7 @@ std::list<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
     return newCells;
 }
 
-std::list<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
+std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 {
     _cell = nullptr;
 

@@ -20,8 +20,7 @@ Server::Server(uint16_t port) :
     _acceptor(_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
     _socket(_service)
 {
-    assert(!_instance);
-    _instance = this;
+    checkInstance();
     _map = new Map();
 }
 

@@ -4,6 +4,7 @@
 
 #include <inttypes.h>
 #include <list>
+#include <vector>
 #include <glm/glm.hpp>
 
 
@@ -26,8 +27,8 @@ public:
     inline uint64_t id() { return _id; }
 
     virtual void update(uint64_t elapsed);
-    virtual std::list<Cell*> onAdded(Cell* cell, Cell* old);
-    virtual std::list<Cell*> onRemoved(Cell* cell, Cell* to);
+    virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
+    virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
 
 protected:
     inline void cell(Cell* cell) { _cell = cell; }

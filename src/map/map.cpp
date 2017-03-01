@@ -113,8 +113,13 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
     broadcast(cells, packet);
 }
 
-std::list<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
+std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 {
+    if (!exclude)
+    {
+        return createSiblings(cell);
+    }
+
     auto offsetCell = cell->offset();
     auto offsetExclude = exclude->offset();
     auto directionQ = offsetCell.q() - offsetExclude.q();

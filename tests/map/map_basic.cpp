@@ -5,11 +5,13 @@
 #include <cluster.hpp>
 #include <map.hpp>
 #include <motion_master.hpp>
+#include <server.hpp>
 
 
 SCENARIO("Map cells can be created and eliminated", "[map]") {
     GIVEN("An empty map") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
 
         REQUIRE(map.size() == 0);
         // REQUIRE(map.scheduledSize() == 0);
@@ -44,7 +46,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with one add operation pending") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         Entity e(0);
         map.addTo2D({ 0, 0 }, &e, nullptr);
 
@@ -70,7 +74,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with one cell") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         map.addTo2D({ 0, 0 }, new Entity(0), nullptr);
         map.runScheduledOperations();
 
@@ -87,7 +93,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with two cells and one pending") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         map.addTo(0, 0, new Entity(0), nullptr);
         map.addTo(4, 0, new Entity(1), nullptr);
         map.runScheduledOperations();
@@ -114,7 +122,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with two cells and one pending which should merge") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         map.addTo(0, 0, new Entity(0, (Client*)1), nullptr);
         map.addTo(3, 0, new Entity(1, (Client*)1), nullptr);
         map.runScheduledOperations();
@@ -142,7 +152,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with entities") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         auto e1 = new Entity(0, (Client*)1);
         auto e2 = new Entity(1);
         e2->motionMaster()->teleport({ 3,0 });
@@ -152,7 +164,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
-        
+
         REQUIRE(map.size() == 7);
         // REQUIRE(map.scheduledSize() == 0);
         REQUIRE(map.cluster()->size() == 1);
@@ -186,7 +198,9 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
     }
 
     GIVEN("A map with entities") {
-        Map map;
+        TestServer server(12345);
+        Map& map = *server.map();
+
         auto e1 = new Entity(0, (Client*)1);
         auto e2 = new Entity(1, (Client*)1);
         e2->motionMaster()->teleport({ 50, 0 });

@@ -35,6 +35,7 @@ if (SHINZUI_BUILD_TESTS)
         BOOST_SYSTEM_NO_DEPRECATED
         BOOST_ALL_NO_LIB
         BASE_DIR_LEN=${BASE_DIR_LEN}
+        SHINZUI_TESTS
     )
 
     BuildNow(

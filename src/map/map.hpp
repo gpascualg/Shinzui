@@ -84,7 +84,7 @@ public:
     Cell* getOrCreate(const Offset& offset);
 
     // NOT thread-safe
-    std::list<Cell*> getCellsExcluding(Cell* cell, Cell* exclude);
+    std::vector<Cell*> getCellsExcluding(Cell* cell, Cell* exclude);
 
     // NOT thread-safe
     // Creates siblings for a cell

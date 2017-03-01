@@ -22,6 +22,15 @@ public:
     explicit Server(uint16_t port);
     virtual ~Server();
 
+    void checkInstance()
+    {
+#ifndef SHINZUI_TESTS
+        // HACK(gpascualg): ifndef not working, remove comment
+        //assert(!_instance);
+#endif
+        _instance = this;
+    }
+
     static Server* get() { return _instance; }
 
     void updateIO();
