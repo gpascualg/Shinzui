@@ -53,7 +53,7 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     Packet* packet = despawnPacket();
 
     // Broadcast all packets
-    auto newCells = cell->map()->getCellsExcluding(to, cell);
+    auto newCells = cell->map()->getCellsExcluding(cell, to);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
             cell->request(this, RequestType::DESPAWN);

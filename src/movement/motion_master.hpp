@@ -32,7 +32,7 @@ public:
 
     void update(uint64_t elapsed);
 
-    inline bool isMoving() { return _flags & (uint8_t)MovementFlags::MOVING; }
+    inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
     inline void move() { move(_forward); }
     void move(glm::vec2 forward);
     void stop();

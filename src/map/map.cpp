@@ -132,14 +132,14 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
     auto i = (idx - 1) % MAX_DIR_IDX;
     auto j = (idx + 1) % MAX_DIR_IDX;
 
-    auto cell1 = getOrCreate({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directionR });  // NOLINT(whitespace/braces)
+    auto cell1 = getOrCreate({ offsetCell.q() + directionQ,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR });  // NOLINT(whitespace/braces)
 
-    auto cell2 = getOrCreate({ offsetCell.q() + directionQ + directions[i].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[i].r });  // NOLINT(whitespace/braces)
+    auto cell2 = getOrCreate({ offsetCell.q() + directions[i].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directions[i].r });  // NOLINT(whitespace/braces)
 
-    auto cell3 = getOrCreate({ offsetCell.q() + directionQ + directions[j].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[j].r });  // NOLINT(whitespace/braces)
+    auto cell3 = getOrCreate({ offsetCell.q() + directions[j].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directions[j].r });  // NOLINT(whitespace/braces)
 
     return { cell1, cell2, cell3 };
 }
@@ -151,7 +151,7 @@ void Map::onMove(MapAwareEntity* entity)
     if (cell != entity->cell())
     {
         removeFrom(entity->cell(), entity, cell);
-        addTo(cell, entity, cell);
+        addTo(cell, entity, entity->cell());
     }
 }
 

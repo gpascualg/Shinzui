@@ -12,7 +12,7 @@ MotionMaster::MotionMaster(MapAwareEntity* owner) :
     _owner(owner),
     _flags(0),
     _position{0, 0},
-    _forward{0, 0},
+    _forward{0, 1},
     _speed(0)
 {}
 
@@ -20,7 +20,7 @@ void MotionMaster::update(uint64_t elapsed)
 {
     if (isMoving())
     {
-        _position += _forward * _speed;
+        _position += _forward * (_speed * elapsed);
 
         // TODO(gpascualg): This can be throttled, no need to do cell-changer per tick
         Server::get()->map()->onMove(_owner);
@@ -46,7 +46,7 @@ void MotionMaster::stop()
 
 void MotionMaster::speed(float speed)
 {
-    _speed = speed;
+    _speed = speed / 1000.0f;
 }
 
 void MotionMaster::forward(glm::vec2 forward)

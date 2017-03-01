@@ -71,7 +71,7 @@ private:
 };
 
 // Windows does not define "cos" as constexpr yet... :(
-constexpr uint8_t cellSize = 15;
+constexpr uint8_t cellSize = 7;
 
 #if defined(_WIN32) || defined(__clang__)
     const double slopeX = cos(15 * M_PI / 180.0) * cellSize;

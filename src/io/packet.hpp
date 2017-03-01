@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <algorithm>
+#include <glm/glm.hpp>
 
 
 union f2u
@@ -60,6 +61,13 @@ public:
         return *this;
     }
 
+    Packet& operator<<(const glm::vec2& v)
+    {
+        *this << v.x;
+        *this << v.y;
+        return *this;
+    }
+
     template <typename T>
     T peek(uint16_t offset)
     {
@@ -74,12 +82,19 @@ public:
         return v;
     }
 
+    template <>
     float read()
     {
         float f;
         uint32_t u = read<uint32_t>();
         memcpy(&f, &u, sizeof(float));
         return f;
+    }
+
+    template <>
+    glm::vec2 read()
+    {
+        return{ read<float>(), read<float>() };
     }
 
     inline void reset() { _read = _write = _size = 0; }
@@ -97,6 +112,7 @@ public:
     inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }
 
+    // TODO(gpascualg): Is object pool threadsafe?
     inline void destroy() { _pool.destroy(this); }
 
 private:
