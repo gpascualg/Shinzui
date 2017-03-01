@@ -90,13 +90,3 @@ void Server::destroyClient(Client* client)
 {
     delete client;
 }
-
-MapAwareEntity* Server::newMapAwareEntity(uint64_t id, Client* client)
-{
-    return new MapAwareEntity(id, client);
-}
-
-void Server::destroyMapAwareEntity(MapAwareEntity* entity)
-{
-    delete entity;
-}

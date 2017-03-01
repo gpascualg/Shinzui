@@ -33,9 +33,7 @@ std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 {
     _cell = cell;
 
-    Packet* packet = Packet::create(0x0AA1);
-    *packet << id() << uint8_t{ 0 };
-    *packet << motionMaster()->position().x << motionMaster()->position().y;
+    Packet* packet = spawnPacket();
 
     // Broadcast all packets
     auto newCells = cell->map()->getCellsExcluding(cell, old);
@@ -52,8 +50,7 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 {
     _cell = nullptr;
 
-    Packet* packet = Packet::create(0x0AA2);
-    *packet << id() << uint8_t{ 0 };
+    Packet* packet = despawnPacket();
 
     // Broadcast all packets
     auto newCells = cell->map()->getCellsExcluding(to, cell);

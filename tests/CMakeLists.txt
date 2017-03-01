@@ -36,6 +36,7 @@ if (SHINZUI_BUILD_TESTS)
         BOOST_ALL_NO_LIB
         BASE_DIR_LEN=${BASE_DIR_LEN}
         SHINZUI_TESTS
+        _WIN32_WINNT=0x0501
     )
 
     BuildNow(

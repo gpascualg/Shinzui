@@ -11,6 +11,7 @@
 class Cell;
 class Client;
 class MotionMaster;
+class Packet;
 
 
 class MapAwareEntity
@@ -29,6 +30,9 @@ public:
     virtual void update(uint64_t elapsed);
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
     virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
+
+    virtual Packet* spawnPacket() = 0;
+    virtual Packet* despawnPacket() = 0;
 
 protected:
     inline void cell(Cell* cell) { _cell = cell; }

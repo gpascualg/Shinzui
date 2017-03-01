@@ -98,13 +98,13 @@ void Cell::processRequests(MapAwareEntity* entity)
             if (request.type == RequestType::SPAWN)
             {
                 // 0x0AAx are reserved packets
-                auto packet = Packet::create(0x0AA1);
+                auto packet = entity->spawnPacket();
                 request.who->client()->send(packet);
             }
             else if (request.type == RequestType::DESPAWN)
             {
                 // 0x0AAx are reserved packets
-                auto packet = Packet::create(0x0AA2);
+                auto packet = entity->despawnPacket();
                 request.who->client()->send(packet);
             }
         }
