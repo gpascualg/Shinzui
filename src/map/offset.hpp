@@ -131,14 +131,6 @@ static Direction directions[] =
     {-1, +1}, {-1, +0}, {+0, -1}
 };
 
-struct pair_hash
-{
-    uint64_t operator () (const std::pair<int32_t, int32_t> &p) const
-    {
-        return Offset(p.first, p.second).hash();
-    }
-};
-
 // Direction to index
 static constexpr int32_t MAX_DIR_IDX = 6;
 static inline int32_t directionIdxs(int32_t q, int32_t r)

@@ -10,9 +10,10 @@ class MapAwareEntity;
 
 enum class MovementFlags
 {
-    STOPPED = 0x1,
-    IDLE = 0x2,
-    MOVING = 0x4
+    STOPPED =   0x1,
+    IDLE =      0x2,
+    MOVING =    0x4,
+    ROTATING =  0x8
 };
 
 
@@ -24,18 +25,19 @@ public:
     void teleport(glm::vec2 to);
     inline const glm::vec2& position() { return _position; }
 
-    void forward(glm::vec2 forward);
+    void forward(float speed);
     inline const glm::vec2& forward() { return _forward; }
 
     void speed(float speed);
     inline const float speed() { return _speed; }
-
-    void update(uint64_t elapsed);
+    
+    void move();
+    void stop();
 
     inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
-    inline void move() { move(_forward); }
-    void move(glm::vec2 forward);
-    void stop();
+    inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
+
+    void update(uint64_t elapsed);
 
 private:
     MapAwareEntity* _owner;
@@ -43,5 +45,7 @@ private:
 
     glm::vec2 _position;
     glm::vec2 _forward;
+    glm::vec2 _forwardSpeed;
+
     float _speed;
 };
