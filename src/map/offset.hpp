@@ -71,33 +71,51 @@ private:
 };
 
 // Windows does not define "cos" as constexpr yet... :(
-constexpr uint8_t cellSize = 7;
+constexpr float cellSize_x = 15.0f;
+constexpr float cellSize_y = 15.0f;
 
-#if defined(_WIN32) || defined(__clang__)
-    const double slopeX = cos(15 * M_PI / 180.0) * cellSize;
+static const float pointy[] = {
+    std::sqrt(3.0f), std::sqrt(3.0f) / 2.0f, 0.0f, 3.0f / 2.0f,
+    std::sqrt(3.0f) / 3.0f, -1.0f / 3.0f, 0.0f, 2.0f / 3.0f, 0.5f
+};
 
-    inline const Offset offsetOf(float x, float y)
+static const float flat[] = {
+    3.0f / 2.0f, 0.0f, std::sqrt(3.0f) / 2.0f, std::sqrt(3.0f),
+    2.0f / 3.0f, 0.0f, -1.0f / 3.0f, std::sqrt(3.0f) / 3.0f, 0.0f
+};
+
+inline Offset offsetOf(float x, float y, const float* orientation = flat)
+{
+    float pt_x = (x - 0) / cellSize_x;
+    float pt_y = (y - 0) / cellSize_y;
+
+    float q = orientation[4] * pt_x + orientation[5] * pt_y;
+    float r = orientation[6] * pt_x + orientation[7] * pt_y;
+    float s = -q - r;
+
+    int q_int = (int)round(q);
+    int r_int = (int)round(r);
+    int s_int = (int)round(s);
+
+    float q_diff = abs(q_int - q);
+    float r_diff = abs(r_int - r);
+    float s_diff = abs(s_int - s);
+
+    if (q_diff > r_diff && q_diff > s_diff)
     {
-        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
+        q_int = -r_int - s_int;
+    }
+    else if (r_diff > s_diff)
+    {
+        r_int = -q_int - s_int;
+    }
+    else
+    {
+        //s_int = -q_int - r_int;
     }
 
-    inline const Offset offsetOf(int32_t x, int32_t y)
-    {
-        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
-    }
-#else
-    constexpr double slopeX = cos(15 * M_PI / 180.0) * cellSize;
-
-    inline const Offset offsetOf(float x, float y)
-    {
-        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
-    }
-
-    constexpr Offset offsetOf(int32_t x, int32_t y)
-    {
-        return Offset((int32_t)(x / slopeX), (int32_t)(y / cellSize));
-    }
-#endif
+    return Offset{ q_int, r_int };
+}
 
 // Directions
 struct Direction

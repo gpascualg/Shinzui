@@ -147,7 +147,9 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 void Map::onMove(MapAwareEntity* entity)
 {
     auto& pos = entity->motionMaster()->position();
-    Cell* cell = getOrCreate(offsetOf(pos.x, pos.y));
+    auto offset = offsetOf(pos.x, pos.y);
+    Cell* cell = getOrCreate(offset);
+    
     if (cell != entity->cell())
     {
         removeFrom(entity->cell(), entity, cell);
