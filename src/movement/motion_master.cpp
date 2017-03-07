@@ -3,39 +3,60 @@
 #include "motion_master.hpp"
 #include "map_aware_entity.hpp"
 #include "map.hpp"
+#include "movement_generator.hpp"
 #include "server.hpp"
 #include "debug.hpp"
 
 #include <utility>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/rotate_vector.hpp>
+
 
 MotionMaster::MotionMaster(MapAwareEntity* owner) :
     _owner(owner),
+    _generator(nullptr),
     _flags(0),
-    _position{0, 0},
-    _forward{0, 1},
+    _position{0, 0, 0},
+    _forward{0, 0, 1},
     _speed(0)
 {}
  
 void MotionMaster::update(uint64_t elapsed)
 {
-    if (isRotating())
+    if (_generator)
     {
-        _forward = glm::normalize(_forward + _forwardSpeed * (float)elapsed);
+        auto newPos = _generator->update(_owner, elapsed);
+        if (!_generator->hasNext())
+        {
+            // TODO(gpascualg): Should we delete it?
+            delete _generator;
+            _generator = nullptr;
+        }
+        else
+        {
+            _position = newPos;
+
+            // TODO(gpascualg): This can be throttled, no need to do cell-changer per tick
+            Server::get()->map()->onMove(_owner);
+        }
     }
 
-    if (isMoving())
+    if (isRotating())
+    {
+        _forward = glm::normalize(glm::rotateY(_forward, _rotationAngle * elapsed));
+    }
+
+    if (!_generator && isMoving())
     {
         _position += _forward * (_speed * elapsed);
-
-        LOG_ALWAYS("(%.2f, %.2f)", _position.x, _position.y);
 
         // TODO(gpascualg): This can be throttled, no need to do cell-changer per tick
         Server::get()->map()->onMove(_owner);
     }
 }
 
-void MotionMaster::teleport(glm::vec2 to)
+void MotionMaster::teleport(glm::vec3 to)
 {
     _position = to;
     _flags = 0;
@@ -64,8 +85,7 @@ void MotionMaster::forward(float speed)
     }
     else
     {
-        speed = speed / 1000.0f;
-        _forwardSpeed = glm::vec2{ std::cos(speed), std::sin(speed) };
+        _rotationAngle = speed / 1000.0f;
         _flags |= (uint8_t)MovementFlags::ROTATING;
     }
 }

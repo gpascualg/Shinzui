@@ -39,7 +39,10 @@ std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
     auto newCells = cell->map()->getCellsExcluding(cell, old);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
-            cell->request(this, RequestType::SPAWN);
+            if (client())
+            {
+                cell->request(this, RequestType::SPAWN);
+            }
         }
     );  // NOLINT(whitespace/parens)
 
@@ -56,7 +59,10 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     auto newCells = cell->map()->getCellsExcluding(cell, to);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
-            cell->request(this, RequestType::DESPAWN);
+            if (client())
+            {
+                cell->request(this, RequestType::DESPAWN);
+            }
         }
     );  // NOLINT(whitespace/parens)
 

@@ -68,6 +68,14 @@ public:
         return *this;
     }
 
+    Packet& operator<<(const glm::vec3& v)
+    {
+        *this << v.x;
+        *this << v.y;
+        *this << v.z;
+        return *this;
+    }
+
     template <typename T>
     T peek(uint16_t offset)
     {
@@ -95,6 +103,12 @@ public:
     glm::vec2 read()
     {
         return{ read<float>(), read<float>() };
+    }
+
+    template <>
+    glm::vec3 read()
+    {
+        return{ read<float>(), read<float>(), read<float>() };
     }
 
     inline void reset() { _read = _write = _size = 0; }

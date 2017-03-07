@@ -21,6 +21,8 @@ Cell::Cell(Map* map, const Offset& offset) :
     _lastUpdateKey(0)
 {
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
+
+    _broadcast = &_broadcastQueue1;
 }
 
 Cell::~Cell()
@@ -57,6 +59,9 @@ void Cell::update(uint64_t elapsed, int updateKey)
     }
     _lastUpdateKey = updateKey;
 
+    auto& currentQueue = *_broadcast;
+    _broadcast = _broadcast == &_broadcastQueue1 ? &_broadcastQueue2 : &_broadcastQueue1;
+
     // Update players
     for (auto pair : _playerData)
     {
@@ -65,7 +70,7 @@ void Cell::update(uint64_t elapsed, int updateKey)
         player->update(elapsed);
 
         // If there is any packet, broadcast it!
-        for (auto packet : _broadcast)
+        for (auto packet : currentQueue)
         {
             client->send(packet);
         }
@@ -87,6 +92,7 @@ void Cell::update(uint64_t elapsed, int updateKey)
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
     clearQueues();
+    currentQueue.clear();
 }
 
 void Cell::processRequests(MapAwareEntity* entity)
@@ -118,11 +124,10 @@ void Cell::request(MapAwareEntity* who, RequestType type)
 
 void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
 {
-    _broadcast.push_back(packet);
+    _broadcast->push_back(packet);
 }
 
 void Cell::clearQueues()
 {
-    _broadcast.clear();
     _requests.clear();
 }

@@ -69,6 +69,9 @@ protected:
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _playerData;
 
     // TODO(gpascualg): Use double lists to avoid locking and/or non-desired cleanups
-    std::list<boost::intrusive_ptr<Packet>> _broadcast;
+    std::list<boost::intrusive_ptr<Packet>> _broadcastQueue1;
+    std::list<boost::intrusive_ptr<Packet>> _broadcastQueue2;
+    std::list<boost::intrusive_ptr<Packet>>* _broadcast;
+
     std::list<Request> _requests;
 };
