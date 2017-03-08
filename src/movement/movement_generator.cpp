@@ -8,28 +8,10 @@
 #include <random>
 
 
-RandomMovement::RandomMovement():
+RandomMovement::RandomMovement() :
     _hasPoint(false)
 {
 
-}
-
-glm::vec2 RandomMovement::next(float t)
-{
-    t = std::min(t, 1.0f);
-
-    float u = 1.0f - t;
-    float tt = t * t;
-    float uu = u * u;
-    float uuu = uu * u;
-    float ttt = tt * t;
-
-    glm::vec2 p = uuu * _start; //first term
-    p += 3 * uu * t * _startOffset; //second term
-    p += 3 * u * tt * _endOffset; //third term
-    p += ttt * _end; //fourth term
-
-    return p;
 }
 
 glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
@@ -51,23 +33,25 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         auto position = owner->motionMaster()->position();
         auto forward = owner->motionMaster()->forward();
 
-        _start = { position.x, position.z };
-        _previous = _start;
-        _startOffset = _start + glm::vec2{ forward.x, forward.z } * (float)positiveDistanceDist(randomEngine);
+        glm::vec2 start = { position.x, position.z };
+        glm::vec2 end = glm::vec2{ start.x + (float)positionDist(randomEngine), start.y + (float)positionDist(randomEngine) };
 
-        _end = glm::vec2{ _start.x + (float)positionDist(randomEngine), _start.y + (float)positionDist(randomEngine) };
-        _endOffset = _end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } * (float)positiveDistanceDist(randomEngine);
+        _bezier = new DerivativeBezier(
+            start,
+            start + glm::vec2{ forward.x, forward.z } *(float)positiveDistanceDist(randomEngine), // StartOffset
+            end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } *(float)positiveDistanceDist(randomEngine),
+            end
+            );
 
         _t = 0;
-        _increase = ((float)newSpeed / glm::distance(_start, _end)) / 1000.0f;
-
+        _previous = _bezier->start();
 
         // TODO(gpascualg): Move this to somewhere else
         // HACK(gpascualg): Packet opcode is not known yet!
         Packet* broadcast = Packet::create(0x0A04);
         *broadcast << owner->id() << newSpeed;
-        *broadcast << _start;
-        
+        *broadcast << _bezier->start();
+
         Server::get()->map()->broadcastToSiblings(owner->cell(), broadcast);
         _hasPoint = true;
 
@@ -75,8 +59,9 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         // HACK(gpascualg): Packet opcode is not known yet!
         broadcast = Packet::create(0x0A05);
         *broadcast << owner->id();
-        *broadcast << _start << _startOffset;
-        *broadcast << _end << _endOffset;
+        *broadcast << (uint32_t)0;
+        *broadcast << _bezier->start() << _bezier->startOffset();
+        *broadcast << _bezier->end() << _bezier->endOffset();
 
         Server::get()->map()->broadcastToSiblings(owner->cell(), broadcast);
 
@@ -84,17 +69,19 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         owner->motionMaster()->speed(newSpeed);
         owner->motionMaster()->move();
 
+        /*
         LOG(LOG_MOVEMENT_GENERATOR, "Moving from (%.2f, %.2f) to (%.2f, %.2f)",
-            _start.x, _start.y,
-            _end.x, _end.y);
+        _start.x, _start.y,
+        _end.x, _end.y);
 
         LOG(LOG_MOVEMENT_GENERATOR, "Offsets from (%.2f, %.2f) to (%.2f, %.2f)",
-            _startOffset.x, _startOffset.y,
-            _endOffset.x, _endOffset.y);
+        _startOffset.x, _startOffset.y,
+        _endOffset.x, _endOffset.y);
+        */
     }
 
-    _t += _increase * elapsed;
-    auto nextPoint = next(_t);
+    _t += _bezier->increase(_t, (float)owner->motionMaster()->speed()) / 1000.0f * elapsed;
+    auto nextPoint = _bezier->next(_t);
     auto forward = glm::normalize(nextPoint - _previous);
     _previous = nextPoint;
     auto oldForward = owner->motionMaster()->forward();
@@ -105,6 +92,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
     if (_t >= 1)
     {
         _hasPoint = false;
+        owner->motionMaster()->stop();
 
         LOG(LOG_MOVEMENT_GENERATOR, "Movement End");
     }
