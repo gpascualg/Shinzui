@@ -39,6 +39,7 @@ public:
     inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
     inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
 
+    inline MovementGenerator* generator() { return _generator; }
     void generator(MovementGenerator* generator) { _generator = generator; }
     void update(uint64_t elapsed);
 

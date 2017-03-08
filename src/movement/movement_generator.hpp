@@ -2,14 +2,19 @@
 
 #pragma once
 
+#include "intrusive.hpp"
+#include <boost/intrusive_ptr.hpp>
 #include <glm/glm.hpp>
 
-class MapAwareEntity;
+
 class Bezier;
+class MapAwareEntity;
+class Packet;
 
 class MovementGenerator
 {
 public:
+    virtual boost::intrusive_ptr<Packet> packet() = 0;
     virtual glm::vec3 update(MapAwareEntity* owner, float elapsed) = 0;
     virtual bool hasNext() = 0;
 };
@@ -20,6 +25,7 @@ class RandomMovement : public MovementGenerator
 public:
     RandomMovement();
 
+    boost::intrusive_ptr<Packet> packet() override;
     glm::vec3 update(MapAwareEntity* owner, float elapsed) override;
     bool hasNext() override;
 

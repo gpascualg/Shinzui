@@ -4,6 +4,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include <inttypes.h>
 #include <algorithm>
@@ -74,6 +75,21 @@ public:
         *this << v.y;
         *this << v.z;
         return *this;
+    }
+
+    Packet& operator<<(Packet* packet)
+    {
+        uint16_t end = (uint16_t)std::max({ packet->totalRead(), packet->size(), packet->written() });
+        for (uint16_t i = 4; i < end; ++i)
+        {
+            *this << packet->data()[i];
+        }
+        return *this;
+    }
+
+    Packet& operator<<(boost::intrusive_ptr<Packet> packet)
+    {
+        return *this << packet.get();
     }
 
     template <typename T>

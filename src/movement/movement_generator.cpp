@@ -9,9 +9,21 @@
 
 
 RandomMovement::RandomMovement() :
-    _hasPoint(false)
+    _hasPoint(false),
+    _bezier(nullptr)
 {
 
+}
+
+boost::intrusive_ptr<Packet> RandomMovement::packet()
+{
+    // TODO(gpascualg): assert hasNext()
+    Packet* broadcast = Packet::create(0x0A05);
+    *broadcast << (uint32_t)0;
+    *broadcast << _bezier->start() << _bezier->startOffset();
+    *broadcast << _bezier->end() << _bezier->endOffset();
+    *broadcast << _t;
+    return broadcast;
 }
 
 glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
@@ -57,13 +69,10 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
         // TODO(gpascualg): Move this to somewhere else
         // HACK(gpascualg): Packet opcode is not known yet!
-        broadcast = Packet::create(0x0A05);
-        *broadcast << owner->id();
-        *broadcast << (uint32_t)0;
-        *broadcast << _bezier->start() << _bezier->startOffset();
-        *broadcast << _bezier->end() << _bezier->endOffset();
+        auto pathPacket = packet();
+        *pathPacket << owner->id();
 
-        Server::get()->map()->broadcastToSiblings(owner->cell(), broadcast);
+        Server::get()->map()->broadcastToSiblings(owner->cell(), pathPacket);
 
         // Start movement
         owner->motionMaster()->speed(newSpeed);
@@ -80,7 +89,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         */
     }
 
-    _t += _bezier->increase(_t, (float)owner->motionMaster()->speed()) / 1000.0f * elapsed;
+    _t += _bezier->increase(_t, (float)owner->motionMaster()->speed()) * elapsed;
     auto nextPoint = _bezier->next(_t);
     auto forward = glm::normalize(nextPoint - _previous);
     _previous = nextPoint;
@@ -102,5 +111,5 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
 bool RandomMovement::hasNext()
 {
-    return true;
+    return _bezier != nullptr;
 }
