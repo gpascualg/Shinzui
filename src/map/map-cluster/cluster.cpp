@@ -129,4 +129,6 @@ void Cluster::remove(MapAwareEntity* entity)
 
     // TODO(gpascualg): Find the entity in whichever cluster it is (see oldId above) - CRITICAL
     entities.erase(std::find(entities.begin(), entities.end(), entity));
+
+    // TODO(gpascualg): Place a dummy updateEntity to avoid instantly discarting the cell
 }

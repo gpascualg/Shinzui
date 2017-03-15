@@ -129,7 +129,7 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
     auto directionR = offsetCell.r() - offsetExclude.r();
 
     auto idx = directionIdxs(directionQ, directionR);
-    auto i = (idx - 1) % MAX_DIR_IDX;
+    auto i = idx == 0 ? MAX_DIR_IDX - 1 : idx - 1;
     auto j = (idx + 1) % MAX_DIR_IDX;
 
     auto cell1 = getOrCreate({ offsetCell.q() + directionQ,  // NOLINT(whitespace/braces)
@@ -147,7 +147,7 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 void Map::onMove(MapAwareEntity* entity)
 {
     auto& pos = entity->motionMaster()->position();
-    auto offset = offsetOf(pos.x, pos.y);
+    auto offset = offsetOf(pos.x, pos.z);
     Cell* cell = getOrCreate(offset);
     
     if (cell != entity->cell())
@@ -159,12 +159,12 @@ void Map::onMove(MapAwareEntity* entity)
 
 void Map::addTo(MapAwareEntity* e, Cell* old)
 {
-    addTo2D(e->motionMaster()->position(), e, old);
+    addTo3D(e->motionMaster()->position(), e, old);
 }
 
-void Map::addTo2D(const glm::vec2& pos, MapAwareEntity* e, Cell* old)
+void Map::addTo3D(const glm::vec3& pos, MapAwareEntity* e, Cell* old)
 {
-    addTo(offsetOf(pos.x, pos.y), e, old);
+    addTo(offsetOf(pos.x, pos.z), e, old);
 }
 
 void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old)
@@ -194,12 +194,12 @@ void Map::addTo(Cell* cell, MapAwareEntity* e, Cell* old)
 
 void Map::removeFrom(MapAwareEntity* e, Cell* to)
 {
-    removeFrom2D(e->motionMaster()->position(), e, to);
+    removeFrom3D(e->motionMaster()->position(), e, to);
 }
 
-void Map::removeFrom2D(const glm::vec2& pos, MapAwareEntity* e, Cell* to)
+void Map::removeFrom3D(const glm::vec3& pos, MapAwareEntity* e, Cell* to)
 {
-    removeFrom(offsetOf(pos.x, pos.y), e, to);
+    removeFrom(offsetOf(pos.x, pos.z), e, to);
 }
 
 void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e, Cell* to)

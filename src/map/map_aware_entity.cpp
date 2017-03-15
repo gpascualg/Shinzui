@@ -56,8 +56,8 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     Packet* packet = despawnPacket();
 
     // Broadcast all packets
-    auto newCells = cell->map()->getCellsExcluding(cell, to);
-    Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
+    auto oldCells = cell->map()->getCellsExcluding(cell, to);
+    Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
         {
             if (client())
             {
@@ -66,5 +66,5 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
         }
     );  // NOLINT(whitespace/parens)
 
-    return newCells;
+    return oldCells;
 }
