@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "intrusive.hpp"
+#include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
 #include <glm/glm.hpp>
 

@@ -1,11 +1,11 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "motion_master.hpp"
-#include "map_aware_entity.hpp"
-#include "map.hpp"
-#include "movement_generator.hpp"
-#include "server.hpp"
-#include "debug.hpp"
+#include "movement/motion_master.hpp"
+#include "map/map_aware_entity.hpp"
+#include "map/map.hpp"
+#include "movement/movement_generator.hpp"
+#include "server/server.hpp"
+#include "debug/debug.hpp"
 
 #include <utility>
 

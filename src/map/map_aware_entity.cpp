@@ -1,11 +1,11 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "cell.hpp"
-#include "client.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "motion_master.hpp"
-#include "server.hpp"
+#include "map/cell.hpp"
+#include "server/client.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "movement/motion_master.hpp"
+#include "server/server.hpp"
 
 #include <list>
 #include <vector>

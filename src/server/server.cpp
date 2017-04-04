@@ -1,11 +1,11 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "server.hpp"
-#include "atomic_autoincrement.hpp"
-#include "client.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
+#include "server/server.hpp"
+#include "defs/atomic_autoincrement.hpp"
+#include "server/client.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
 
 #include <list>
 

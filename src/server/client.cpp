@@ -1,12 +1,12 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "client.hpp"
-#include "debug.hpp"
-#include "server.hpp"
-#include "packet.hpp"
-#include "cell.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
+#include "server/client.hpp"
+#include "debug/debug.hpp"
+#include "server/server.hpp"
+#include "io/packet.hpp"
+#include "map/cell.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
 
 #include <boost/bind.hpp>
 

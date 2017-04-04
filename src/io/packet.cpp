@@ -1,7 +1,7 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "packet.hpp"
-#include "debug.hpp"
+#include "io/packet.hpp"
+#include "debug/debug.hpp"
 
 
 boost::object_pool<Packet> Packet::_pool(2048);
@@ -16,4 +16,26 @@ Packet::Packet() :
 Packet::~Packet()
 {
     LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", *(uint16_t*)_buffer);
+}
+
+
+template <>
+float Packet::read()
+{
+    float f;
+    uint32_t u = read<uint32_t>();
+    memcpy(&f, &u, sizeof(float));
+    return f;
+}
+
+template <>
+glm::vec2 Packet::read()
+{
+    return{ read<float>(), read<float>() };
+}
+
+template <>
+glm::vec3 Packet::read()
+{
+    return{ read<float>(), read<float>(), read<float>() };
 }

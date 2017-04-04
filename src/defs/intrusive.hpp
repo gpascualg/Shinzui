@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "packet.hpp"
+#include "io/packet.hpp"
 
 
 inline void intrusive_ptr_add_ref(Packet* x)

@@ -106,27 +106,6 @@ public:
         return v;
     }
 
-    template <>
-    float read()
-    {
-        float f;
-        uint32_t u = read<uint32_t>();
-        memcpy(&f, &u, sizeof(float));
-        return f;
-    }
-
-    template <>
-    glm::vec2 read()
-    {
-        return{ read<float>(), read<float>() };
-    }
-
-    template <>
-    glm::vec3 read()
-    {
-        return{ read<float>(), read<float>(), read<float>() };
-    }
-
     inline void reset() { _read = _write = _size = 0; }
 
     inline uint16_t size() { return _size; }
@@ -157,3 +136,4 @@ private:
 
     static boost::object_pool<Packet> _pool;
 };
+

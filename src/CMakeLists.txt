@@ -76,6 +76,11 @@ if (Shinzui_IS_RESOLVED)
         )
     endforeach()
 
+    AddToIncludes(
+        TARGET Shinzui
+        INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
     if (UNIX AND SHINZUI_COVERAGE)
         AddDependency(
             TARGET Shinzui

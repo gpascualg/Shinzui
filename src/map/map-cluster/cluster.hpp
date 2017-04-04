@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "queue_with_size.hpp"
+#include "debug/queue_with_size.hpp"
 
 #include <array>
 #include <functional>

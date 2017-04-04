@@ -1,12 +1,12 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "map.hpp"
-#include "cell.hpp"
-#include "debug.hpp"
-#include "cluster.hpp"
-#include "map_operation.hpp"
-#include "map_aware_entity.hpp"
-#include "motion_master.hpp"
+#include "map/map.hpp"
+#include "map/cell.hpp"
+#include "debug/debug.hpp"
+#include "map/map-cluster/cluster.hpp"
+#include "map/map_operation.hpp"
+#include "map/map_aware_entity.hpp"
+#include "movement/motion_master.hpp"
 
 #include <algorithm>
 #include <iterator>

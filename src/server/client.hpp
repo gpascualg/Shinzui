@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include <boost/asio.hpp>
-#include "intrusive.hpp"
+#include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
 
 

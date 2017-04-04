@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "offset.hpp"
+#include "map/offset.hpp"
 
 #include <inttypes.h>
 

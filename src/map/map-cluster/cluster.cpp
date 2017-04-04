@@ -1,16 +1,16 @@
 /* Copyright 2016 Guillem Pascual */
 
 
-#include "atomic_autoincrement.hpp"
-#include "cell.hpp"
-#include "cluster.hpp"
-#include "cluster_center.hpp"
-#include "cluster_operation.hpp"
-#include "common.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "offset.hpp"
+#include "defs/atomic_autoincrement.hpp"
+#include "map/cell.hpp"
+#include "map/map-cluster/cluster.hpp"
+#include "map/map-cluster/cluster_center.hpp"
+#include "map/map-cluster/cluster_operation.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "map/offset.hpp"
 
 #include <algorithm>
 #include <set>

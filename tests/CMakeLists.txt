@@ -23,6 +23,11 @@ if (SHINZUI_BUILD_TESTS)
         )
     endforeach()
 
+    AddToIncludes(
+        TARGET ShinzuiTests
+        INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
     AddDependency(
         TARGET ShinzuiTests
         DEPENDENCY Shinzui

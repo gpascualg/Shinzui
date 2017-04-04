@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "offset.hpp"
+#include "map/offset.hpp"
 #include "boost/lockfree/lockfree_forward.hpp"
 #include "boost/pool/pool_forward.hpp"
 
@@ -11,7 +11,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "intrusive.hpp"
+#include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
 #include <glm/glm.hpp>
 

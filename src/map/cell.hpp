@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "offset.hpp"
-#include "common.hpp"
-#include "debug.hpp"
+#include "map/offset.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
 
 #include <array>
 #include <list>
@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "intrusive.hpp"
+#include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
 
 

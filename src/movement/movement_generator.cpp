@@ -1,9 +1,9 @@
-#include "movement_generator.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "motion_master.hpp"
-#include "server.hpp"
+#include "movement/movement_generator.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "movement/motion_master.hpp"
+#include "server/server.hpp"
 
 #include <random>
 
