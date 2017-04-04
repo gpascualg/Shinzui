@@ -39,7 +39,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         static std::uniform_real_distribution<> normal(0, 1);
         static std::bernoulli_distribution coin;
 
-        uint8_t newSpeed = (uint8_t)speedDist(randomEngine);
+        uint8_t newSpeed = 1; // (uint8_t)speedDist(randomEngine);
 
         auto coinValue = coin(randomEngine);
         auto position = owner->motionMaster()->position();

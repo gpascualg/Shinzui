@@ -12,6 +12,7 @@ if (SHINZUI_BUILD_TESTS)
     set(SOURCE_FOLDERS
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/map
+        ${CMAKE_CURRENT_SOURCE_DIR}/mocks
         ${CMAKE_CURRENT_SOURCE_DIR}/offset
     )
 

@@ -59,11 +59,14 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
             // Update cell
             entity->cell()->update(elapsed, updateKey);
 
-            // Update neighbour cells in radius 1
+            // Update neighbour cells in radius 2
             auto cell = entity->cell();
-            for (auto* sibling : cell->map()->getSiblings(cell))
+            for (auto sibling : cell->ring(2))
             {
-                sibling->update(elapsed, updateKey);
+                if (sibling)
+                {
+                    sibling->update(elapsed, updateKey);
+                }
             }
         }
     }
@@ -131,4 +134,14 @@ void Cluster::remove(MapAwareEntity* entity)
     entities.erase(std::find(entities.begin(), entities.end(), entity));
 
     // TODO(gpascualg): Place a dummy updateEntity to avoid instantly discarting the cell
+    /*
+    if (_updaterEntities[clusterId].empty() && entity->client())
+    {
+        auto updater = new DummyUpdater(-1);
+        updater->triggerUpdater();
+        updater->cell(entity->cell());
+
+        _updaterEntities[clusterId].emplace_back(updater);
+    }
+    */
 }

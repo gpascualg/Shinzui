@@ -31,7 +31,7 @@ Cell::~Cell()
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
     std::vector<Cell*> results;
-    // results.resize(radius * 6, nullptr);
+    results.reserve(radius * 6);
 
     int32_t q = _offset.q() + directions[4].q * radius;
     int32_t r = _offset.r() + directions[4].r * radius;
@@ -65,18 +65,21 @@ void Cell::update(uint64_t elapsed, int updateKey)
     // Update players
     for (auto pair : _playerData)
     {
-        auto player = pair.second;
-        auto client = player->client();
-        player->update(elapsed);
+        auto updater = pair.second;
+        auto client = updater->client();
+        updater->update(elapsed);
 
         // If there is any packet, broadcast it!
-        for (auto packet : currentQueue)
+        if (client)
         {
-            client->send(packet);
+            for (auto packet : currentQueue)
+            {
+                client->send(packet);
+            }
         }
 
         // Process map on spawn packets
-        processRequests(player);
+        processRequests(updater);
     }
 
     // Update mobs

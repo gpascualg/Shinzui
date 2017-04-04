@@ -17,6 +17,7 @@ MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _cell(nullptr)
 {
     _motionMaster = new MotionMaster(this);
+    _isUpdater = client != nullptr;
 }
 
 MapAwareEntity::~MapAwareEntity()

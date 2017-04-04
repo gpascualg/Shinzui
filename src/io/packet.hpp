@@ -137,3 +137,6 @@ private:
     static boost::object_pool<Packet> _pool;
 };
 
+template <> float Packet::read();
+template <> glm::vec2 Packet::read();
+template <> glm::vec3 Packet::read();

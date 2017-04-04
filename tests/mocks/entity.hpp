@@ -1,7 +1,6 @@
 #pragma once
 
-#include <map_aware_entity.hpp>
-#include <server.hpp>
+#include <map/map_aware_entity.hpp>
 
 #include <inttypes.h>
 
@@ -27,20 +26,22 @@ public:
         return MapAwareEntity::onRemoved(cell, to);
     }
 
+    Packet* spawnPacket() override
+    {
+        return nullptr;
+    }
+    Packet* despawnPacket() override
+    {
+        return nullptr;
+    }
+
     void update(uint64_t elapsed) override { MapAwareEntity::update(elapsed); }
 
     bool hasBeenAdded = false;
     bool hasBeenRemoved = false;
 
+    void forceUpdater() { _isUpdater = true; }
+
 private:
     uint32_t _id = gID++;
-};
-
-
-class TestServer : public Server
-{
-public:
-    using Server::Server;
-
-    void handleRead(Client* client, const boost::system::error_code& error, size_t size){}
 };

@@ -54,7 +54,7 @@ void Map::runScheduledOperations()
                 {
                     operation->entity->cell(cell);
 
-                    if (operation->entity->client())
+                    if (operation->entity->isUpdater())
                     {
                         cell->_playerData.emplace(operation->entity->id(), operation->entity);
                         cluster()->add(operation->entity, createSiblings(cell));
@@ -72,7 +72,7 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    if (operation->entity->client())
+                    if (operation->entity->isUpdater())
                     {
                         cell->_playerData.erase(operation->entity->id());
                         cluster()->remove(operation->entity);

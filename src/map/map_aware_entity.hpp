@@ -34,6 +34,8 @@ public:
     virtual Packet* spawnPacket() = 0;
     virtual Packet* despawnPacket() = 0;
 
+    inline bool isUpdater() { return _isUpdater; }
+
 protected:
     inline void cell(Cell* cell) { _cell = cell; }
 
@@ -42,4 +44,18 @@ protected:
     Client* _client;
     Cell* _cell;
     uint64_t _id;
+
+    bool _isUpdater;
+};
+
+
+class DummyUpdater : public MapAwareEntity
+{
+public:
+    using MapAwareEntity::MapAwareEntity;
+
+    Packet* spawnPacket() override { return nullptr; }
+    Packet* despawnPacket() override { return nullptr; }
+
+    void triggerUpdater() { _isUpdater = true; }
 };
