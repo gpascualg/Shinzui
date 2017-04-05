@@ -56,8 +56,8 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
         // Update all entities
         for (auto* entity : queue)
         {
-            // Update cell
-            entity->cell()->update(elapsed, updateKey);
+            // Update cell (Should be included in inRadius)
+            // entity->cell()->update(elapsed, updateKey);
 
             // Update neighbour cells in radius 2
             auto cell = entity->cell();
