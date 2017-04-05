@@ -28,6 +28,9 @@ Cell::Cell(Map* map, const Offset& offset) :
 Cell::~Cell()
 {}
 
+#undef min
+#undef max
+
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
     std::vector<Cell*> results;
@@ -47,6 +50,29 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
             cube = _map->get(q, r);
         }
     }
+
+
+    return results;
+}
+
+std::vector<Cell*> Cell::inRadius(uint16_t radius)
+{
+    std::vector<Cell*> results;
+    // TODO(gpascualg): This is overestimating the size
+    results.reserve(radius * radius * 6 + 1);
+
+    int32_t q = _offset.q() + directions[4].q * radius;
+    int32_t r = _offset.r() + directions[4].r * radius;
+
+    for (int dx = -radius; dx <= radius; ++dx)
+    {
+        int rmin = std::min<int>(radius, -dx + radius);
+        for (int dy = std::max<int>(-radius, -dx - radius); dy <= rmin; ++dy)
+        {
+            results.push_back(_map->get(dx + _offset.q(), dy + _offset.r()));
+        }
+    }
+
 
     return results;
 }

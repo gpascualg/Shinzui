@@ -54,6 +54,7 @@ public:
     void broadcast(boost::intrusive_ptr<Packet> packet);
     void clearQueues();
 
+    std::vector<Cell*> inRadius(uint16_t radius = 1);
     std::vector<Cell*> ring(uint16_t radius = 1);
 
 private:

@@ -61,7 +61,7 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
 
             // Update neighbour cells in radius 2
             auto cell = entity->cell();
-            for (auto sibling : cell->ring(2))
+            for (auto sibling : cell->inRadius(2))
             {
                 if (sibling)
                 {
