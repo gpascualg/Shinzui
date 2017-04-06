@@ -1,11 +1,11 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "cell.hpp"
-#include "client.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "motion_master.hpp"
-#include "server.hpp"
+#include "map/cell.hpp"
+#include "server/client.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "movement/motion_master.hpp"
+#include "server/server.hpp"
 
 #include <list>
 #include <vector>
@@ -17,6 +17,7 @@ MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _cell(nullptr)
 {
     _motionMaster = new MotionMaster(this);
+    _isUpdater = client != nullptr;
 }
 
 MapAwareEntity::~MapAwareEntity()
@@ -33,15 +34,16 @@ std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 {
     _cell = cell;
 
-    Packet* packet = Packet::create(0x0AA1);
-    *packet << id() << uint8_t{ 0 };
-    *packet << motionMaster()->position().x << motionMaster()->position().y;
+    Packet* packet = spawnPacket();
 
     // Broadcast all packets
     auto newCells = cell->map()->getCellsExcluding(cell, old);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
-            cell->request(this, RequestType::SPAWN);
+            if (client())
+            {
+                cell->request(this, RequestType::SPAWN);
+            }
         }
     );  // NOLINT(whitespace/parens)
 
@@ -52,16 +54,18 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 {
     _cell = nullptr;
 
-    Packet* packet = Packet::create(0x0AA2);
-    *packet << id() << uint8_t{ 0 };
+    Packet* packet = despawnPacket();
 
     // Broadcast all packets
-    auto newCells = cell->map()->getCellsExcluding(to, cell);
-    Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
+    auto oldCells = cell->map()->getCellsExcluding(cell, to);
+    Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
         {
-            cell->request(this, RequestType::DESPAWN);
+            if (client())
+            {
+                cell->request(this, RequestType::DESPAWN);
+            }
         }
     );  // NOLINT(whitespace/parens)
 
-    return newCells;
+    return oldCells;
 }

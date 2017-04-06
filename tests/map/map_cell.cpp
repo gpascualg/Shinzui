@@ -1,9 +1,10 @@
 #include <catch.hpp>
-#include "entity.hpp"
+#include "mocks/entity.hpp"
+#include "mocks/server.hpp"
 
-#include <cell.hpp>
-#include <cluster.hpp>
-#include <map.hpp>
+#include <map/cell.hpp>
+#include <map/map-cluster/cluster.hpp>
+#include <map/map.hpp>
 
 
 SCENARIO("Map cells can be fetched once created", "[map]") {
@@ -17,7 +18,7 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
         map.cluster()->update(0);
         map.cluster()->runScheduledOperations();
 
-        REQUIRE(map.size() == 1);
+        REQUIRE(map.size() == 7);
         // REQUIRE(map.scheduledSize() == 0);
 
         WHEN("the main cell is required") {
@@ -33,7 +34,7 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
                 REQUIRE(ring.size() == 6);
                 for (int i = 0; i < 6; ++i)
                 {
-                    REQUIRE(ring[i] == nullptr);
+                    REQUIRE(ring[i] != nullptr);
                 }
             }
 
@@ -53,7 +54,9 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
         TestServer server(12345);
         Map& map = *server.map();
 
-        map.addTo(0, 0, new Entity(0, (Client*)1), nullptr);
+        Entity e(0); e.forceUpdater();
+
+        map.addTo(0, 0, &e, nullptr);
         map.runScheduledOperations();
 
         map.cluster()->update(0);

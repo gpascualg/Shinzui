@@ -4,9 +4,11 @@
 
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include <inttypes.h>
 #include <algorithm>
+#include <glm/glm.hpp>
 
 
 union f2u
@@ -60,6 +62,36 @@ public:
         return *this;
     }
 
+    Packet& operator<<(const glm::vec2& v)
+    {
+        *this << v.x;
+        *this << v.y;
+        return *this;
+    }
+
+    Packet& operator<<(const glm::vec3& v)
+    {
+        *this << v.x;
+        *this << v.y;
+        *this << v.z;
+        return *this;
+    }
+
+    Packet& operator<<(Packet* packet)
+    {
+        uint16_t end = (uint16_t)std::max({ packet->totalRead(), packet->size(), packet->written() });
+        for (uint16_t i = 4; i < end; ++i)
+        {
+            *this << packet->data()[i];
+        }
+        return *this;
+    }
+
+    Packet& operator<<(boost::intrusive_ptr<Packet> packet)
+    {
+        return *this << packet.get();
+    }
+
     template <typename T>
     T peek(uint16_t offset)
     {
@@ -72,14 +104,6 @@ public:
         T v = peek<T>(_read);
         _read += sizeof(T);
         return v;
-    }
-
-    float read()
-    {
-        float f;
-        uint32_t u = read<uint32_t>();
-        memcpy(&f, &u, sizeof(float));
-        return f;
     }
 
     inline void reset() { _read = _write = _size = 0; }
@@ -97,6 +121,7 @@ public:
     inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }
 
+    // TODO(gpascualg): Is object pool threadsafe?
     inline void destroy() { _pool.destroy(this); }
 
 private:
@@ -111,3 +136,7 @@ private:
 
     static boost::object_pool<Packet> _pool;
 };
+
+template <> float Packet::read();
+template <> glm::vec2 Packet::read();
+template <> glm::vec3 Packet::read();

@@ -12,6 +12,7 @@ if (SHINZUI_BUILD_TESTS)
     set(SOURCE_FOLDERS
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/map
+        ${CMAKE_CURRENT_SOURCE_DIR}/mocks
         ${CMAKE_CURRENT_SOURCE_DIR}/offset
     )
 
@@ -22,6 +23,11 @@ if (SHINZUI_BUILD_TESTS)
             GLOB_SEARCH ".hpp;.cpp"
         )
     endforeach()
+
+    AddToIncludes(
+        TARGET ShinzuiTests
+        INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
     AddDependency(
         TARGET ShinzuiTests
@@ -36,6 +42,7 @@ if (SHINZUI_BUILD_TESTS)
         BOOST_ALL_NO_LIB
         BASE_DIR_LEN=${BASE_DIR_LEN}
         SHINZUI_TESTS
+        _WIN32_WINNT=0x0501
     )
 
     BuildNow(

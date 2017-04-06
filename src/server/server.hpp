@@ -46,8 +46,8 @@ public:
     virtual Client* newClient(boost::asio::io_service* service, uint64_t id);
     virtual void destroyClient(Client* client);
 
-    virtual MapAwareEntity* newMapAwareEntity(uint64_t id, Client* client);
-    virtual void destroyMapAwareEntity(MapAwareEntity* entity);
+    virtual MapAwareEntity* newMapAwareEntity(uint64_t id, Client* client) = 0;
+    virtual void destroyMapAwareEntity(MapAwareEntity* entity) = 0;
 
 private:
     static Server* _instance;

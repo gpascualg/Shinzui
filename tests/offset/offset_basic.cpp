@@ -1,7 +1,8 @@
 #include <catch.hpp>
-#include "entity.hpp"
+#include "mocks/entity.hpp"
+#include "mocks/server.hpp"
 
-#include <offset.hpp>
+#include <map/offset.hpp>
 #include <stdlib.h>
 #include <unordered_map>
 

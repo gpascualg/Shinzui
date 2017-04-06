@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "offset.hpp"
-#include "common.hpp"
-#include "debug.hpp"
+#include "map/offset.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
 
 #include <array>
 #include <list>
@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "intrusive.hpp"
+#include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
 
 
@@ -54,6 +54,7 @@ public:
     void broadcast(boost::intrusive_ptr<Packet> packet);
     void clearQueues();
 
+    std::vector<Cell*> inRadius(uint16_t radius = 1);
     std::vector<Cell*> ring(uint16_t radius = 1);
 
 private:
@@ -69,6 +70,9 @@ protected:
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _playerData;
 
     // TODO(gpascualg): Use double lists to avoid locking and/or non-desired cleanups
-    std::list<boost::intrusive_ptr<Packet>> _broadcast;
+    std::list<boost::intrusive_ptr<Packet>> _broadcastQueue1;
+    std::list<boost::intrusive_ptr<Packet>> _broadcastQueue2;
+    std::list<boost::intrusive_ptr<Packet>>* _broadcast;
+
     std::list<Request> _requests;
 };

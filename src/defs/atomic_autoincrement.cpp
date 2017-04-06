@@ -1,3 +1,3 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "atomic_autoincrement.hpp"
+#include "defs/atomic_autoincrement.hpp"

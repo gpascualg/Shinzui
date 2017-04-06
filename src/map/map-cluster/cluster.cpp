@@ -1,16 +1,16 @@
 /* Copyright 2016 Guillem Pascual */
 
 
-#include "atomic_autoincrement.hpp"
-#include "cell.hpp"
-#include "cluster.hpp"
-#include "cluster_center.hpp"
-#include "cluster_operation.hpp"
-#include "common.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "offset.hpp"
+#include "defs/atomic_autoincrement.hpp"
+#include "map/cell.hpp"
+#include "map/map-cluster/cluster.hpp"
+#include "map/map-cluster/cluster_center.hpp"
+#include "map/map-cluster/cluster_operation.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "map/offset.hpp"
 
 #include <algorithm>
 #include <set>
@@ -56,14 +56,17 @@ void Cluster::updateCluster(UpdateStructure* updateStructure)
         // Update all entities
         for (auto* entity : queue)
         {
-            // Update cell
-            entity->cell()->update(elapsed, updateKey);
+            // Update cell (Should be included in inRadius)
+            // entity->cell()->update(elapsed, updateKey);
 
-            // Update neighbour cells in radius 1
+            // Update neighbour cells in radius 2
             auto cell = entity->cell();
-            for (auto* sibling : cell->map()->getSiblings(cell))
+            for (auto sibling : cell->inRadius(2))
             {
-                sibling->update(elapsed, updateKey);
+                if (sibling)
+                {
+                    sibling->update(elapsed, updateKey);
+                }
             }
         }
     }
@@ -129,4 +132,16 @@ void Cluster::remove(MapAwareEntity* entity)
 
     // TODO(gpascualg): Find the entity in whichever cluster it is (see oldId above) - CRITICAL
     entities.erase(std::find(entities.begin(), entities.end(), entity));
+
+    // TODO(gpascualg): Place a dummy updateEntity to avoid instantly discarting the cell
+    /*
+    if (_updaterEntities[clusterId].empty() && entity->client())
+    {
+        auto updater = new DummyUpdater(-1);
+        updater->triggerUpdater();
+        updater->cell(entity->cell());
+
+        _updaterEntities[clusterId].emplace_back(updater);
+    }
+    */
 }

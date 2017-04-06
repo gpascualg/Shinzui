@@ -7,8 +7,8 @@
 #include <array>
 #include <vector>
 
-#include "common.hpp"
-#include "debug.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
 
 
 class Cluster;

@@ -1,12 +1,12 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "cell.hpp"
-#include "client.hpp"
-#include "cluster_center.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
-#include "offset.hpp"
+#include "map/cell.hpp"
+#include "server/client.hpp"
+#include "map/map-cluster/cluster_center.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
+#include "map/offset.hpp"
 
 #include <array>
 #include <map>
@@ -21,15 +21,20 @@ Cell::Cell(Map* map, const Offset& offset) :
     _lastUpdateKey(0)
 {
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
+
+    _broadcast = &_broadcastQueue1;
 }
 
 Cell::~Cell()
 {}
 
+#undef min
+#undef max
+
 std::vector<Cell*> Cell::ring(uint16_t radius)
 {
     std::vector<Cell*> results;
-    // results.resize(radius * 6, nullptr);
+    results.reserve(radius * 6);
 
     int32_t q = _offset.q() + directions[4].q * radius;
     int32_t r = _offset.r() + directions[4].r * radius;
@@ -46,6 +51,29 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
         }
     }
 
+
+    return results;
+}
+
+std::vector<Cell*> Cell::inRadius(uint16_t radius)
+{
+    std::vector<Cell*> results;
+    // TODO(gpascualg): This is overestimating the size
+    results.reserve(radius * radius * 6 + 1);
+
+    int32_t q = _offset.q() + directions[4].q * radius;
+    int32_t r = _offset.r() + directions[4].r * radius;
+
+    for (int dx = -radius; dx <= radius; ++dx)
+    {
+        int rmin = std::min<int>(radius, -dx + radius);
+        for (int dy = std::max<int>(-radius, -dx - radius); dy <= rmin; ++dy)
+        {
+            results.push_back(_map->get(dx + _offset.q(), dy + _offset.r()));
+        }
+    }
+
+
     return results;
 }
 
@@ -57,21 +85,27 @@ void Cell::update(uint64_t elapsed, int updateKey)
     }
     _lastUpdateKey = updateKey;
 
+    auto& currentQueue = *_broadcast;
+    _broadcast = _broadcast == &_broadcastQueue1 ? &_broadcastQueue2 : &_broadcastQueue1;
+
     // Update players
     for (auto pair : _playerData)
     {
-        auto player = pair.second;
-        auto client = player->client();
-        player->update(elapsed);
+        auto updater = pair.second;
+        auto client = updater->client();
+        updater->update(elapsed);
 
         // If there is any packet, broadcast it!
-        for (auto packet : _broadcast)
+        if (client)
         {
-            client->send(packet);
+            for (auto packet : currentQueue)
+            {
+                client->send(packet);
+            }
         }
 
         // Process map on spawn packets
-        processRequests(player);
+        processRequests(updater);
     }
 
     // Update mobs
@@ -87,6 +121,7 @@ void Cell::update(uint64_t elapsed, int updateKey)
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
     clearQueues();
+    currentQueue.clear();
 }
 
 void Cell::processRequests(MapAwareEntity* entity)
@@ -98,13 +133,13 @@ void Cell::processRequests(MapAwareEntity* entity)
             if (request.type == RequestType::SPAWN)
             {
                 // 0x0AAx are reserved packets
-                auto packet = Packet::create(0x0AA1);
+                auto packet = entity->spawnPacket();
                 request.who->client()->send(packet);
             }
             else if (request.type == RequestType::DESPAWN)
             {
                 // 0x0AAx are reserved packets
-                auto packet = Packet::create(0x0AA2);
+                auto packet = entity->despawnPacket();
                 request.who->client()->send(packet);
             }
         }
@@ -118,11 +153,10 @@ void Cell::request(MapAwareEntity* who, RequestType type)
 
 void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
 {
-    _broadcast.push_back(packet);
+    _broadcast->push_back(packet);
 }
 
 void Cell::clearQueues()
 {
-    _broadcast.clear();
     _requests.clear();
 }

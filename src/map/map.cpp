@@ -1,12 +1,12 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "map.hpp"
-#include "cell.hpp"
-#include "debug.hpp"
-#include "cluster.hpp"
-#include "map_operation.hpp"
-#include "map_aware_entity.hpp"
-#include "motion_master.hpp"
+#include "map/map.hpp"
+#include "map/cell.hpp"
+#include "debug/debug.hpp"
+#include "map/map-cluster/cluster.hpp"
+#include "map/map_operation.hpp"
+#include "map/map_aware_entity.hpp"
+#include "movement/motion_master.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -54,7 +54,7 @@ void Map::runScheduledOperations()
                 {
                     operation->entity->cell(cell);
 
-                    if (operation->entity->client())
+                    if (operation->entity->isUpdater())
                     {
                         cell->_playerData.emplace(operation->entity->id(), operation->entity);
                         cluster()->add(operation->entity, createSiblings(cell));
@@ -72,7 +72,7 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    if (operation->entity->client())
+                    if (operation->entity->isUpdater())
                     {
                         cell->_playerData.erase(operation->entity->id());
                         cluster()->remove(operation->entity);
@@ -115,9 +115,12 @@ void Map::broadcastExcluding(Cell* cell, Cell* exclude, boost::intrusive_ptr<Pac
 
 std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 {
-    if (!exclude)
+    if (!exclude || !cell)
     {
-        return createSiblings(cell);
+        auto ref = cell ? cell : exclude;
+        auto cells = createSiblings(ref);
+        cells.push_back(ref);
+        return cells;
     }
 
     auto offsetCell = cell->offset();
@@ -126,17 +129,17 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
     auto directionR = offsetCell.r() - offsetExclude.r();
 
     auto idx = directionIdxs(directionQ, directionR);
-    auto i = (idx - 1) % MAX_DIR_IDX;
+    auto i = idx == 0 ? MAX_DIR_IDX - 1 : idx - 1;
     auto j = (idx + 1) % MAX_DIR_IDX;
 
-    auto cell1 = getOrCreate({ offsetCell.q() + directionQ + directionQ,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directionR });  // NOLINT(whitespace/braces)
+    auto cell1 = getOrCreate({ offsetCell.q() + directionQ,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directionR });  // NOLINT(whitespace/braces)
 
-    auto cell2 = getOrCreate({ offsetCell.q() + directionQ + directions[i].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[i].r });  // NOLINT(whitespace/braces)
+    auto cell2 = getOrCreate({ offsetCell.q() + directions[i].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directions[i].r });  // NOLINT(whitespace/braces)
 
-    auto cell3 = getOrCreate({ offsetCell.q() + directionQ + directions[j].q,  // NOLINT(whitespace/braces)
-        offsetCell.r() + directionR + directions[j].r });  // NOLINT(whitespace/braces)
+    auto cell3 = getOrCreate({ offsetCell.q() + directions[j].q,  // NOLINT(whitespace/braces)
+        offsetCell.r() + directions[j].r });  // NOLINT(whitespace/braces)
 
     return { cell1, cell2, cell3 };
 }
@@ -144,22 +147,24 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 void Map::onMove(MapAwareEntity* entity)
 {
     auto& pos = entity->motionMaster()->position();
-    Cell* cell = getOrCreate(offsetOf(pos.x, pos.y));
+    auto offset = offsetOf(pos.x, pos.z);
+    Cell* cell = getOrCreate(offset);
+    
     if (cell != entity->cell())
     {
         removeFrom(entity->cell(), entity, cell);
-        addTo(cell, entity, cell);
+        addTo(cell, entity, entity->cell());
     }
 }
 
 void Map::addTo(MapAwareEntity* e, Cell* old)
 {
-    addTo2D(e->motionMaster()->position(), e, old);
+    addTo3D(e->motionMaster()->position(), e, old);
 }
 
-void Map::addTo2D(const glm::vec2& pos, MapAwareEntity* e, Cell* old)
+void Map::addTo3D(const glm::vec3& pos, MapAwareEntity* e, Cell* old)
 {
-    addTo(offsetOf(pos.x, pos.y), e, old);
+    addTo(offsetOf(pos.x, pos.z), e, old);
 }
 
 void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old)
@@ -189,12 +194,12 @@ void Map::addTo(Cell* cell, MapAwareEntity* e, Cell* old)
 
 void Map::removeFrom(MapAwareEntity* e, Cell* to)
 {
-    removeFrom2D(e->motionMaster()->position(), e, to);
+    removeFrom3D(e->motionMaster()->position(), e, to);
 }
 
-void Map::removeFrom2D(const glm::vec2& pos, MapAwareEntity* e, Cell* to)
+void Map::removeFrom3D(const glm::vec3& pos, MapAwareEntity* e, Cell* to)
 {
-    removeFrom(offsetOf(pos.x, pos.y), e, to);
+    removeFrom(offsetOf(pos.x, pos.z), e, to);
 }
 
 void Map::removeFrom(int32_t q, int32_t r, MapAwareEntity* e, Cell* to)

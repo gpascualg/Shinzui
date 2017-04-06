@@ -53,6 +53,7 @@ if (Shinzui_IS_RESOLVED)
         BOOST_SYSTEM_NO_DEPRECATED
         BOOST_ALL_NO_LIB
         BASE_DIR_LEN=${BASE_DIR_LEN}
+        _WIN32_WINNT=0x0501
     )
 
     set(SOURCE_FOLDERS
@@ -74,6 +75,11 @@ if (Shinzui_IS_RESOLVED)
             GLOB_SEARCH ".hpp;.cpp"
         )
     endforeach()
+
+    AddToIncludes(
+        TARGET Shinzui
+        INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
     if (UNIX AND SHINZUI_COVERAGE)
         AddDependency(

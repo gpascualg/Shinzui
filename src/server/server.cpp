@@ -1,11 +1,11 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "server.hpp"
-#include "atomic_autoincrement.hpp"
-#include "client.hpp"
-#include "debug.hpp"
-#include "map.hpp"
-#include "map_aware_entity.hpp"
+#include "server/server.hpp"
+#include "defs/atomic_autoincrement.hpp"
+#include "server/client.hpp"
+#include "debug/debug.hpp"
+#include "map/map.hpp"
+#include "map/map_aware_entity.hpp"
 
 #include <list>
 
@@ -89,14 +89,4 @@ Client* Server::newClient(boost::asio::io_service* service, uint64_t id)
 void Server::destroyClient(Client* client)
 {
     delete client;
-}
-
-MapAwareEntity* Server::newMapAwareEntity(uint64_t id, Client* client)
-{
-    return new MapAwareEntity(id, client);
-}
-
-void Server::destroyMapAwareEntity(MapAwareEntity* entity)
-{
-    delete entity;
 }
