@@ -22,17 +22,27 @@
 // Expand is a trick for MSVC __VA_ARGS__ to work :(
 #define EXPAND(x)               x
 
-#if defined(_MSC_VER)
-    #define __func__ __FUNCTION__
-    #define __FILENAME__ __FILE__ + BASE_DIR_LEN
-#else
-    #undef __func__
-    #define __func__ STR(__FUNCTION__)
-    #define __FILENAME__ __FILE__
+#ifndef FUNCTION_NAME
+    #if defined(_MSC_VER)
+        #define FUNCTION_NAME __FUNCTION__
+        #define FILE_NAME __FILE__ + BASE_DIR_LEN
+    #else
+        #define FILE_NAME __FILE__ + BASE_DIR_LEN
+
+        static inline void __dummy_func__(){
+            #ifdef __PRETTY_FUNCTION__
+                #define FUNCTION_NAME __PRETTY_FUNCTION__
+            #elif __FUNCTION__
+                #define FUNCTION_NAME __FUNCTION__
+            #else
+                #define FUNCTION_NAME __func__
+            #endif
+        }
+    #endif
 #endif
 
 #define LOG_HELPER(lvl, fmt, ...) \
-    EXPAND(printf("[%.2X] %s:" STR(__LINE__) "(" __func__ ") > " fmt "\n%s", lvl, __FILENAME__, __VA_ARGS__))
+    EXPAND(printf("[%.2X] %s:" STR(__LINE__) "(%s) > " fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))
 
 #define LOG_ALWAYS(...)             EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
 
