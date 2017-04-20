@@ -53,8 +53,11 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
         _bezier = new DerivativeBezier(
             start,
-            start + glm::vec2{ forward.x, forward.z } * static_cast<float>(positiveDistanceDist(randomEngine)),  // StartOffset
-            end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } *
+            start + glm::vec2{ forward.x, forward.z } *    // NOLINT(whitespace/braces)
+                static_cast<float>(positiveDistanceDist(randomEngine)),  // StartOffset
+            end + glm::vec2{
+                    -forward.x * normal(randomEngine),     // NOLINT(whitespace/braces)
+                    -forward.z * normal(randomEngine) } *  // NOLINT(whitespace/braces)
                 static_cast<float>(positiveDistanceDist(randomEngine)),
             end
         );  // NOLINT(whitespace/parens)

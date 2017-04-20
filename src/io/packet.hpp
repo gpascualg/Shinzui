@@ -87,7 +87,7 @@ public:
         {
             *this << packet->data()[i];
         }
-        
+
         return *this;
     }
 
