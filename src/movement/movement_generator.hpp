@@ -141,7 +141,8 @@ protected:
         }
 
 
-        return (index + (targetLength - lengthBefore) / static_cast<float>(_segments[index + 1] - lengthBefore)) / static_cast<float>(len);
+        return (index + (targetLength - lengthBefore) /
+            static_cast<float>(_segments[index + 1] - lengthBefore)) / static_cast<float>(len);
     }
 
 protected:

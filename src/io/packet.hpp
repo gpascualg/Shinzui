@@ -79,11 +79,15 @@ public:
 
     Packet& operator<<(Packet* packet)
     {
-        uint16_t end = (uint16_t)std::max({ packet->totalRead(), packet->size(), packet->written() });  // NOLINT(whitespace/braces)
+        uint16_t end = (uint16_t)std::max({ packet->totalRead(),   // NOLINT(whitespace/braces)
+                                            packet->size(),
+                                            packet->written() });  // NOLINT(whitespace/braces)
+
         for (uint16_t i = 4; i < end; ++i)
         {
             *this << packet->data()[i];
         }
+        
         return *this;
     }
 

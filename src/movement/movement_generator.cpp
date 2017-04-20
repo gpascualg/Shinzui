@@ -13,9 +13,7 @@
 RandomMovement::RandomMovement() :
     _hasPoint(false),
     _bezier(nullptr)
-{
-
-}
+{}
 
 boost::intrusive_ptr<Packet> RandomMovement::packet()
 {
@@ -48,8 +46,10 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         auto forward = owner->motionMaster()->forward();
 
         glm::vec2 start = { position.x, position.z };
-        glm::vec2 end = glm::vec2{ start.x + static_cast<float>(positionDist(randomEngine)),    // NOLINT(whitespace/braces)
-                                   start.y + static_cast<float>(positionDist(randomEngine)) };  // NOLINT(whitespace/braces)
+        glm::vec2 end = glm::vec2 {  // NOLINT(whitespace/braces)
+            start.x + static_cast<float>(positionDist(randomEngine)),
+            start.y + static_cast<float>(positionDist(randomEngine))
+        };  // NOLINT(whitespace/braces)
 
         _bezier = new DerivativeBezier(
             start,
@@ -57,7 +57,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
             end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } *
                 static_cast<float>(positiveDistanceDist(randomEngine)),
             end
-            );
+        );  // NOLINT(whitespace/parens)
 
         _t = 0;
         _previous = _bezier->start();
