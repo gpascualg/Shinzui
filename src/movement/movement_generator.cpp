@@ -55,7 +55,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
             start,
             start + glm::vec2{ forward.x, forward.z } *    // NOLINT(whitespace/braces)
                 static_cast<float>(positiveDistanceDist(randomEngine)),  // StartOffset
-            end + glm::vec2{
+            end + glm::vec2{                               // NOLINT(whitespace/braces)
                     -forward.x * normal(randomEngine),     // NOLINT(whitespace/braces)
                     -forward.z * normal(randomEngine) } *  // NOLINT(whitespace/braces)
                 static_cast<float>(positiveDistanceDist(randomEngine)),
