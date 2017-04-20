@@ -149,7 +149,7 @@ void Map::onMove(MapAwareEntity* entity)
     auto& pos = entity->motionMaster()->position();
     auto offset = offsetOf(pos.x, pos.z);
     Cell* cell = getOrCreate(offset);
-    
+
     if (cell != entity->cell())
     {
         removeFrom(entity->cell(), entity, cell);

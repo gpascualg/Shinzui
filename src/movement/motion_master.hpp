@@ -32,7 +32,7 @@ public:
 
     void speed(float speed);
     inline const float speed() { return _speed; }
-    
+
     void move();
     void stop();
 

@@ -1,3 +1,5 @@
+/* Copyright 2016 Guillem Pascual */
+
 #include "movement/movement_generator.hpp"
 #include "debug/debug.hpp"
 #include "map/map.hpp"
@@ -32,26 +34,28 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
     {
         // TODO(gpascualg): Move this out to somewhere else
         static std::default_random_engine randomEngine;
-        static std::uniform_real_distribution<> speedDist(2, 10); // rage 0 - 1
-        static std::uniform_real_distribution<> negativeDistanceDist(-400.0f, -250.0f); // rage 0 - 1
-        static std::uniform_real_distribution<> positiveDistanceDist(250.0f, 400.0f); // rage 0 - 1
-        static std::uniform_real_distribution<> positionDist(100.0f, 200.0f); // rage 0 - 1
+        static std::uniform_real_distribution<> speedDist(2, 10);
+        static std::uniform_real_distribution<> negativeDistanceDist(-400.0f, -250.0f);
+        static std::uniform_real_distribution<> positiveDistanceDist(250.0f, 400.0f);
+        static std::uniform_real_distribution<> positionDist(100.0f, 200.0f);
         static std::uniform_real_distribution<> normal(0, 1);
         static std::bernoulli_distribution coin;
 
-        uint8_t newSpeed = 1; // (uint8_t)speedDist(randomEngine);
+        uint8_t newSpeed = static_cast<uint8_t>(speedDist(randomEngine));
 
         auto coinValue = coin(randomEngine);
         auto position = owner->motionMaster()->position();
         auto forward = owner->motionMaster()->forward();
 
         glm::vec2 start = { position.x, position.z };
-        glm::vec2 end = glm::vec2{ start.x + (float)positionDist(randomEngine), start.y + (float)positionDist(randomEngine) };
+        glm::vec2 end = glm::vec2{ start.x + static_cast<float>(positionDist(randomEngine)),    // NOLINT(whitespace/braces)
+                                   start.y + static_cast<float>(positionDist(randomEngine)) };  // NOLINT(whitespace/braces)
 
         _bezier = new DerivativeBezier(
             start,
-            start + glm::vec2{ forward.x, forward.z } *(float)positiveDistanceDist(randomEngine), // StartOffset
-            end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } *(float)positiveDistanceDist(randomEngine),
+            start + glm::vec2{ forward.x, forward.z } * static_cast<float>(positiveDistanceDist(randomEngine)),  // StartOffset
+            end + glm::vec2{ -forward.x * normal(randomEngine), -forward.z * normal(randomEngine) } *
+                static_cast<float>(positiveDistanceDist(randomEngine)),
             end
             );
 
@@ -89,7 +93,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         */
     }
 
-    _t += _bezier->increase(_t, (float)owner->motionMaster()->speed()) * elapsed;
+    _t += _bezier->increase(_t, static_cast<float>(owner->motionMaster()->speed())) * elapsed;
     auto nextPoint = _bezier->next(_t);
     auto forward = glm::normalize(nextPoint - _previous);
     _previous = nextPoint;

@@ -74,12 +74,12 @@ private:
 constexpr float cellSize_x = 15.0f;
 constexpr float cellSize_y = 15.0f;
 
-static const float pointy[] = {
+static const float pointy[] = {  // NOLINT(whitespace/braces)
     std::sqrt(3.0f), std::sqrt(3.0f) / 2.0f, 0.0f, 3.0f / 2.0f,
     std::sqrt(3.0f) / 3.0f, -1.0f / 3.0f, 0.0f, 2.0f / 3.0f, 0.5f
 };
 
-static const float flat[] = {
+static const float flat[] = {  // NOLINT(whitespace/braces)
     3.0f / 2.0f, 0.0f, std::sqrt(3.0f) / 2.0f, std::sqrt(3.0f),
     2.0f / 3.0f, 0.0f, -1.0f / 3.0f, std::sqrt(3.0f) / 3.0f, 0.0f
 };
@@ -93,9 +93,9 @@ inline Offset offsetOf(float x, float y, const float* orientation = flat)
     float r = orientation[6] * pt_x + orientation[7] * pt_y;
     float s = -q - r;
 
-    int q_int = (int)round(q);
-    int r_int = (int)round(r);
-    int s_int = (int)round(s);
+    int q_int = static_cast<int>(round(q));
+    int r_int = static_cast<int>(round(r));
+    int s_int = static_cast<int>(round(s));
 
     float q_diff = abs(q_int - q);
     float r_diff = abs(r_int - r);
@@ -111,7 +111,7 @@ inline Offset offsetOf(float x, float y, const float* orientation = flat)
     }
     else
     {
-        //s_int = -q_int - r_int;
+        // s_int = -q_int - r_int;
     }
 
     return Offset{ q_int, r_int };

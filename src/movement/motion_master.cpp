@@ -21,7 +21,7 @@ MotionMaster::MotionMaster(MapAwareEntity* owner) :
     _forward{0, 0, 1},
     _speed(0)
 {}
- 
+
 void MotionMaster::update(uint64_t elapsed)
 {
     if (_generator)

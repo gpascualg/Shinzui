@@ -8,6 +8,7 @@
 #include "map/map_aware_entity.hpp"
 #include "map/offset.hpp"
 
+#include <algorithm>
 #include <array>
 #include <map>
 #include <utility>

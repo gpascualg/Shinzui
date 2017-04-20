@@ -30,7 +30,8 @@
     #else
         #define FILE_NAME __FILE__ + BASE_DIR_LEN
 
-        static inline void __dummy_func__(){
+        static inline void __dummy_func__()
+        {
             #ifdef __PRETTY_FUNCTION__
                 #define FUNCTION_NAME __PRETTY_FUNCTION__
             #elif __FUNCTION__

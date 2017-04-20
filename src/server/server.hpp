@@ -26,7 +26,7 @@ public:
     {
 #ifndef SHINZUI_TESTS
         // HACK(gpascualg): ifndef not working, remove comment
-        //assert(!_instance);
+        // assert(!_instance);
 #endif
         _instance = this;
     }

@@ -137,11 +137,11 @@ protected:
         float lengthBefore = _segments[index];
         if (lengthBefore == targetLength)
         {
-            return index / (float)len;
+            return index / static_cast<float>(len);
         }
 
 
-        return (index + (targetLength - lengthBefore) / (float)(_segments[index + 1] - lengthBefore)) / (float)len;
+        return (index + (targetLength - lengthBefore) / static_cast<float>(_segments[index + 1] - lengthBefore)) / static_cast<float>(len);
     }
 
 protected:
@@ -165,7 +165,7 @@ public:
     {
         return speed / glm::length(t * t * _dv1 + t * _dv2 + _dv3);
     }
-    
+
     glm::vec2 next(float t)
     {
         return calc(t);
