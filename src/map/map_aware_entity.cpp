@@ -36,10 +36,19 @@ std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 
     Packet* packet = spawnPacket();
 
+	LOG(LOG_CELL_CHANGES, "MapAwareEntity::onAdded (%" PRId64 ")", id());
+
+	if (old) LOG(LOG_CELL_CHANGES, "Old (%d, %d)", old->offset().q(), old->offset().r());
+	else LOG(LOG_CELL_CHANGES, "No old");
+	
+	if (cell) LOG(LOG_CELL_CHANGES, "Cell (%d, %d)", cell->offset().q(), cell->offset().r());
+	else LOG(LOG_CELL_CHANGES, "No cell");
+
     // Broadcast all packets
     auto newCells = cell->map()->getCellsExcluding(cell, old);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
+			LOG(LOG_CELL_CHANGES, "RequestType::SPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
             if (client())
             {
                 cell->request(this, RequestType::SPAWN);
@@ -56,10 +65,19 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 
     Packet* packet = despawnPacket();
 
+	LOG(LOG_CELL_CHANGES, "MapAwareEntity::onRemoved (%" PRId64 ")", id());
+
+	if (cell) LOG(LOG_CELL_CHANGES, "Cell (%d, %d)", cell->offset().q(), cell->offset().r());
+	else LOG(LOG_CELL_CHANGES, "No cell");
+
+	if (to) LOG(LOG_CELL_CHANGES, "To (%d, %d)", to->offset().q(), to->offset().r());
+	else LOG(LOG_CELL_CHANGES, "No to");
+
     // Broadcast all packets
     auto oldCells = cell->map()->getCellsExcluding(cell, to);
     Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
         {
+			LOG(LOG_CELL_CHANGES, "RequestType::DESPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
             if (client())
             {
                 cell->request(this, RequestType::DESPAWN);

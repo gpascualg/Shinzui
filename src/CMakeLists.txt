@@ -13,7 +13,7 @@ else()
         # Lockfree dependencies
         lockfree core config assert static_assert type_traits mpl preprocessor
         array throw_exception functional align parameter atomic detail
-        utility predef
+        utility predef winapi
 
         # Asio dependencies
         asio system date_time smart_ptr bind regex
