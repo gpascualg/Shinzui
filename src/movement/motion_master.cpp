@@ -6,6 +6,7 @@
 #include "movement/movement_generator.hpp"
 #include "server/server.hpp"
 #include "debug/debug.hpp"
+#include "physics/bounding_box.hpp"
 
 #include <utility>
 
@@ -44,7 +45,13 @@ void MotionMaster::update(uint64_t elapsed)
 
     if (isRotating())
     {
-        _forward = glm::normalize(glm::rotateY(_forward, _rotationAngle * elapsed));
+		float elapsedAngle = _rotationAngle * elapsed;
+
+        _forward = glm::normalize(glm::rotateY(_forward, elapsedAngle));
+		if (auto bb = _owner->boundingBox())
+		{
+			bb->rotate(elapsedAngle);
+		}
     }
 
     if (!_generator && isMoving())

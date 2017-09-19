@@ -64,6 +64,7 @@ if (Shinzui_IS_RESOLVED)
         ${CMAKE_CURRENT_SOURCE_DIR}/map
         ${CMAKE_CURRENT_SOURCE_DIR}/map/map-cluster
         ${CMAKE_CURRENT_SOURCE_DIR}/movement
+        ${CMAKE_CURRENT_SOURCE_DIR}/physics
         ${CMAKE_CURRENT_SOURCE_DIR}/server
         ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
     )

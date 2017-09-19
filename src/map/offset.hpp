@@ -71,8 +71,8 @@ private:
 };
 
 // Windows does not define "cos" as constexpr yet... :(
-constexpr float cellSize_x = 15.0f;
-constexpr float cellSize_y = 15.0f;
+constexpr float cellSize_x = 150.0f;
+constexpr float cellSize_y = 150.0f;
 
 static const float pointy[] = {  // NOLINT(whitespace/braces)
     std::sqrt(3.0f), std::sqrt(3.0f) / 2.0f, 0.0f, 3.0f / 2.0f,

@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 
+class BoundingBox;
 class Cell;
 class Client;
 class MotionMaster;
@@ -25,6 +26,7 @@ public:
     inline Cell* cell() { return _cell; }
     inline Client* client() { return _client; }
     inline MotionMaster* motionMaster() { return _motionMaster; }
+	inline BoundingBox* boundingBox() { return _boundingBox; }
     inline uint64_t id() { return _id; }
 
     virtual void update(uint64_t elapsed);
@@ -41,6 +43,7 @@ protected:
 
 protected:
     MotionMaster* _motionMaster;
+	BoundingBox* _boundingBox;
     Client* _client;
     Cell* _cell;
     uint64_t _id;

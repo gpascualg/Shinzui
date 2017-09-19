@@ -5,6 +5,7 @@
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 #include "movement/motion_master.hpp"
+#include "physics/bounding_box.hpp"
 #include "server/server.hpp"
 
 #include <list>
@@ -14,7 +15,8 @@
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _client(client),
     _id(id),
-    _cell(nullptr)
+    _cell(nullptr),
+	_boundingBox(nullptr)
 {
     _motionMaster = new MotionMaster(this);
     _isUpdater = client != nullptr;

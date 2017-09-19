@@ -6,6 +6,7 @@
 #include "map/map_aware_entity.hpp"
 #include "movement/motion_master.hpp"
 #include "server/server.hpp"
+#include "physics/bounding_box.hpp"
 
 #include <random>
 
@@ -104,6 +105,12 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
     glm::vec3 forward3{ forward.x, oldForward.y, forward.y };
     owner->motionMaster()->forward(forward3);
+
+	if (auto bb = owner->boundingBox())
+	{
+		float elapsedAngle = atan2(forward.y - oldForward.y, forward.x - oldForward.x);
+		bb->rotate(elapsedAngle);
+	}
 
     if (_t >= 1)
     {
