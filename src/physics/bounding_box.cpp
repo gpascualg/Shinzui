@@ -13,7 +13,7 @@ BoundingBox::BoundingBox(MotionMaster* motionMaster) :
     _motionMaster(motionMaster),
     _recalcNormals(false)
 {
-    _normals.reserve(2);
+    _normals.resize(2);
 }
 
 BoundingBox::BoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices) :
