@@ -7,6 +7,7 @@
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 #include "map/offset.hpp"
+#include "physics/bounding_box.hpp"
 
 #include <algorithm>
 #include <array>
@@ -117,6 +118,37 @@ void Cell::update(uint64_t elapsed, int updateKey)
 
         // Process on spawn packets
         processRequests(entity);
+    }
+
+    // Collisions
+    // TODO(gpascualg): Throttling / Quadtrees to avoid that much comparations
+    // TODO(gpascualg): What happens when we are at the edge of the cell?
+    // TODO(gpascualg): Above could be solved by using shared QuadTrees among cells
+    for (auto pair1 : _playerData)
+    {
+        auto p1 = pair1.second;
+
+        // TODO(gpascualg): Could this happen at all?
+        if (!p1->boundingBox())
+        {
+            continue;
+        }
+
+        for (auto pair2 : _playerData)
+        {
+            auto p2 = pair2.second;
+
+            // TODO(gpascualg): Could this happen at all? (not having boundingBox)
+            if (p1 == p2 || !p2->boundingBox())
+            {
+                continue;
+            }
+
+            if (p1->boundingBox()->overlaps(p2->boundingBox()))
+            {
+                // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
+            }
+        }
     }
 
     // Clear all broadcasts (should already be done!)

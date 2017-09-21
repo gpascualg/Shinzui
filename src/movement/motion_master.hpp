@@ -25,6 +25,7 @@ public:
 
     void teleport(glm::vec3 to);
     inline const glm::vec3& position() { return _position; }
+    inline const glm::vec2 position2D() { return { _position.x, _position.z }; }
 
     void forward(float speed);
     void forward(glm::vec3 forward) { _forward = forward; }
