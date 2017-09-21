@@ -53,15 +53,11 @@ void Map::runScheduledOperations()
                 if (cell)
                 {
                     operation->entity->cell(cell);
+                    cell->_entities.emplace(operation->entity->id(), operation->entity);
 
                     if (operation->entity->isUpdater())
                     {
-                        cell->_playerData.emplace(operation->entity->id(), operation->entity);
                         cluster()->add(operation->entity, createSiblings(cell));
-                    }
-                    else
-                    {
-                        cell->_data.emplace(operation->entity->id(), operation->entity);
                     }
 
                     operation->entity->onAdded(cell, operation->param);
@@ -72,14 +68,11 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
+                    cell->_entities.erase(operation->entity->id());
+
                     if (operation->entity->isUpdater())
                     {
-                        cell->_playerData.erase(operation->entity->id());
                         cluster()->remove(operation->entity);
-                    }
-                    else
-                    {
-                        cell->_data.erase(operation->entity->id());
                     }
 
                     operation->entity->onRemoved(cell, operation->param);

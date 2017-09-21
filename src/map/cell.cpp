@@ -91,7 +91,7 @@ void Cell::update(uint64_t elapsed, int updateKey)
     _broadcast = _broadcast == &_broadcastQueue1 ? &_broadcastQueue2 : &_broadcastQueue1;
 
     // Update players
-    for (auto pair : _playerData)
+    for (auto pair : _entities)
     {
         auto updater = pair.second;
         auto client = updater->client();
@@ -109,22 +109,13 @@ void Cell::update(uint64_t elapsed, int updateKey)
         // Process map on spawn packets
         processRequests(updater);
     }
-
-    // Update mobs
-    for (auto pair : _data)
-    {
-        auto entity = pair.second;
-        entity->update(elapsed);
-
-        // Process on spawn packets
-        processRequests(entity);
-    }
-
+    
     // Collisions
     // TODO(gpascualg): Throttling / Quadtrees to avoid that much comparations
     // TODO(gpascualg): What happens when we are at the edge of the cell?
     // TODO(gpascualg): Above could be solved by using shared QuadTrees among cells
-    for (auto pair1 : _playerData)
+    // TODO(gpascualg): Is there any need to check npc/npc collisions??
+    for (auto pair1 : _entities)
     {
         auto p1 = pair1.second;
 
@@ -134,7 +125,7 @@ void Cell::update(uint64_t elapsed, int updateKey)
             continue;
         }
 
-        for (auto pair2 : _playerData)
+        for (auto pair2 : _entities)
         {
             auto p2 = pair2.second;
 
@@ -149,25 +140,8 @@ void Cell::update(uint64_t elapsed, int updateKey)
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }
         }
-
-        for (auto pair : _data)
-        {
-            auto p2 = pair.second;
-
-            // TODO(gpascualg): Could this happen at all?
-            if (!p2->boundingBox())
-            {
-                continue;
-            }
-
-            if (p1->boundingBox()->overlaps(p2->boundingBox()))
-            {
-                // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
-            }
-        }
     }
 
-    // TODO(gpascualg): Is there any need to check npc/npc collisions??
 
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue

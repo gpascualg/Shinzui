@@ -66,8 +66,7 @@ protected:
     Map* _map;
     uint64_t _clusterId;
     int _lastUpdateKey;
-    std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _data;
-    std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _playerData;
+    std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _entities;
 
     // TODO(gpascualg): Use double lists to avoid locking and/or non-desired cleanups
     std::list<boost::intrusive_ptr<Packet>> _broadcastQueue1;
