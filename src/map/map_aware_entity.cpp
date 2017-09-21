@@ -32,6 +32,13 @@ void MapAwareEntity::update(uint64_t elapsed)
     _motionMaster->update(elapsed);
 }
 
+void MapAwareEntity::setupBoundingBox(std::initializer_list<glm::vec2>&& vertices)
+{
+    // TODO(gpascualg): Logging friendly assert
+    assert(_boundingBox == nullptr);
+    _boundingBox = new BoundingBox(_motionMaster, std::move(vertices));
+}
+
 std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 {
     _cell = cell;

@@ -149,7 +149,25 @@ void Cell::update(uint64_t elapsed, int updateKey)
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }
         }
+
+        for (auto pair : _data)
+        {
+            auto p2 = pair.second;
+
+            // TODO(gpascualg): Could this happen at all?
+            if (!p2->boundingBox())
+            {
+                continue;
+            }
+
+            if (p1->boundingBox()->overlaps(p2->boundingBox()))
+            {
+                // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
+            }
+        }
     }
+
+    // TODO(gpascualg): Is there any need to check npc/npc collisions??
 
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue

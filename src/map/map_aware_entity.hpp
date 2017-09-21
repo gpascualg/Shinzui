@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <list>
 #include <vector>
+#include <initializer_list>
 #include <glm/glm.hpp>
 
 
@@ -28,6 +29,8 @@ public:
     inline MotionMaster* motionMaster() { return _motionMaster; }
 	inline BoundingBox* boundingBox() { return _boundingBox; }
     inline uint64_t id() { return _id; }
+
+    void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
 
     virtual void update(uint64_t elapsed);
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
