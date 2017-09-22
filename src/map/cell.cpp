@@ -7,6 +7,7 @@
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 #include "map/offset.hpp"
+#include "map/quadtree.hpp"
 #include "physics/bounding_box.hpp"
 
 #include <algorithm>
@@ -25,10 +26,13 @@ Cell::Cell(Map* map, const Offset& offset) :
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
 
     _broadcast = &_broadcastQueue1;
+    _quadTree = new RadialQuadTree<5, 10>(offset.center(), cellSize_x + 10);
 }
 
 Cell::~Cell()
-{}
+{
+    delete _quadTree;
+}
 
 #undef min
 #undef max
@@ -108,8 +112,14 @@ void Cell::update(uint64_t elapsed, int updateKey)
 
         // Process map on spawn packets
         processRequests(updater);
+
+        // Insert into quadtree
+        _quadTree->insert(updater);
     }
-    
+}
+
+void Cell::physics(uint64_t elapsed, int updateKey)
+{
     // Collisions
     // TODO(gpascualg): Throttling / Quadtrees to avoid that much comparations
     // TODO(gpascualg): What happens when we are at the edge of the cell?
@@ -141,11 +151,15 @@ void Cell::update(uint64_t elapsed, int updateKey)
             }
         }
     }
+}
 
-
+void Cell::cleanup(uint64_t elapsed, int updateKey)
+{
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
     clearQueues();
+
+    auto& currentQueue = _broadcast == &_broadcastQueue1 ? _broadcastQueue2 : _broadcastQueue1;
     currentQueue.clear();
 }
 

@@ -19,7 +19,11 @@ public:
 
 	inline void setVertices(std::initializer_list<glm::vec2>&& vertices);
     std::vector<glm::vec2>& normals();
+
+    glm::vec4 asRect();
+
     bool overlaps(BoundingBox* other);
+    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e);
 
 private:
     glm::vec2 project(glm::vec2 axis);

@@ -162,6 +162,7 @@ void Map::addTo3D(const glm::vec3& pos, MapAwareEntity* e, Cell* old)
 
 void Map::addTo(int32_t q, int32_t r, MapAwareEntity* e, Cell* old)
 {
+    // TODO(gpascualg): Deprecate
     addTo(Offset(q, r), e, old);
 }
 

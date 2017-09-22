@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <utility>
+#include <glm/glm.hpp>
 
 
 #ifdef _MSC_VER
@@ -31,8 +32,9 @@ union HashConverter
 struct Offset
 {
 public:
-    constexpr Offset(int32_t q, int32_t r):
-        _q(q), _r(r)
+    constexpr Offset(int32_t q, int32_t r) :
+        _q(q), _r(r),
+        _center{ 0 } // TODO(gpascualg): This is not a valid center
     {}
 
     inline constexpr int32_t q() const { return _q; }
@@ -65,7 +67,10 @@ public:
         return std::max(std::max(dq, dr), ds);
     }
 
+    constexpr glm::vec2 center() const { return _center; }
+
 private:
+    glm::vec2 _center;
     const int32_t _q;
     const int32_t _r;
 };

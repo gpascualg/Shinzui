@@ -28,6 +28,7 @@ private:
         Cluster* cluster;
         uint64_t id;
         uint64_t elapsed;
+        void (Cell::*fun)(uint64_t, int);
     };
 
 public:

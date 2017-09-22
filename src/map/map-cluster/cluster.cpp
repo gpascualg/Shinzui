@@ -34,7 +34,25 @@ void Cluster::update(uint64_t elapsed)
     for (auto id : _uniqueIdsList)
     {
         // TODO(gpascualg): Launch threaded task per cluster
-        updateCluster({ this, id, elapsed });  // NOLINT(whitespace/braces)
+        updateCluster({ this, id, elapsed, &Cell::update });  // NOLINT(whitespace/braces)
+    }
+
+    // TODO(gpascualg): Block until previous ends
+
+    // Update physics
+    for (auto id : _uniqueIdsList)
+    {
+        // TODO(gpascualg): Launch threaded task per cluster
+        updateCluster({ this, id, elapsed, &Cell::physics });  // NOLINT(whitespace/braces)
+    }
+
+    // TODO(gpascualg): Block until previous ends
+
+    // Cleanup
+    for (auto id : _uniqueIdsList)
+    {
+        // TODO(gpascualg): Launch threaded task per cluster
+        updateCluster({ this, id, elapsed, &Cell::cleanup });  // NOLINT(whitespace/braces)
     }
 }
 
@@ -65,7 +83,7 @@ void Cluster::updateCluster(UpdateStructure&& updateStructure)
             {
                 if (sibling)
                 {
-                    sibling->update(elapsed, updateKey);
+                    (sibling->*updateStructure.fun)(elapsed, updateKey);
                 }
             }
         }

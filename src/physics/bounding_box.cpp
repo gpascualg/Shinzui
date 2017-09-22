@@ -49,6 +49,11 @@ std::vector<glm::vec2>& BoundingBox::normals()
     return _normals;
 }
 
+glm::vec4 BoundingBox::asRect()
+{
+    return { _vertices[0].x, _vertices[0].y, _vertices[2].x, _vertices[2].y };
+}
+
 bool BoundingBox::overlaps(BoundingBox* other)
 {
     auto& axes1 = normals();
@@ -76,6 +81,33 @@ bool BoundingBox::overlaps(BoundingBox* other)
     }
 
     return true;
+}
+
+bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e)
+{
+    for (int i = 0; i < _vertices.size(); ++i)
+    {
+        auto& s0_s = _vertices[i];
+        auto& s0_e = _vertices[i + 1];
+        
+        auto d = (s0_e.y - s0_s.y) * (s1_e.x - s1_s.x) - (s0_e.x - s0_s.x) * (s1_e.y - s0_s.y);
+        if (std::abs(d) > glm::epsilon<float>())
+        {
+            auto s = (s0_e.x - s0_s.x) * (s1_s.y - s0_s.y) - (s0_e.y - s0_s.y) * (s1_s.x - s0_s.x);
+            auto sd = s / d;
+            if (sd >= 0 && sd <= 1)
+            {
+                auto t = (s1_e.x - s1_s.x) * (s1_s.y - s0_s.y) - (s1_e.y - s1_s.y) * (s1_s.x - s0_s.x);
+                auto st = t / d;
+                if (st >= 0 && st <= 1)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 glm::vec2 BoundingBox::project(glm::vec2 axis)

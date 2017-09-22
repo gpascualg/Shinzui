@@ -22,6 +22,8 @@ struct ClusterCenter;
 class Map;
 class MapAwareEntity;
 class Packet;
+template <int E, int D>
+class RadialQuadTree;
 
 enum class RequestType
 {
@@ -49,6 +51,8 @@ public:
     inline Map* map() const { return _map; }
 
     virtual void update(uint64_t elapsed, int updateKey);
+    virtual void physics(uint64_t elapsed, int updateKey);
+    virtual void cleanup(uint64_t elapsed, int updateKey);
 
     void request(MapAwareEntity* who, RequestType type);
     void broadcast(boost::intrusive_ptr<Packet> packet);
@@ -66,6 +70,8 @@ protected:
     Map* _map;
     uint64_t _clusterId;
     int _lastUpdateKey;
+
+    RadialQuadTree<5, 10>* _quadTree;
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _entities;
 
     // TODO(gpascualg): Use double lists to avoid locking and/or non-desired cleanups
