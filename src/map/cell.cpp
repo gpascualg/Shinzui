@@ -8,6 +8,7 @@
 #include "map/map_aware_entity.hpp"
 #include "map/offset.hpp"
 #include "map/quadtree.hpp"
+#include "movement/motion_master.hpp"
 #include "physics/bounding_box.hpp"
 
 #include <algorithm>
@@ -115,8 +116,16 @@ void Cell::update(uint64_t elapsed, int updateKey)
         processRequests(updater);
 
         // Insert into quadtree
-        // TODO(gpascualg): Insert in siblings if inside radius
         _quadTree->insert(updater);
+
+        // Try to insert into neighbours
+        for (auto&& cell : _map->getSiblings(this))
+        {
+            if (cell->_quadTree->contains(updater->motionMaster()->position2D()))
+            {
+                cell->_quadTree->insert(updater);
+            }
+        }
     }
 }
 

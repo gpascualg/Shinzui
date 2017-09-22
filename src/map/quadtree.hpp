@@ -37,10 +37,11 @@ class RadialQuadTree : public QuadTree<MaxEntities, MaxDepth>
 {
 public:
     RadialQuadTree(glm::vec2 center, float radius);
+    bool contains(glm::vec2 pos);
 
 private:
     const glm::vec2 _center;
-    const float _radius;
+    const float _radiusSqr;
 };
 
 
@@ -161,5 +162,12 @@ template <int MaxEntities, int MaxDepth>
 RadialQuadTree<MaxEntities, MaxDepth>::RadialQuadTree(glm::vec2 center, float radius) :
     QuadTree<MaxEntities, MaxDepth>(0, { center.x - radius, center.y - radius, center.x + radius, center.y + radius }),
     _center(center),
-    _radius(radius)
+    _radiusSqr(std::pow(radius, 2))
 {};
+
+template <int MaxEntities, int MaxDepth>
+bool RadialQuadTree<MaxEntities, MaxDepth>::contains(glm::vec2 pos)
+{
+    auto distSqr = std::pow(pos.x - _center.x, 2) + std::pow(pos.y - _center.y, 2);
+    return distSqr <= _radiusSqr;
+}
