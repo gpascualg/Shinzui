@@ -78,17 +78,18 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
 
         for (auto it = _entities.begin(); it != _entities.end();)
         {
-            auto next = ++it;
             auto entity = *it;
             
             int index = getIndex(entity->boundingBox()->asRect());
             if (index != -1)
             {
                 _nodes[index]->insert(entity);
-                _entities.erase(it);
+                it = _entities.erase(it);
             }
-
-            it = next;
+            else
+            {
+                ++it;
+            }
         }
     }
 }
