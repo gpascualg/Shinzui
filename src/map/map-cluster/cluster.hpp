@@ -38,7 +38,7 @@ public:
     void update(uint64_t elapsed);
     void runScheduledOperations();
 
-    static void updateCluster(UpdateStructure* updateStructure);
+    static void updateCluster(UpdateStructure&& updateStructure);
 
     inline std::size_t size() { return _uniqueIdsList.size(); }
 

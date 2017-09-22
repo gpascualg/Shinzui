@@ -33,18 +33,18 @@ void Cluster::update(uint64_t elapsed)
     // Try to update unique clusters only
     for (auto id : _uniqueIdsList)
     {
-        // TODO(gpascualg): Launch thread per cluster
-        updateCluster(new UpdateStructure{ this, id, elapsed });  // NOLINT(whitespace/braces)
+        // TODO(gpascualg): Launch threaded task per cluster
+        updateCluster({ this, id, elapsed });  // NOLINT(whitespace/braces)
     }
 }
 
-void Cluster::updateCluster(UpdateStructure* updateStructure)
+void Cluster::updateCluster(UpdateStructure&& updateStructure)
 {
-    auto* cluster = updateStructure->cluster;
-    auto id = updateStructure->id;
-    auto elapsed = updateStructure->elapsed;
+    auto* cluster = updateStructure.cluster;
+    auto id = updateStructure.id;
+    auto elapsed = updateStructure.elapsed;
 
-    // As long as they are different, race-conditions are of no importance
+    // HACK(gpascualg): Once multithreading is used, this will blow up
     auto updateKey = rand();  // NOLINT(runtime/threadsafe_fn)
 
     // Get all old nodes
