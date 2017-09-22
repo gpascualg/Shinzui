@@ -33,6 +33,9 @@ private:
     bool _recalcNormals;
 	std::vector<glm::vec2> _vertices;
     std::vector<glm::vec2> _normals;
+
+    glm::vec2 _min;
+    glm::vec2 _max;
 };
 
 void BoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
