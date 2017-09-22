@@ -85,6 +85,7 @@ std::vector<Cell*> Cell::inRadius(uint16_t radius)
 
 void Cell::update(uint64_t elapsed, int updateKey)
 {
+    // TODO(gpascualg): Check for better ways / clustering algo
     if (updateKey == _lastUpdateKey)
     {
         return;
@@ -114,38 +115,38 @@ void Cell::update(uint64_t elapsed, int updateKey)
         processRequests(updater);
 
         // Insert into quadtree
+        // TODO(gpascualg): Insert in siblings if inside radius
         _quadTree->insert(updater);
     }
 }
 
 void Cell::physics(uint64_t elapsed, int updateKey)
 {
+    // TODO(gpascualg): Check for better ways / clustering algo
+    if (updateKey == _lastUpdateKey)
+    {
+        return;
+    }
+    _lastUpdateKey = updateKey;
+
     // Collisions
-    // TODO(gpascualg): Throttling / Quadtrees to avoid that much comparations
     // TODO(gpascualg): What happens when we are at the edge of the cell?
     // TODO(gpascualg): Above could be solved by using shared QuadTrees among cells
-    // TODO(gpascualg): Is there any need to check npc/npc collisions??
     for (auto pair1 : _entities)
     {
-        auto p1 = pair1.second;
+        auto e1 = pair1.second;
 
-        // TODO(gpascualg): Could this happen at all?
-        if (!p1->boundingBox())
+        std::list<MapAwareEntity*> candidates;
+        _quadTree->retrieve(candidates, e1->boundingBox()->asRect());
+
+        for (auto e2 : candidates)
         {
-            continue;
-        }
-
-        for (auto pair2 : _entities)
-        {
-            auto p2 = pair2.second;
-
-            // TODO(gpascualg): Could this happen at all? (not having boundingBox)
-            if (p1 == p2 || !p2->boundingBox())
+            if (e1 == e2)
             {
                 continue;
             }
 
-            if (p1->boundingBox()->overlaps(p2->boundingBox()))
+            if (e1->boundingBox()->overlaps(e2->boundingBox()))
             {
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }
@@ -155,12 +156,19 @@ void Cell::physics(uint64_t elapsed, int updateKey)
 
 void Cell::cleanup(uint64_t elapsed, int updateKey)
 {
+    // TODO(gpascualg): Check for better ways / clustering algo
+    if (updateKey == _lastUpdateKey)
+    {
+        return;
+    }
+    _lastUpdateKey = updateKey;
+
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
     clearQueues();
 
-    auto& currentQueue = _broadcast == &_broadcastQueue1 ? _broadcastQueue2 : _broadcastQueue1;
-    currentQueue.clear();
+    // Clear quadtree
+    _quadTree->clear();
 }
 
 void Cell::processRequests(MapAwareEntity* entity)
@@ -197,5 +205,7 @@ void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
 
 void Cell::clearQueues()
 {
+    auto& currentQueue = _broadcast == &_broadcastQueue1 ? _broadcastQueue2 : _broadcastQueue1;
+    currentQueue.clear();
     _requests.clear();
 }

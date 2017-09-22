@@ -51,7 +51,8 @@ std::vector<glm::vec2>& BoundingBox::normals()
 
 glm::vec4 BoundingBox::asRect()
 {
-    return { _vertices[0].x, _vertices[0].y, _vertices[2].x, _vertices[2].y };
+    const auto pos = _motionMaster->position2D();
+    return { _vertices[0].x + pos.x, _vertices[0].y + pos.y, _vertices[2].x + pos.x, _vertices[2].y + pos.y };
 }
 
 bool BoundingBox::overlaps(BoundingBox* other)

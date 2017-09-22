@@ -3,6 +3,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include <list>
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -14,21 +15,21 @@ class QuadTree
 {
 public:
     void insert(MapAwareEntity* entity);
+    void retrieve(std::list<MapAwareEntity*> entities, glm::vec4 rect);
+    void clear();
 
 protected:
-    QuadTree();
     QuadTree(int depth, glm::vec4 bounds);
 
     std::vector<QuadTree<MaxEntities, MaxDepth>*> _nodes;
-    std::vector<MapAwareEntity*> _entities;
+    std::list<MapAwareEntity*> _entities;
 
     int getIndex(glm::vec4 rect);
     void split();
-    void clear();
 
 private:
-    int _depth;
-    glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, t)
+    const int _depth;
+    const glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, t)
 };
 
 template <int MaxEntities, int MaxDepth>
@@ -38,15 +39,10 @@ public:
     RadialQuadTree(glm::vec2 center, float radius);
 
 private:
-    glm::vec2 _center;
-    float _radius;
+    const glm::vec2 _center;
+    const float _radius;
 };
 
-
-template <int MaxEntities, int MaxDepth>
-QuadTree<MaxEntities, MaxDepth>::QuadTree() :
-    _depth(0)
-{}
 
 template <int MaxEntities, int MaxDepth>
 QuadTree<MaxEntities, MaxDepth>::QuadTree(int depth, glm::vec4 bounds) :
@@ -92,6 +88,18 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
             }
         }
     }
+}
+
+template <int MaxEntities, int MaxDepth>
+void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*> entities, glm::vec4 rect)
+{
+    int index = getIndex(rect);
+    if (index != -1 && !_nodes.empty())
+    {
+        _nodes[index]->retrieve(entities, rect);
+    }
+
+    entities.insert(entities.end(), _entities.begin(), _entities.end());
 }
 
 template <int MaxEntities, int MaxDepth>
@@ -151,7 +159,7 @@ void QuadTree<MaxEntities, MaxDepth>::clear()
 
 template <int MaxEntities, int MaxDepth>
 RadialQuadTree<MaxEntities, MaxDepth>::RadialQuadTree(glm::vec2 center, float radius) :
-    QuadTree<MaxEntities, MaxDepth>(),
+    QuadTree<MaxEntities, MaxDepth>(0, { center.x - radius, center.y - radius, center.x + radius, center.y + radius }),
     _center(center),
     _radius(radius)
 {};

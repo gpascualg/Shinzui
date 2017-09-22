@@ -29,12 +29,15 @@ union HashConverter
 
 #endif
 
+// Windows does not define "cos" as constexpr yet... :(
+constexpr float cellSize_x = 30.0f;
+constexpr float cellSize_y = 30.0f;
+
 struct Offset
 {
 public:
     constexpr Offset(int32_t q, int32_t r) :
-        _q(q), _r(r),
-        _center{ 0 } // TODO(gpascualg): This is not a valid center
+        _q(q), _r(r)
     {}
 
     inline constexpr int32_t q() const { return _q; }
@@ -67,35 +70,20 @@ public:
         return std::max(std::max(dq, dr), ds);
     }
 
-    constexpr glm::vec2 center() const { return _center; }
+    constexpr glm::vec2 center() const 
+    { 
+        return { cellSize_x * 3.0 / 2.0 * _q, cellSize_y * std::sqrt(3.0) * (_r + _q / 2.0) };
+    }
 
 private:
-    glm::vec2 _center;
     const int32_t _q;
     const int32_t _r;
 };
 
-// Windows does not define "cos" as constexpr yet... :(
-constexpr float cellSize_x = 150.0f;
-constexpr float cellSize_y = 150.0f;
-
-static const float pointy[] = {  // NOLINT(whitespace/braces)
-    std::sqrt(3.0f), std::sqrt(3.0f) / 2.0f, 0.0f, 3.0f / 2.0f,
-    std::sqrt(3.0f) / 3.0f, -1.0f / 3.0f, 0.0f, 2.0f / 3.0f, 0.5f
-};
-
-static const float flat[] = {  // NOLINT(whitespace/braces)
-    3.0f / 2.0f, 0.0f, std::sqrt(3.0f) / 2.0f, std::sqrt(3.0f),
-    2.0f / 3.0f, 0.0f, -1.0f / 3.0f, std::sqrt(3.0f) / 3.0f, 0.0f
-};
-
-inline Offset offsetOf(float x, float y, const float* orientation = flat)
+inline Offset offsetOf(float x, float y)
 {
-    float pt_x = (x - 0) / cellSize_x;
-    float pt_y = (y - 0) / cellSize_y;
-
-    float q = orientation[4] * pt_x + orientation[5] * pt_y;
-    float r = orientation[6] * pt_x + orientation[7] * pt_y;
+    float q = x * 2.0 / 3.0 / cellSize_x;
+    float r = (-x / 3.0 + std::sqrt(3.0) / 3.0 * y) / cellSize_y;
     float s = -q - r;
 
     int q_int = static_cast<int>(round(q));
