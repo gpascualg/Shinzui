@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 
 #include "map/map_aware_entity.hpp"
+// TODO(gpascualg): Included only for "intersects", might be moved elsewhere
+#include "physics/bounding_box.hpp"
 
 
 template <int MaxEntities, int MaxDepth>
@@ -15,8 +17,8 @@ class QuadTree
 {
 public:
     void insert(MapAwareEntity* entity);
-    void retrieve(std::list<MapAwareEntity*> entities, glm::vec4 rect);
-    void trace(std::list<MapAwareEntity*> entities, glm::vec2 start, glm::vec2 end);
+    void retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect);
+    void trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end);
     void clear();
 
 protected:
@@ -103,12 +105,28 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
 }
 
 template <int MaxEntities, int MaxDepth>
-void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*> entities, glm::vec4 rect)
+void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect)
 {
     int index = getIndex(rect);
     if (index != -1 && !_nodes.empty())
     {
         _nodes[index]->retrieve(entities, rect);
+    }
+
+    entities.insert(entities.end(), _entities.begin(), _entities.end());
+}
+
+template <int MaxEntities, int MaxDepth>
+void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)
+{
+    if (!intersects(start, end))
+    {
+        return;
+    }
+
+    for (auto*& node : _nodes)
+    {
+        node->trace(entities, start, end);
     }
 
     entities.insert(entities.end(), _entities.begin(), _entities.end());
@@ -151,6 +169,30 @@ int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
     }
 
     // Check segments 
+    auto width = _bounds.z - _bounds.x;
+    auto height = _bounds.t - _bounds.y;
+
+    if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))
+    {
+        return true;
+    }
+    
+    if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))
+    {
+        return true;
+    }
+
+    if (::intersects({ _bounds.x + width, _bounds.y + height }, { _bounds.x + width, _bounds.y }, start, end))
+    {
+        return true;
+    }
+
+    if (::intersects({ _bounds.x + width, _bounds.y }, { _bounds.x, _bounds.y }, start, end))
+    {
+        return true;
+    }
+
+    return false;
 }
 
 template <int MaxEntities, int MaxDepth>

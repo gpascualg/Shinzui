@@ -27,7 +27,7 @@ Cell::Cell(Map* map, const Offset& offset) :
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
 
     _broadcast = &_broadcastQueue1;
-    _quadTree = new RadialQuadTree<5, 10>(offset.center(), cellSize_x + 10);
+    _quadTree = new RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>(offset.center(), cellSize_x + 10);
 }
 
 Cell::~Cell()

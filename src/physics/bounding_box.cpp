@@ -101,6 +101,26 @@ bool BoundingBox::overlaps(BoundingBox* other)
     return true;
 }
 
+bool intersects(glm::vec2 s0_s, glm::vec2 s0_e, glm::vec2 s1_s, glm::vec2 s1_e)
+{
+    auto d = (s0_e.y - s0_s.y) * (s1_e.x - s1_s.x) - (s0_e.x - s0_s.x) * (s1_e.y - s0_s.y);
+    if (std::abs(d) <= glm::epsilon<float>())
+    {
+        return false;
+    }
+
+    auto s = (s0_e.x - s0_s.x) * (s1_s.y - s0_s.y) - (s0_e.y - s0_s.y) * (s1_s.x - s0_s.x);
+    auto sd = s / d;
+    if (sd < 0 || sd > 1)
+    {
+        return false;
+    }
+
+    auto t = (s1_e.x - s1_s.x) * (s1_s.y - s0_s.y) - (s1_e.y - s1_s.y) * (s1_s.x - s0_s.x);
+    auto st = t / d;
+    return (st >= 0 && st <= 1);
+}
+
 bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e)
 {
     for (int i = 0; i < _vertices.size(); ++i)
@@ -108,20 +128,9 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e)
         auto& s0_s = _vertices[i];
         auto& s0_e = _vertices[i + 1];
         
-        auto d = (s0_e.y - s0_s.y) * (s1_e.x - s1_s.x) - (s0_e.x - s0_s.x) * (s1_e.y - s0_s.y);
-        if (std::abs(d) > glm::epsilon<float>())
+        if (::intersects(s0_s, s0_e, s1_s, s1_e))
         {
-            auto s = (s0_e.x - s0_s.x) * (s1_s.y - s0_s.y) - (s0_e.y - s0_s.y) * (s1_s.x - s0_s.x);
-            auto sd = s / d;
-            if (sd >= 0 && sd <= 1)
-            {
-                auto t = (s1_e.x - s1_s.x) * (s1_s.y - s0_s.y) - (s1_e.y - s1_s.y) * (s1_s.x - s0_s.x);
-                auto st = t / d;
-                if (st >= 0 && st <= 1)
-                {
-                    return true;
-                }
-            }
+            return true;
         }
     }
 
