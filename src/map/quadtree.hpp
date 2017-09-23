@@ -16,6 +16,7 @@ class QuadTree
 public:
     void insert(MapAwareEntity* entity);
     void retrieve(std::list<MapAwareEntity*> entities, glm::vec4 rect);
+    void trace(std::list<MapAwareEntity*> entities, glm::vec2 start, glm::vec2 end);
     void clear();
 
 protected:
@@ -25,11 +26,13 @@ protected:
     std::list<MapAwareEntity*> _entities;
 
     int getIndex(glm::vec4 rect);
+    int intersects(glm::vec2 start, glm::vec2 end);
     void split();
 
 private:
     const int _depth;
     const glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, t)
+    std::vector<glm::vec2> _vertices;
 };
 
 template <int MaxEntities, int MaxDepth>
@@ -49,7 +52,15 @@ template <int MaxEntities, int MaxDepth>
 QuadTree<MaxEntities, MaxDepth>::QuadTree(int depth, glm::vec4 bounds) :
     _depth(depth),
     _bounds(bounds)
-{}
+{
+    auto width = _bounds.z - _bounds.x;
+    auto height = _bounds.t - _bounds.y;
+    
+    _vertices.push_back({ bounds.x, bounds.y });
+    _vertices.push_back({ bounds.x, bounds.y + height });
+    _vertices.push_back({ bounds.x + width, bounds.y + height });
+    _vertices.push_back({ bounds.x + width, bounds.y });
+}
 
 template <int MaxEntities, int MaxDepth>
 void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
@@ -128,6 +139,18 @@ int QuadTree<MaxEntities, MaxDepth>::getIndex(glm::vec4 rect)
     }
 
     return -1;
+}
+
+template <int MaxEntities, int MaxDepth>
+int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
+{
+    // Check inclusion
+    if (start.x > _bounds.x && start.y < _bounds.y && end.x < _bounds.z && end.y < _bounds.t)
+    {
+        return true;
+    }
+
+    // Check segments 
 }
 
 template <int MaxEntities, int MaxDepth>

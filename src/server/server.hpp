@@ -18,6 +18,20 @@ class MapAwareEntity;
 
 class Server
 {
+private:
+    enum class OperationType
+    {
+        ACCEPT,
+        CLOSE
+    };
+
+    struct Operation
+    {
+        OperationType type;
+        Client* client;
+        const boost::system::error_code& error;
+    };
+
 public:
     explicit Server(uint16_t port);
     virtual ~Server();
@@ -58,5 +72,5 @@ private:
     boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::acceptor _acceptor;
 
-    boost::lockfree::queue<Client*, boost::lockfree::capacity<1024>> _closeList;
+    boost::lockfree::queue<Operation*, boost::lockfree::capacity<1024>> _operations;
 };

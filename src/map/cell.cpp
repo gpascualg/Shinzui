@@ -139,8 +139,6 @@ void Cell::physics(uint64_t elapsed, int updateKey)
     _lastUpdateKey = updateKey;
 
     // Collisions
-    // TODO(gpascualg): What happens when we are at the edge of the cell?
-    // TODO(gpascualg): Above could be solved by using shared QuadTrees among cells
     for (auto pair1 : _entities)
     {
         auto e1 = pair1.second;
@@ -204,6 +202,9 @@ void Cell::processRequests(MapAwareEntity* entity)
 
 void Cell::request(MapAwareEntity* who, RequestType type)
 {
+    // TODO(gpascualg): Macro/debug friendly assert
+    assert(who->client());
+
     _requests.push_back({ who, type });  // NOLINT(whitespace/braces)
 }
 

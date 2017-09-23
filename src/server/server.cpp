@@ -36,25 +36,37 @@ void Server::updateIO()
 
 void Server::runScheduledOperations()
 {
-    std::list<Client*> pending;
+    std::list<Operation*> pending;
 
-    _closeList.consume_all([this, &pending](Client* client)
+    _operations.consume_all([this, &pending](Operation* op)
         {
-            // Still in the map
-            if (client->inMap())
+            switch (op->type)
             {
-                pending.push_back(client);
-            }
-            else
-            {
-                destroyClient(client);
+                case OperationType::ACCEPT:
+                    this->handleAccept(op->client, op->error);
+                    delete op;
+                    break;
+
+                case OperationType::CLOSE:
+                    // Still in the map
+                    if (op->client->inMap())
+                    {
+                        pending.push_back(op);
+                    }
+                    else
+                    {
+                        destroyClient(op->client);
+                        delete op;
+                    }
+                    break;
             }
         }
     );  // NOLINT(whitespace/parens)
 
-    for (Client* client : pending)
+    // Reschedule pending operations
+    for (auto op : pending)
     {
-        _closeList.push(client);
+        _operations.push(op);
     }
 }
 
@@ -64,7 +76,9 @@ void Server::startAccept()
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
         {
-            this->handleAccept(client, error);
+            _operations.push(new Operation{ OperationType::ACCEPT, client, error });
+
+            startAccept();
         }
     );  // NOLINT(whitespace/parens)
 }
@@ -72,13 +86,11 @@ void Server::startAccept()
 void Server::handleAccept(Client* client, const boost::system::error_code& error)
 {
     LOG(LOG_CLIENT_LIFECYCLE, "Client accepted");
-
-    startAccept();
 };
 
 void Server::handleClose(Client* client)
 {
-    _closeList.push(client);
+    _operations.push(new Operation{ OperationType::CLOSE, client, boost::system::error_code() });
 }
 
 Client* Server::newClient(boost::asio::io_service* service, uint64_t id)

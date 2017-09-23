@@ -30,8 +30,8 @@ union HashConverter
 #endif
 
 // Windows does not define "cos" as constexpr yet... :(
-constexpr float cellSize_x = 30.0f;
-constexpr float cellSize_y = 30.0f;
+constexpr float cellSize_x = 80.0f;
+constexpr float cellSize_y = 80.0f;
 
 struct Offset
 {
