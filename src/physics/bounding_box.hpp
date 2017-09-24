@@ -23,7 +23,7 @@ public:
     glm::vec4 asRect();
 
     bool overlaps(BoundingBox* other);
-    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e);
+    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr);
 
 private:
     glm::vec2 project(glm::vec2 axis);
@@ -43,4 +43,4 @@ void BoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
 	_vertices = std::move(vertices);
 }
 
-bool intersects(glm::vec2 s0_s, glm::vec2 s0_e, glm::vec2 s1_s, glm::vec2 s1_e);
+bool intersects(glm::vec2 s1, glm::vec2 s2, glm::vec2 p1, glm::vec2 p2);

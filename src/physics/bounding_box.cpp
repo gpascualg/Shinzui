@@ -101,40 +101,71 @@ bool BoundingBox::overlaps(BoundingBox* other)
     return true;
 }
 
-bool intersects(glm::vec2 s0_s, glm::vec2 s0_e, glm::vec2 s1_s, glm::vec2 s1_e)
+bool intersects(glm::vec2 s1, glm::vec2 s2, glm::vec2 p1, glm::vec2 p2)
 {
-    auto d = (s0_e.y - s0_s.y) * (s1_e.x - s1_s.x) - (s0_e.x - s0_s.x) * (s1_e.y - s0_s.y);
-    if (std::abs(d) <= glm::epsilon<float>())
+    auto vec = s1 - s2;
+    auto normal = glm::vec2{ vec.y, -vec.x };
+
+    auto v1 = p1 - s1;
+    auto v2 = p2 - s2;
+
+    auto proj1 = glm::dot(v1, normal);
+    auto proj2 = glm::dot(v2, normal);
+
+    if (std::abs(proj1) <= glm::epsilon<float>() ||
+        std::abs(proj2) <= glm::epsilon<float>())
     {
-        return false;
+        // Points are colinear
+        return true;
     }
 
-    auto s = (s0_e.x - s0_s.x) * (s1_s.y - s0_s.y) - (s0_e.y - s0_s.y) * (s1_s.x - s0_s.x);
-    auto sd = s / d;
-    if (sd < 0 || sd > 1)
-    {
-        return false;
-    }
-
-    auto t = (s1_e.x - s1_s.x) * (s1_s.y - s0_s.y) - (s1_e.y - s1_s.y) * (s1_s.x - s0_s.x);
-    auto st = t / d;
-    return (st >= 0 && st <= 1);
+    return glm::sign(proj1) != glm::sign(proj2);
 }
 
-bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e)
+bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 {
+    bool check = false;
+
+    if (dist)
+    {
+        *dist = 0;
+    }
+
     for (int i = 0; i < _vertices.size(); ++i)
     {
-        auto& s0_s = _vertices[i];
-        auto& s0_e = _vertices[i + 1];
+        auto& s0_s = _vertices[i] + _motionMaster->position2D();
+        auto& s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
         
         if (::intersects(s0_s, s0_e, s1_s, s1_e))
         {
-            return true;
+            // If dist is not needed, return right away
+            if (!dist)
+            {
+                return true;
+            }
+            else
+            {
+                // Calculate dist
+                float d = std::sqrt(std::pow(s0_e.y - s0_s.y, 2) + std::pow(s0_e.x - s0_s.x, 2));
+                if (std::abs(d) <= glm::epsilon<float>())
+                {
+                    float tmp = ((s0_e.y - s0_s.y) * s1_s.x - (s0_e.x - s0_s.x) * s1_s.y + s0_e.x * s0_s.y - s0_e.y * s0_s.x) / d;
+                    if (!check || tmp < *dist)
+                    {
+                        *dist = tmp;
+                    }
+                }
+                else
+                {
+                    *dist = 0;
+                }
+            }
+
+            check = true;
         }
     }
 
-    return false;
+    return check;
 }
 
 glm::vec2 BoundingBox::project(glm::vec2 axis)

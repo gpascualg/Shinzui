@@ -47,7 +47,11 @@ void Cluster::update(uint64_t elapsed)
     }
 
     // TODO(gpascualg): Block until previous ends
+}
 
+
+void Cluster::cleanup(uint64_t elapsed)
+{
     // Cleanup
     for (auto id : _uniqueIdsList)
     {

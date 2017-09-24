@@ -37,6 +37,7 @@ public:
     void add(MapAwareEntity* entity, std::vector<Cell*> const& siblings);
     void remove(MapAwareEntity* entity);
     void update(uint64_t elapsed);
+    void cleanup(uint64_t elapsed);
     void runScheduledOperations();
 
     static void updateCluster(UpdateStructure&& updateStructure);

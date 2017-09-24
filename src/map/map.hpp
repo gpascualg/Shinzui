@@ -34,6 +34,7 @@ public:
     virtual ~Map();
 
     void update(uint64_t elapsed);
+    void cleanup(uint64_t elapsed);
     void runScheduledOperations();
 
     // Broadcast operations

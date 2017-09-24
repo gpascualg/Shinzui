@@ -7,6 +7,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "debug/debug.hpp"
 #include "map/map_aware_entity.hpp"
 // TODO(gpascualg): Included only for "intersects", might be moved elsewhere
 #include "physics/bounding_box.hpp"
@@ -119,8 +120,11 @@ void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entit
 template <int MaxEntities, int MaxDepth>
 void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)
 {
+    LOG(LOG_QUADTREE, "Trace call from (%f, %f) to (%f, %f)", start.x, start.y, end.x, end.y);
+
     if (!intersects(start, end))
     {
+        LOG(LOG_QUADTREE, "Does not intersect with (%f, %f, %f, %f)", _bounds.x, _bounds.y, _bounds.z, _bounds.t);
         return;
     }
 

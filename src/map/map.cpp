@@ -39,6 +39,11 @@ void Map::update(uint64_t elapsed)
     cluster()->runScheduledOperations();
 }
 
+void Map::cleanup(uint64_t elapsed)
+{
+    cluster()->cleanup(elapsed);
+}
+
 void Map::runScheduledOperations()
 {
     MapOperation* operation;
