@@ -28,7 +28,7 @@ void BoundingBox::rotate(float angle)
 	for (auto& vertix : _vertices)
 	{
         // TODO(gpascualg): Is rotate 2D equivalent to rotateY?
-		vertix = glm::normalize(glm::rotate(vertix, angle));
+		vertix = glm::rotate(vertix, angle);
 	}
 
     _recalcNormals = true;
@@ -126,6 +126,9 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
     {
         auto& s0_s = _vertices[i] + _motionMaster->position2D();
         auto& s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
+
+        /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
+            s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/
 
         if (::intersects(s0_s, s0_e, s1_s, s1_e))
         {
