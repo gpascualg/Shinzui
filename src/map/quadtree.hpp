@@ -34,7 +34,7 @@ protected:
 
 private:
     const int _depth;
-    const glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, t)
+    const glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, w)
     std::vector<glm::vec2> _vertices;
 };
 
@@ -57,7 +57,7 @@ QuadTree<MaxEntities, MaxDepth>::QuadTree(int depth, glm::vec4 bounds) :
     _bounds(bounds)
 {
     auto width = _bounds.z - _bounds.x;
-    auto height = _bounds.t - _bounds.y;
+    auto height = _bounds.w - _bounds.y;
     
     _vertices.push_back({ bounds.x, bounds.y });
     _vertices.push_back({ bounds.x, bounds.y + height });
@@ -124,7 +124,7 @@ void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities
 
     if (!intersects(start, end))
     {
-        LOG(LOG_QUADTREE, "Does not intersect with (%f, %f, %f, %f)", _bounds.x, _bounds.y, _bounds.z, _bounds.t);
+        LOG(LOG_QUADTREE, "Does not intersect with (%f, %f, %f, %f)", _bounds.x, _bounds.y, _bounds.z, _bounds.w);
         return;
     }
 
@@ -140,10 +140,10 @@ template <int MaxEntities, int MaxDepth>
 int QuadTree<MaxEntities, MaxDepth>::getIndex(glm::vec4 rect)
 {
     float verticalMidpoint = _bounds.x + ((_bounds.z - _bounds.x) / 2);
-    float horizontalMidpoint = _bounds.y + ((_bounds.t - _bounds.y) / 2);
+    float horizontalMidpoint = _bounds.y + ((_bounds.w - _bounds.y) / 2);
 
     // Object can completely fit within the top quadrants
-    bool topQuadrant = (rect.y < horizontalMidpoint && rect.y + (rect.t - rect.y) < horizontalMidpoint);
+    bool topQuadrant = (rect.y < horizontalMidpoint && rect.y + (rect.w - rect.y) < horizontalMidpoint);
     // Object can completely fit within the bottom quadrants
     bool bottomQuadrant = (rect.y > horizontalMidpoint);
 
@@ -167,14 +167,14 @@ template <int MaxEntities, int MaxDepth>
 int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
 {
     // Check inclusion
-    if (start.x > _bounds.x && start.y < _bounds.y && end.x < _bounds.z && end.y < _bounds.t)
+    if (start.x > _bounds.x && start.y > _bounds.y && end.x < _bounds.z && end.y < _bounds.w)
     {
         return true;
     }
 
     // Check segments 
     auto width = _bounds.z - _bounds.x;
-    auto height = _bounds.t - _bounds.y;
+    auto height = _bounds.w - _bounds.y;
 
     if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))
     {
@@ -203,7 +203,7 @@ template <int MaxEntities, int MaxDepth>
 void QuadTree<MaxEntities, MaxDepth>::split()
 {
     int subWidth = static_cast<int>((_bounds.z - _bounds.x) / 2);
-    int subHeight = static_cast<int>((_bounds.t - _bounds.y) / 2);
+    int subHeight = static_cast<int>((_bounds.w - _bounds.y) / 2);
     int x = static_cast<int>(_bounds.x);
     int y = static_cast<int>(_bounds.y);
 

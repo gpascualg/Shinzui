@@ -1,5 +1,6 @@
 /* Copyright 2016 Guillem Pascual */
 
+#include "debug/debug.hpp"
 #include "physics/bounding_box.hpp"
 #include "movement/motion_master.hpp"
 
@@ -101,25 +102,15 @@ bool BoundingBox::overlaps(BoundingBox* other)
     return true;
 }
 
-bool intersects(glm::vec2 s1, glm::vec2 s2, glm::vec2 p1, glm::vec2 p2)
+// TODO(gpascualg): Benchmark different segment-segment intersection algos
+bool ccw(glm::vec2 A, glm::vec2 B, glm::vec2 C)
 {
-    auto vec = s1 - s2;
-    auto normal = glm::vec2{ vec.y, -vec.x };
+    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
+}
 
-    auto v1 = p1 - s1;
-    auto v2 = p2 - s2;
-
-    auto proj1 = glm::dot(v1, normal);
-    auto proj2 = glm::dot(v2, normal);
-
-    if (std::abs(proj1) <= glm::epsilon<float>() ||
-        std::abs(proj2) <= glm::epsilon<float>())
-    {
-        // Points are colinear
-        return true;
-    }
-
-    return glm::sign(proj1) != glm::sign(proj2);
+bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D)
+{
+    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D);
 }
 
 bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
@@ -135,7 +126,7 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
     {
         auto& s0_s = _vertices[i] + _motionMaster->position2D();
         auto& s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
-        
+
         if (::intersects(s0_s, s0_e, s1_s, s1_e))
         {
             // If dist is not needed, return right away

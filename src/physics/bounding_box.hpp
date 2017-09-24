@@ -43,4 +43,4 @@ void BoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
 	_vertices = std::move(vertices);
 }
 
-bool intersects(glm::vec2 s1, glm::vec2 s2, glm::vec2 p1, glm::vec2 p2);
+bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D);
