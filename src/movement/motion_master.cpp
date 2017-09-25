@@ -74,9 +74,16 @@ void MotionMaster::move()
     _flags |= (uint8_t)MovementFlags::MOVING;
 }
 
-void MotionMaster::stop()
+void MotionMaster::stop(bool cleanup)
 {
     _flags &= ~(uint8_t)MovementFlags::MOVING;
+    _flags &= ~(uint8_t)MovementFlags::ROTATING;
+
+    if (cleanup && _generator)
+    {
+        delete _generator;
+        _generator = nullptr;
+    }
 }
 
 void MotionMaster::speed(float speed)

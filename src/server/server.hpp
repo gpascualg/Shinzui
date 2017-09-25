@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "defs/common.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
 #include <boost/lockfree/queue.hpp>
@@ -51,6 +53,8 @@ public:
     void runScheduledOperations();
 
     inline Map* map() { return _map; }
+    inline TimePoint now() { return _now; }
+    inline void update() { _now = std::chrono::high_resolution_clock::now(); }
 
     void startAccept();
     virtual void handleAccept(Client* client, const boost::system::error_code& error);
@@ -68,6 +72,7 @@ private:
 
     Map* _map;
 
+    TimePoint _now;
     boost::asio::io_service _service;
     boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::acceptor _acceptor;

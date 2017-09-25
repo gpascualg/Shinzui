@@ -7,3 +7,7 @@
 #else
     #define FMT_PTR "%X"
 #endif
+
+#include <chrono>
+
+using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;

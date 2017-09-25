@@ -12,6 +12,7 @@
 #include <vector>
 
 
+
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _client(client),
     _id(id),
@@ -29,6 +30,20 @@ MapAwareEntity::~MapAwareEntity()
 
 void MapAwareEntity::update(uint64_t elapsed)
 {
+    // Run all scheduled tasks if any
+    while (!_scheduledTasks.empty() && _scheduledTasks.top()->when < Server::get()->now())
+    {
+        auto st = _scheduledTasks.top();
+
+        // Execute task and pop
+        (*st->task)(this);
+        _scheduledTasks.pop();
+
+        // Free memory
+        delete st;
+    }
+
+    // Update motion
     _motionMaster->update(elapsed);
 }
 
@@ -95,4 +110,9 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     );  // NOLINT(whitespace/parens)
 
     return oldCells;
+}
+
+void MapAwareEntity::schedule(SchedulableTask&& task, TimePoint when)
+{
+    _scheduledTasks.emplace(new Schedulable{ task, when });
 }

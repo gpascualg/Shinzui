@@ -35,7 +35,7 @@ public:
     inline const float speed() { return _speed; }
 
     void move();
-    void stop();
+    void stop(bool cleanup = false);
 
     inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
     inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }

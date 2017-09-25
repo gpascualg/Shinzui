@@ -2,8 +2,11 @@
 
 #pragma once
 
+#include "defs/common.hpp"
+
 #include <inttypes.h>
 #include <list>
+#include <queue>
 #include <vector>
 #include <initializer_list>
 #include <glm/glm.hpp>
@@ -12,9 +15,30 @@
 class BoundingBox;
 class Cell;
 class Client;
+class MapAwareEntity;
 class MotionMaster;
 class Packet;
 
+// TODO(gpascualg): Most probably, this should be moved somewhere else
+using SchedulableTask = void(*)(MapAwareEntity*);
+struct Schedulable
+{
+    bool operator<(const Schedulable& other) const
+    {
+        return when < other.when;
+    }
+
+    SchedulableTask task;
+    TimePoint when;
+};
+
+struct Comp
+{
+    bool operator()(const Schedulable* a, const Schedulable* b)
+    {
+        return a->when < b->when;
+    }
+};
 
 class MapAwareEntity
 {
@@ -36,6 +60,8 @@ public:
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
     virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
 
+    void schedule(SchedulableTask&& task, TimePoint when);
+
     virtual Packet* spawnPacket() = 0;
     virtual Packet* despawnPacket() = 0;
 
@@ -51,6 +77,7 @@ protected:
     Cell* _cell;
     uint64_t _id;
 
+    std::priority_queue<Schedulable*, std::vector<Schedulable*>, Comp> _scheduledTasks;
     bool _isUpdater;
 };
 
