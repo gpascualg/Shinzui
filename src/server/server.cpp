@@ -78,7 +78,7 @@ void Server::startAccept()
         {
             _operations.push(new Operation{ OperationType::ACCEPT, client, error });
 
-            startAccept();
+            this->startAccept();
         }
     );  // NOLINT(whitespace/parens)
 }

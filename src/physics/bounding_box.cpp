@@ -124,8 +124,8 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 
     for (int i = 0; i < _vertices.size(); ++i)
     {
-        auto& s0_s = _vertices[i] + _motionMaster->position2D();
-        auto& s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
+        auto s0_s = _vertices[i] + _motionMaster->position2D();
+        auto s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
 
         /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
             s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/

@@ -10,4 +10,4 @@
 
 #include <chrono>
 
-using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+using TimePoint = std::chrono::high_resolution_clock::time_point;
