@@ -45,15 +45,10 @@ bool SAT::collides(RectBoundingBox& a, RectBoundingBox& b)
         return false;
     }
 
-    if (!collides(b.normals(), &a, &b))
-    {
-        return false;
-    }
-
-    return true;
+    return collides(b.normals(), &a, &b);
 }
 
-bool SAT::collides(const RectBoundingBox& a, const CircularBoundingBox& b)
+bool SAT::collides(RectBoundingBox& a, const CircularBoundingBox& b)
 {
     // Find closest point from a to b
     float minDist = glm::length2(a._vertices[0] - b.center2D());
@@ -69,7 +64,14 @@ bool SAT::collides(const RectBoundingBox& a, const CircularBoundingBox& b)
         }
     }
 
-    return collides({ minVertex - b.center2D() }, &a, &b);
+    // Collision based on circle normal?
+    if (!collides({ minVertex - b.center2D() }, &a, &b))
+    {
+        return false;
+    }
+
+    // Collision based on rectangle edges
+    return collides(a.normals(), &a, &b);
 }
 
 bool SAT::collides(const CircularBoundingBox& a, const CircularBoundingBox& b)
@@ -84,6 +86,7 @@ bool SAT::collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, con
         auto p1 = a->project(this, axis);
         auto p2 = b->project(this, axis);
 
+        // TODO(gpascualg): It should be working, but test it!
         if (std::min(p1.y, p2.y) - std::max(p1.x, p2.x) < 0)
         {
             return false;

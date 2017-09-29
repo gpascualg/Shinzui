@@ -18,7 +18,7 @@ class SAT : public CollisionsFramework
 public:
     bool collides(BoundingBox* a, BoundingBox* b) override;
     bool collides(RectBoundingBox& a, RectBoundingBox& b);
-    bool collides(const RectBoundingBox& a, const CircularBoundingBox& b);
+    bool collides(RectBoundingBox& a, const CircularBoundingBox& b);
     bool collides(const CircularBoundingBox& a, const CircularBoundingBox& b);
 
     inline static SAT* get()
