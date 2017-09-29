@@ -14,33 +14,20 @@ class BoundingBox
 {
 public:
 	BoundingBox(MotionMaster* motionMaster);
-	BoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
-	void rotate(float angle);
 
-	inline void setVertices(std::initializer_list<glm::vec2>&& vertices);
-    std::vector<glm::vec2>& normals();
+    // Rotate with motion master
+	virtual void rotate(float angle) = 0;
 
-    glm::vec4 asRect();
+    // Returns the minimum rect that contains the OBB
+    virtual glm::vec4 asRect() = 0;
 
-    bool overlaps(BoundingBox* other);
-    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr);
+    // Intersection with a segment
+    virtual bool intersects(glm::vec2 p0, glm::vec2 p1, float* dist) = 0;
 
-private:
-    glm::vec2 project(glm::vec2 axis);
+protected:
+    // Normals of the edges (if any)
+    virtual const std::vector<glm::vec2>& normals() = 0;
 
-private:
+protected:
     MotionMaster* _motionMaster;
-    bool _recalcNormals;
-	std::vector<glm::vec2> _vertices;
-    std::vector<glm::vec2> _normals;
-
-    glm::vec2 _min;
-    glm::vec2 _max;
 };
-
-void BoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
-{
-	_vertices = std::move(vertices);
-}
-
-bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D);
