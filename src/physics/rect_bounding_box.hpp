@@ -14,13 +14,16 @@ class MotionMaster;
 
 class RectBoundingBox : public BoundingBox
 {
+    friend class CollisionsFramework;
+    friend class SAT;
+
 public:
-    RectBoundingBox(MotionMaster* motionMaster);
-    inline void setVertices(std::initializer_list<glm::vec2>&& vertices);
+    RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
 
 	void rotate(float angle) override;
     glm::vec4 asRect() override;
     bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr) override;
+    glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const override;
 
 protected:
     const std::vector<glm::vec2>& normals() override;
@@ -33,8 +36,3 @@ private:
     glm::vec2 _min;
     glm::vec2 _max;
 };
-
-void RectBoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
-{
-	_vertices = std::move(vertices);
-}

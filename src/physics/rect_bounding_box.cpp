@@ -1,6 +1,8 @@
 /* Copyright 2016 Guillem Pascual */
 
 #include "debug/debug.hpp"
+#include "physics/methods.hpp"
+#include "physics/collisions_framework.hpp"
 #include "physics/rect_bounding_box.hpp"
 #include "movement/motion_master.hpp"
 
@@ -10,9 +12,10 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 
-RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster) :
-    BoundingBox{ motionMaster },
-    _recalcNormals(false)
+RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices) :
+    BoundingBox{ motionMaster, BoundingBoxType::RECT },
+    _recalcNormals(false),
+    _vertices(std::move(vertices))
 {
     _normals.resize(2);
 }
@@ -61,24 +64,13 @@ const std::vector<glm::vec2>& RectBoundingBox::normals()
 
 glm::vec4 RectBoundingBox::asRect()
 {
-    const auto pos = _motionMaster->position2D();
+    const auto pos = motionMaster()->position2D();
     normals(); // Force recalc
 
     return { _min.x + pos.x, _min.y + pos.y, _max.x + pos.x, _max.y + pos.y };
 }
 
-// TODO(gpascualg): Benchmark different segment-segment intersection algos
-bool ccw(glm::vec2 A, glm::vec2 B, glm::vec2 C)
-{
-    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
-}
-
-bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D)
-{
-    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D);
-}
-
-bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
+bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 {
     bool check = false;
 
@@ -89,11 +81,11 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 
     for (int i = 0; i < _vertices.size(); ++i)
     {
-        auto s0_s = _vertices[i] + _motionMaster->position2D();
-        auto s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
+        auto s0_s = _vertices[i] + motionMaster()->position2D();
+        auto s0_e = _vertices[(i + 1) % _vertices.size()] + motionMaster()->position2D();
 
         /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
-            s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/
+        s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/
 
         if (::intersects(s0_s, s0_e, s1_s, s1_e))
         {
@@ -127,22 +119,8 @@ bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
     return check;
 }
 
-glm::vec2 BoundingBox::project(glm::vec2 axis)
+glm::vec2 RectBoundingBox::project(CollisionsFramework* framework, glm::vec2 axis) const
 {
-    float min = glm::dot(axis, _vertices[0] + _motionMaster->position2D());
-    float max = min;
-    for (int i = 1; i < _vertices.size(); ++i)
-    {
-        float tmp = glm::dot(axis, _vertices[i] + _motionMaster->position2D());
-        if (tmp < min)
-        {
-            min = tmp;
-        }
-        else if (tmp > max)
-        {
-            max = tmp;
-        }
-    }
-
-    return { min, max };
+    return framework->project(*this, axis);
 }
+

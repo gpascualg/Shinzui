@@ -10,6 +10,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 
-BoundingBox::BoundingBox(MotionMaster* motionMaster) :
-    _motionMaster(motionMaster)
+BoundingBox::BoundingBox(MotionMaster* motionMaster, BoundingBoxType type) :
+    _motionMaster(motionMaster),
+    Type(type)
 {}

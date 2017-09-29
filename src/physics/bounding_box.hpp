@@ -9,11 +9,18 @@
 
 
 class MotionMaster;
+class CollisionsFramework;
+
+enum class BoundingBoxType
+{
+    RECT,
+    CIRCULAR
+};
 
 class BoundingBox
 {
 public:
-	BoundingBox(MotionMaster* motionMaster);
+	BoundingBox(MotionMaster* motionMaster, BoundingBoxType type);
 
     // Rotate with motion master
 	virtual void rotate(float angle) = 0;
@@ -24,10 +31,18 @@ public:
     // Intersection with a segment
     virtual bool intersects(glm::vec2 p0, glm::vec2 p1, float* dist) = 0;
 
+    // Collisions
+    virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const = 0;
+    
+    inline MotionMaster* motionMaster() const { return _motionMaster; }
+
 protected:
     // Normals of the edges (if any)
     virtual const std::vector<glm::vec2>& normals() = 0;
 
-protected:
+public:
+    const BoundingBoxType Type;
+
+private:
     MotionMaster* _motionMaster;
 };

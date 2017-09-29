@@ -70,10 +70,13 @@ if (Shinzui_IS_RESOLVED)
     )
 
     foreach(folder ${SOURCE_FOLDERS})
+        get_filename_component(FOLDER_NAME ${folder} NAME)
+
         AddToSources(
             TARGET Shinzui
             SRC_PATH ${folder}
             GLOB_SEARCH ".hpp;.cpp"
+            FOLDER_NAME ${FOLDER_NAME}
         )
     endforeach()
 

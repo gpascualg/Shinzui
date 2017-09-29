@@ -5,7 +5,7 @@
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 #include "movement/motion_master.hpp"
-#include "physics/bounding_box.hpp"
+#include "physics/rect_bounding_box.hpp"
 #include "server/server.hpp"
 
 #include <list>
@@ -51,7 +51,7 @@ void MapAwareEntity::setupBoundingBox(std::initializer_list<glm::vec2>&& vertice
 {
     // TODO(gpascualg): Logging friendly assert
     assert(_boundingBox == nullptr);
-    _boundingBox = new BoundingBox(_motionMaster, std::move(vertices));
+    _boundingBox = new RectBoundingBox(_motionMaster, std::move(vertices));
 }
 
 std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)

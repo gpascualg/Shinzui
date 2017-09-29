@@ -2,45 +2,42 @@
 
 #pragma once
 
+#include "physics/bounding_box.hpp"
+#include "physics/circular_bounding_box.hpp"
+#include "physics/collisions_framework.hpp"
+#include "physics/rect_bounding_box.hpp"
+
 #include <initializer_list>
 #include <vector>
 #include <utility>
 #include <glm/glm.hpp>
 
 
-class MotionMaster;
-
-class BoundingBox
+class SAT : public CollisionsFramework
 {
 public:
-	BoundingBox(MotionMaster* motionMaster);
-	BoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
-	void rotate(float angle);
+    bool collides(BoundingBox* a, BoundingBox* b) override;
+    bool collides(RectBoundingBox& a, RectBoundingBox& b);
+    bool collides(const RectBoundingBox& a, const CircularBoundingBox& b);
+    bool collides(const CircularBoundingBox& a, const CircularBoundingBox& b);
 
-	inline void setVertices(std::initializer_list<glm::vec2>&& vertices);
-    std::vector<glm::vec2>& normals();
+    inline static SAT* get()
+    {
+        if (!_instance)
+        {
+            _instance = new SAT();
+        }
 
-    glm::vec4 asRect();
+        return _instance;
+    }
 
-    bool overlaps(BoundingBox* other);
-    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr);
+protected:
+    SAT()
+    {}
 
 private:
-    glm::vec2 project(glm::vec2 axis);
+    bool collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, const BoundingBox* b);
 
 private:
-    MotionMaster* _motionMaster;
-    bool _recalcNormals;
-	std::vector<glm::vec2> _vertices;
-    std::vector<glm::vec2> _normals;
-
-    glm::vec2 _min;
-    glm::vec2 _max;
+    static SAT* _instance;
 };
-
-void BoundingBox::setVertices(std::initializer_list<glm::vec2>&& vertices)
-{
-	_vertices = std::move(vertices);
-}
-
-bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D);

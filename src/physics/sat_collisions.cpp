@@ -1,97 +1,88 @@
 /* Copyright 2016 Guillem Pascual */
 
-#include "debug/debug.hpp"
-#include "physics/bounding_box.hpp"
+#include "physics/sat_collisions.hpp"
 #include "movement/motion_master.hpp"
 
 #include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/norm.hpp>
 
 
-BoundingBox::BoundingBox(MotionMaster* motionMaster) :
-    _motionMaster(motionMaster),
-    _recalcNormals(false)
+SAT* SAT::_instance = nullptr;
+
+bool SAT::collides(BoundingBox* a, BoundingBox* b)
 {
-    _normals.resize(2);
-}
-
-BoundingBox::BoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices) :
-	BoundingBox{motionMaster}
-{
-	setVertices(std::move(vertices));
-}
-
-void BoundingBox::rotate(float angle)
-{
-	for (auto& vertix : _vertices)
-	{
-        // TODO(gpascualg): Is rotate 2D equivalent to rotateY?
-		vertix = glm::rotate(vertix, angle);
-	}
-
-    _recalcNormals = true;
-}
-
-std::vector<glm::vec2>& BoundingBox::normals()
-{
-    if (_recalcNormals)
+    if (a->Type == BoundingBoxType::RECT)
     {
-        _min = _vertices[0];
-        _max = _vertices[0];
-
-        for (int i = 0; i < 4; ++i)
+        if (b->Type == BoundingBoxType::RECT)
         {
-            if (i < 2)
-            {
-                auto tmp = _vertices[i] - _vertices[i + 1];
-                _normals[i] = glm::vec2(-tmp.y, tmp.x); // (-y, x) || (y, -x)
-            }
-
-            if (i > 0)
-            {
-                if (_vertices[i].x < _min.x) _min.x = _vertices[i].x;
-                else if (_vertices[i].x > _max.x) _max.x = _vertices[i].x;
-
-                if (_vertices[i].y < _min.y) _min.y = _vertices[i].y;
-                else if (_vertices[i].y > _max.y) _max.y = _vertices[i].y;
-            }
+            return collides(*static_cast<RectBoundingBox*>(a), *static_cast<RectBoundingBox*>(b));
         }
+        else if (b->Type == BoundingBoxType::CIRCULAR)
+        {
+            return collides(*static_cast<RectBoundingBox*>(a), *static_cast<CircularBoundingBox*>(b));
+        }
+    }
+    else
+    {
+        if (b->Type == BoundingBoxType::RECT)
+        {
+            return collides(*static_cast<RectBoundingBox*>(b), *static_cast<CircularBoundingBox*>(a));
+        }
+        else if (b->Type == BoundingBoxType::CIRCULAR)
+        {
+            return collides(*static_cast<CircularBoundingBox*>(a), *static_cast<CircularBoundingBox*>(b));
+        }
+    }
+}
 
-        _recalcNormals = false;
+bool SAT::collides(RectBoundingBox& a, RectBoundingBox& b)
+{
+    if (!collides(a.normals(), &a, &b))
+    {
+        return false;
     }
 
-    return _normals;
-}
-
-glm::vec4 BoundingBox::asRect()
-{
-    const auto pos = _motionMaster->position2D();
-    normals(); // Force recalc
-
-    return { _min.x + pos.x, _min.y + pos.y, _max.x + pos.x, _max.y + pos.y };
-}
-
-bool BoundingBox::overlaps(BoundingBox* other)
-{
-    auto& axes1 = normals();
-    for (auto& axis : axes1)
+    if (!collides(b.normals(), &a, &b))
     {
-        auto p1 = project(axis);
-        auto p2 = other->project(axis);
+        return false;
+    }
 
-        if (std::min(p1.y, p2.y) - std::max(p1.x, p2.x) < 0)
+    return true;
+}
+
+bool SAT::collides(const RectBoundingBox& a, const CircularBoundingBox& b)
+{
+    // Find closest point from a to b
+    float minDist = glm::length2(a._vertices[0] - b.center2D());
+    glm::vec2 minVertex = a._vertices[0];
+
+    for (int i = 1; i < a._vertices.size(); ++i)
+    {
+        float tmp = glm::length2(a._vertices[i] - b.center2D());
+        if (tmp < minDist)
         {
-            return false;
+            minDist = tmp;
+            minVertex = a._vertices[i];
         }
     }
 
-    auto& axes2 = other->normals();
-    for (auto& axis : axes2)
+    return collides({ minVertex - b.center2D() }, &a, &b);
+}
+
+bool SAT::collides(const CircularBoundingBox& a, const CircularBoundingBox& b)
+{
+    return collides({ a.center2D() - b.center2D() }, &a, &b);
+}
+
+bool SAT::collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, const BoundingBox* b)
+{
+    for (auto& axis : axes)
     {
-        auto p1 = project(axis);
-        auto p2 = other->project(axis);
+        auto p1 = a->project(this, axis);
+        auto p2 = b->project(this, axis);
 
         if (std::min(p1.y, p2.y) - std::max(p1.x, p2.x) < 0)
         {
@@ -100,84 +91,4 @@ bool BoundingBox::overlaps(BoundingBox* other)
     }
 
     return true;
-}
-
-// TODO(gpascualg): Benchmark different segment-segment intersection algos
-bool ccw(glm::vec2 A, glm::vec2 B, glm::vec2 C)
-{
-    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
-}
-
-bool intersects(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::vec2 D)
-{
-    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D);
-}
-
-bool BoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
-{
-    bool check = false;
-
-    if (dist)
-    {
-        *dist = 0;
-    }
-
-    for (int i = 0; i < _vertices.size(); ++i)
-    {
-        auto s0_s = _vertices[i] + _motionMaster->position2D();
-        auto s0_e = _vertices[(i + 1) % _vertices.size()] + _motionMaster->position2D();
-
-        /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
-            s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/
-
-        if (::intersects(s0_s, s0_e, s1_s, s1_e))
-        {
-            // If dist is not needed, return right away
-            if (!dist)
-            {
-                return true;
-            }
-            else
-            {
-                // Calculate dist
-                float d = std::sqrt(std::pow(s0_e.y - s0_s.y, 2) + std::pow(s0_e.x - s0_s.x, 2));
-                if (std::abs(d) <= glm::epsilon<float>())
-                {
-                    float tmp = ((s0_e.y - s0_s.y) * s1_s.x - (s0_e.x - s0_s.x) * s1_s.y + s0_e.x * s0_s.y - s0_e.y * s0_s.x) / d;
-                    if (!check || tmp < *dist)
-                    {
-                        *dist = tmp;
-                    }
-                }
-                else
-                {
-                    *dist = 0;
-                }
-            }
-
-            check = true;
-        }
-    }
-
-    return check;
-}
-
-glm::vec2 BoundingBox::project(glm::vec2 axis)
-{
-    float min = glm::dot(axis, _vertices[0] + _motionMaster->position2D());
-    float max = min;
-    for (int i = 1; i < _vertices.size(); ++i)
-    {
-        float tmp = glm::dot(axis, _vertices[i] + _motionMaster->position2D());
-        if (tmp < min)
-        {
-            min = tmp;
-        }
-        else if (tmp > max)
-        {
-            max = tmp;
-        }
-    }
-
-    return { min, max };
 }

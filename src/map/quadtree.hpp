@@ -9,8 +9,8 @@
 
 #include "debug/debug.hpp"
 #include "map/map_aware_entity.hpp"
-// TODO(gpascualg): Included only for "intersects", might be moved elsewhere
-#include "physics/bounding_box.hpp"
+#include "physics/methods.hpp"
+#include "physics/sat_collisions.hpp"
 
 
 template <int MaxEntities, int MaxDepth>

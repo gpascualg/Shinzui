@@ -153,7 +153,7 @@ void Cell::physics(uint64_t elapsed, int updateKey)
                 continue;
             }
 
-            if (e1->boundingBox()->overlaps(e2->boundingBox()))
+            if (SAT::get()->collides(e1->boundingBox(), e2->boundingBox()))
             {
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }
