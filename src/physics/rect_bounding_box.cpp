@@ -79,7 +79,7 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
         *dist = 0;
     }
 
-    for (int i = 0; i < _vertices.size(); ++i)
+    for (uint32_t i = 0; i < _vertices.size(); ++i)
     {
         auto s0_s = _vertices[i] + position();
         auto s0_e = _vertices[(i + 1) % _vertices.size()] + position();

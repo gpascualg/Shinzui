@@ -82,8 +82,8 @@ private:
 
 inline Offset offsetOf(float x, float y)
 {
-    float q = x * 2.0 / 3.0 / cellSize_x;
-    float r = (-x / 3.0 + std::sqrt(3.0) / 3.0 * y) / cellSize_y;
+    float q = x * 2.0f / 3.0f / cellSize_x;
+    float r = (-x / 3.0f + std::sqrt(3.0f) / 3.0f * y) / cellSize_y;
     float s = -q - r;
 
     int q_int = static_cast<int>(round(q));

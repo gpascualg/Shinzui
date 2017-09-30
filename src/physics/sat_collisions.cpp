@@ -36,6 +36,8 @@ bool SAT::collides(BoundingBox* a, BoundingBox* b)
             return collides(*static_cast<CircularBoundingBox*>(a), *static_cast<CircularBoundingBox*>(b));
         }
     }
+
+    return false;
 }
 
 bool SAT::collides(RectBoundingBox& a, RectBoundingBox& b)
@@ -54,7 +56,7 @@ bool SAT::collides(RectBoundingBox& a, const CircularBoundingBox& b)
     float minDist = glm::length2(a._vertices[0] - b.center2D());
     glm::vec2 minVertex = a._vertices[0];
 
-    for (int i = 1; i < a._vertices.size(); ++i)
+    for (uint32_t i = 1; i < a._vertices.size(); ++i)
     {
         float tmp = glm::length2(a._vertices[i] - b.center2D());
         if (tmp < minDist)

@@ -99,6 +99,8 @@ if (Shinzui_IS_RESOLVED)
         OUTPUT_NAME Shinzui
     )
 
+    WarningAll(TARGET Shinzui)
+
     if (SHINZUI_LINT)
         include(Lint)
         setup_target_for_lint(ShinzuiLint "${Shinzui_SOURCES}")

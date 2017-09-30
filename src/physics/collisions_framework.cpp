@@ -11,7 +11,7 @@ glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis
 {
     float min = glm::dot(axis, bb._vertices[0] + bb.position());
     float max = min;
-    for (int i = 1; i < bb._vertices.size(); ++i)
+    for (uint32_t i = 1; i < bb._vertices.size(); ++i)
     {
         float tmp = glm::dot(axis, bb._vertices[i] + bb.position());
         if (tmp < min)

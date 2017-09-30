@@ -27,7 +27,7 @@ public:
     glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const override;
 
     const inline glm::vec3& center() const { return _center; }
-    const inline glm::vec2& center2D() const { return { _center.x, _center.z }; }
+    const inline glm::vec2 center2D() const { return { _center.x, _center.z }; }
     inline float radius() const { return _radius; }
 
 protected:
