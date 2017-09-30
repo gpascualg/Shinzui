@@ -64,7 +64,7 @@ const std::vector<glm::vec2>& RectBoundingBox::normals()
 
 glm::vec4 RectBoundingBox::asRect()
 {
-    const auto pos = motionMaster()->position2D();
+    const auto pos = position();
     normals(); // Force recalc
 
     return { _min.x + pos.x, _min.y + pos.y, _max.x + pos.x, _max.y + pos.y };
@@ -81,8 +81,8 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 
     for (int i = 0; i < _vertices.size(); ++i)
     {
-        auto s0_s = _vertices[i] + motionMaster()->position2D();
-        auto s0_e = _vertices[(i + 1) % _vertices.size()] + motionMaster()->position2D();
+        auto s0_s = _vertices[i] + position();
+        auto s0_e = _vertices[(i + 1) % _vertices.size()] + position();
 
         /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
         s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/

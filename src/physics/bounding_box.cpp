@@ -12,5 +12,12 @@
 
 BoundingBox::BoundingBox(MotionMaster* motionMaster, BoundingBoxType type) :
     _motionMaster(motionMaster),
-    Type(type)
+    Type(type),
+    _position(motionMaster->position())
+{}
+
+BoundingBox::BoundingBox(const glm::vec2& position, BoundingBoxType type) :
+    _motionMaster(nullptr),
+    Type(type),
+    _position(position)
 {}

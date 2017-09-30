@@ -17,6 +17,12 @@ CircularBoundingBox::CircularBoundingBox(MotionMaster* motionMaster, glm::vec3 c
     _radius(radius)
 {}
 
+CircularBoundingBox::CircularBoundingBox(const glm::vec2& position, glm::vec3 center, float radius) :
+    BoundingBox{ position, BoundingBoxType::CIRCULAR },
+    _center(center),
+    _radius(radius)
+{}
+
 void CircularBoundingBox::rotate(float angle)
 {
 	// No need to do anything! Rotating does not change the center
@@ -24,15 +30,14 @@ void CircularBoundingBox::rotate(float angle)
 
 const std::vector<glm::vec2>& CircularBoundingBox::normals()
 {
-    // What should we do here? A circle has no normals... :(
+    // TODO(gpascualg): What should we do here? A circle has no normals... :(
     assert(false);
-
     return {};
 }
 
 glm::vec4 CircularBoundingBox::asRect()
 {
-    const auto pos = motionMaster()->position2D();
+    const auto pos = position();
     normals(); // Force recalc
 
     return { 
