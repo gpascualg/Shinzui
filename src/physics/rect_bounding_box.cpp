@@ -22,11 +22,11 @@ RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster, std::initializer_li
 
 void RectBoundingBox::rotate(float angle)
 {
-	for (auto& vertix : _vertices)
-	{
-        // TODO(gpascualg): Is rotate 2D equivalent to rotateY?
-		vertix = glm::rotate(vertix, angle);
-	}
+    for (auto& vertix : _vertices)
+    {
+        // TODO(gpascualg): Do not immediatelly rotate, accumulate and do so in demand
+        vertix = glm::rotate(vertix, angle);
+    }
 
     _recalcNormals = true;
 }
@@ -123,4 +123,3 @@ glm::vec2 RectBoundingBox::project(CollisionsFramework* framework, glm::vec2 axi
 {
     return framework->project(*this, axis);
 }
-

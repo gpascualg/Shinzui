@@ -65,7 +65,7 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
 std::vector<Cell*> Cell::inRadius(uint16_t radius)
 {
     std::vector<Cell*> results;
-    // TODO(gpascualg): This is overestimating the size
+    // This is overestimating the size, but should be fine
     results.reserve(radius * radius * 6 + 1);
 
     int32_t q = _offset.q() + directions[4].q * radius;

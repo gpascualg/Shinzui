@@ -19,10 +19,10 @@
 #define LOG_FIRE_LOGIC_EXT      0x0000000000001000
 #define LOG_QUADTREE            0x0000000000002000
 
-#define LOG_LEVEL               (LOG_FIRE_LOGIC)
+#define LOG_LEVEL               LOG_NOTHING
 
-#define STR(a) STR_(a)
-#define STR_(a) #a
+#define STR(a)                  STR_(a)
+#define STR_(a)                 #a
 
 // Expand is a trick for MSVC __VA_ARGS__ to work :(
 #define EXPAND(x)               x
@@ -55,8 +55,8 @@
 #define FORCE_DEBUG
 
 #if defined(FORCE_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
-    #define IF_LOG(lvl)         (lvl & LOG_LEVEL)  // NOLINT
-    #define LOG(lvl, ...)       ((lvl & LOG_LEVEL) && EXPAND(LOG_HELPER(lvl, __VA_ARGS__, "")))  // NOLINT
+    #define IF_LOG(lvl)         (lvl & (LOG_LEVEL))  // NOLINT
+    #define LOG(lvl, ...)       ((lvl & (LOG_LEVEL)) && EXPAND(LOG_HELPER(lvl, __VA_ARGS__, "")))  // NOLINT
 #else
     #define IF_LOG(lvl)         false
     #define LOG(lvl, ...)

@@ -30,7 +30,6 @@ void MotionMaster::update(uint64_t elapsed)
         auto newPos = _generator->update(_owner, elapsed);
         if (!_generator->hasNext())
         {
-            // TODO(gpascualg): Should we delete it?
             delete _generator;
             _generator = nullptr;
         }
