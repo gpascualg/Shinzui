@@ -38,7 +38,6 @@ const std::vector<glm::vec2>& CircularBoundingBox::normals()
 glm::vec4 CircularBoundingBox::asRect()
 {
     const auto pos = position();
-    normals(); // Force recalc
 
     return { 
         _center.x + pos.x - _radius, 
