@@ -20,6 +20,14 @@ RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster, std::initializer_li
     _normals.resize(2);
 }
 
+RectBoundingBox::RectBoundingBox(const glm::vec2& position, std::initializer_list<glm::vec2>&& vertices) :
+    BoundingBox{ position, BoundingBoxType::RECT },
+    _recalcNormals(false),
+    _vertices(std::move(vertices))
+{
+    _normals.resize(2);
+}
+
 void RectBoundingBox::rotate(float angle)
 {
     for (auto& vertix : _vertices)

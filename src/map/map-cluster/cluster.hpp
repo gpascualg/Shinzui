@@ -12,9 +12,9 @@
 #include <unordered_map>
 
 
-struct ClusterCenter;
 struct ClusterOperation;
 class Cell;
+class ClusterCenter;
 class Map;
 class MapAwareEntity;
 
@@ -28,7 +28,7 @@ private:
         Cluster* cluster;
         uint64_t id;
         uint64_t elapsed;
-        void (Cell::*fun)(uint64_t, int);
+        void (Cell::*fun)(uint64_t);
     };
 
 public:
@@ -53,10 +53,8 @@ private:
 
     QueueWithSize<ClusterOperation*>* _scheduledOperations;
 
-    // Unique Cluster ID to old IDs
-    std::unordered_map<uint64_t, std::vector<uint64_t>> _uniqueClusters;
     // List of unique cluster IDs
     std::set<uint64_t> _uniqueIdsList;
-    // Cluster ID to MapAwareEntity
-    std::unordered_map<uint64_t, std::vector<MapAwareEntity*>> _updaterEntities;
+    // Cluster ID to Centers
+    std::unordered_map<uint64_t, ClusterCenter*> _clusterCenters;
 };

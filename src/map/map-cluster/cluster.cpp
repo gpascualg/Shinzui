@@ -2,15 +2,18 @@
 
 
 #include "defs/atomic_autoincrement.hpp"
+#include "defs/common.hpp"
+#include "debug/debug.hpp"
 #include "map/cell.hpp"
 #include "map/map-cluster/cluster.hpp"
 #include "map/map-cluster/cluster_center.hpp"
 #include "map/map-cluster/cluster_operation.hpp"
-#include "defs/common.hpp"
-#include "debug/debug.hpp"
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 #include "map/offset.hpp"
+#include "movement/motion_master.hpp"
+#include "physics/rect_bounding_box.hpp"
+#include "server/server.hpp"
 
 #include <algorithm>
 #include <set>
@@ -24,7 +27,12 @@ Cluster::Cluster()
 
 Cluster::~Cluster()
 {
-    _updaterEntities.clear();
+    for (auto center : _clusterCenters)
+    {
+        delete center.second;
+    }
+
+    _clusterCenters.clear();
     delete _scheduledOperations;
 }
 
@@ -65,31 +73,15 @@ void Cluster::updateCluster(UpdateStructure&& updateStructure)
     auto* cluster = updateStructure.cluster;
     auto id = updateStructure.id;
     auto elapsed = updateStructure.elapsed;
-
-    // HACK(gpascualg): Once multithreading is used, this will blow up
-    auto updateKey = rand();  // NOLINT(runtime/threadsafe_fn)
-
-    // Get all old nodes
-    for (auto subId : cluster->_uniqueClusters[id])
+    
+    // Expand center
+    auto center = cluster->_clusterCenters[id];
+    for (auto cell : center->center->inRadius(center->radius))
     {
-        // Get all entites
-        auto queue = cluster->_updaterEntities[subId];
-
-        // Update all entities
-        for (auto* entity : queue)
+        // No need for the cell to exist!
+        if (cell)
         {
-            // Update cell (Should be included in inRadius)
-            // entity->cell()->update(elapsed, updateKey);
-
-            // Update neighbour cells in radius 2
-            auto cell = entity->cell();
-            for (auto sibling : cell->inRadius(2))
-            {
-                if (sibling)
-                {
-                    (sibling->*updateStructure.fun)(elapsed, updateKey);
-                }
-            }
+            (cell->*updateStructure.fun)(elapsed);
         }
     }
 }
@@ -101,17 +93,35 @@ void Cluster::runScheduledOperations()
 
 void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
 {
-    uint64_t uniqueClusterId = entity->cell()->_clusterId;
+    auto affectedCell = entity->cell();
+    uint64_t uniqueClusterId = affectedCell->_clusterId;
+    uint64_t oldUniqueClusterid = uniqueClusterId;
 
     // Is the cell at a cluster already?
     if (uniqueClusterId == 0)
     {
         // If not, assign a new cluster
         uniqueClusterId = AtomicAutoIncrement<1>::get();
-        entity->cell()->_clusterId = uniqueClusterId;
-        _uniqueClusters[uniqueClusterId].emplace_back(uniqueClusterId);
+        affectedCell->_clusterId = uniqueClusterId;
 
         LOG(LOG_CLUSTERS, "Create new cluster: %" PRId64, uniqueClusterId);
+    }
+
+    // Do we have a cell center?
+    ClusterCenter* center = nullptr;
+    auto it = _clusterCenters.find(uniqueClusterId);
+    if (it == _clusterCenters.end())
+    {
+        _uniqueIdsList.emplace(uniqueClusterId);
+
+        center = new ClusterCenter{ affectedCell, 2 };
+        center->updaters.push_back(entity);
+        _clusterCenters.emplace(uniqueClusterId, center);
+    }
+    else
+    {
+        center = it->second;
+        center->updaters.push_back(entity);
     }
 
     // Are neighours in a cluster already? Assign them either way
@@ -121,27 +131,52 @@ void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
         uint64_t oldId = cell->_clusterId;
         if (oldId > 0 && oldId != uniqueClusterId)
         {
-            LOG(LOG_CLUSTERS, "\tMerged in %" PRId64 " <- %" PRId64, uniqueClusterId, oldId);
-
             // Remove unique Ids if any
             auto it = _uniqueIdsList.find(oldId);
             if (it != _uniqueIdsList.end())
             {
-                // Unify old ids into the new one
-                _uniqueClusters[uniqueClusterId].emplace_back(oldId);
-                _uniqueIdsList.erase(it);
-            }
+                LOG(LOG_CLUSTERS, "\tMerged in %" PRId64 " <- %" PRId64, uniqueClusterId, oldId);
 
-            // TODO(gpascualg): What should we do with _updaterEntities[oldId]? - CRITICAL
+                auto oldCenter = _clusterCenters[oldId];
+                center->updaters.splice(center->updaters.end(), oldCenter->updaters);
+
+                // Clean unique id
+                _uniqueIdsList.erase(it);
+
+                // Clean cluster center
+                delete oldCenter;
+                _clusterCenters.erase(oldId);
+            }
         }
 
         // Setup current cell
         cell->_clusterId = uniqueClusterId;
     }
 
-    // Add updater entity
-    _updaterEntities[uniqueClusterId].emplace_back(entity);
-    _uniqueIdsList.emplace(uniqueClusterId);
+    // Update cluster center now 
+    if (it != _clusterCenters.end())
+    {
+        // Update center unless the cluster already existed
+        if (oldUniqueClusterid != uniqueClusterId)
+        {
+            // Calculate center based on existing entities
+            glm::vec2 newCenter = { 0, 0 };
+
+            for (auto entity : center->updaters)
+            {
+                newCenter += entity->motionMaster()->position2D();
+            }
+
+            newCenter /= center->updaters.size();
+            center->center = Server::get()->map()->getOrCreate(offsetOf(newCenter.x, newCenter.y));
+        }
+
+        // Is this cell (or neighbours +2) further from the center?
+        int dist = center->center->offset().distance(affectedCell->offset()) + 2;
+        center->radius = std::max(center->radius, static_cast<uint16_t>(dist));
+
+        LOG(LOG_CLUSTERS, "\tExpanded cluster %" PRId64 " to %d", uniqueClusterId, center->radius);
+    }
 }
 
 void Cluster::remove(MapAwareEntity* entity)
@@ -150,10 +185,12 @@ void Cluster::remove(MapAwareEntity* entity)
 
     // Simply erase from the updaterEntities
     auto clusterId = entity->cell()->_clusterId;
-    auto& entities = _updaterEntities[clusterId];
+    auto& entities = _clusterCenters[clusterId]->updaters;
 
-    // TODO(gpascualg): Find the entity in whichever cluster it is (see oldId above) - CRITICAL
+    // Remove updater
     entities.erase(std::find(entities.begin(), entities.end(), entity));
+
+    // TODO(gpascualg): Update center and radius
 
     // TODO(gpascualg): Place a dummy updateEntity to avoid instantly discarting the cell
     /*

@@ -54,9 +54,9 @@ public:
     inline Map* map() const { return _map; }
     inline RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>* quadtree() { return _quadTree; }
 
-    virtual void update(uint64_t elapsed, int updateKey);
-    virtual void physics(uint64_t elapsed, int updateKey);
-    virtual void cleanup(uint64_t elapsed, int updateKey);
+    virtual void update(uint64_t elapsed);
+    virtual void physics(uint64_t elapsed);
+    virtual void cleanup(uint64_t elapsed);
 
     void request(MapAwareEntity* who, RequestType type);
     void broadcast(boost::intrusive_ptr<Packet> packet);
@@ -73,7 +73,6 @@ protected:
 
     Map* _map;
     uint64_t _clusterId;
-    int _lastUpdateKey;
 
     RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>* _quadTree;
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _entities;

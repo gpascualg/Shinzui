@@ -21,8 +21,7 @@
 Cell::Cell(Map* map, const Offset& offset) :
     _offset(std::move(offset)),
     _map(map),
-    _clusterId(0),
-    _lastUpdateKey(0)
+    _clusterId(0)
 {
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
 
@@ -84,15 +83,8 @@ std::vector<Cell*> Cell::inRadius(uint16_t radius)
     return results;
 }
 
-void Cell::update(uint64_t elapsed, int updateKey)
+void Cell::update(uint64_t elapsed)
 {
-    // TODO(gpascualg): Check for better ways / clustering algo
-    if (updateKey == _lastUpdateKey)
-    {
-        return;
-    }
-    _lastUpdateKey = updateKey;
-
     auto& currentQueue = *_broadcast;
     _broadcast = _broadcast == &_broadcastQueue1 ? &_broadcastQueue2 : &_broadcastQueue1;
 
@@ -129,15 +121,8 @@ void Cell::update(uint64_t elapsed, int updateKey)
     }
 }
 
-void Cell::physics(uint64_t elapsed, int updateKey)
+void Cell::physics(uint64_t elapsed)
 {
-    // TODO(gpascualg): Check for better ways / clustering algo
-    if (updateKey == _lastUpdateKey)
-    {
-        return;
-    }
-    _lastUpdateKey = updateKey;
-
     // Collisions
     for (auto pair1 : _entities)
     {
@@ -161,15 +146,8 @@ void Cell::physics(uint64_t elapsed, int updateKey)
     }
 }
 
-void Cell::cleanup(uint64_t elapsed, int updateKey)
+void Cell::cleanup(uint64_t elapsed)
 {
-    // TODO(gpascualg): Check for better ways / clustering algo
-    if (updateKey == _lastUpdateKey)
-    {
-        return;
-    }
-    _lastUpdateKey = updateKey;
-
     // Clear all broadcasts (should already be done!)
     // TODO(gpascualg): If a mob triggers a broadcast packet, it should be added to a "future" queue
     clearQueues();

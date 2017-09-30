@@ -19,6 +19,7 @@ class RectBoundingBox : public BoundingBox
 
 public:
     RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
+    RectBoundingBox(const glm::vec2& position, std::initializer_list<glm::vec2>&& vertices);
 
 	void rotate(float angle) override;
     glm::vec4 asRect() override;

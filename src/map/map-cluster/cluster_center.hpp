@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <algorithm>
 #include <array>
+#include <list>
 #include <vector>
 
 #include "defs/common.hpp"
@@ -13,13 +14,17 @@
 
 class Cluster;
 class Cell;
+class BoundingBox;
+class MapAwareEntity;
 
 struct ClusterCenter
 {
     Cell* center;
-    bool mergeSignaled = false;
+    uint16_t radius;
+    std::list<MapAwareEntity*> updaters;
 
-    constexpr explicit ClusterCenter(Cell* ctr) :
-        center(ctr)
+    explicit ClusterCenter(Cell* ctr, uint16_t rad) :
+        center(ctr),
+        radius(rad)
     {}
 };
