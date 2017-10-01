@@ -5,7 +5,12 @@
 #include <initializer_list>
 #include <vector>
 #include <utility>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 class MotionMaster;
@@ -34,7 +39,7 @@ public:
 
     // Collisions
     virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const = 0;
-    
+
     inline const glm::vec2& position() const { return _position; }
 
 protected:

@@ -2,14 +2,17 @@
 
 #pragma once
 
-#include "defs/common.hpp"
-
 #include <inttypes.h>
 #include <list>
 #include <queue>
 #include <vector>
 #include <initializer_list>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 class BoundingBox;

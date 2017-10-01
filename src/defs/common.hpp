@@ -11,3 +11,10 @@
 #include <chrono>
 
 using TimePoint = std::chrono::high_resolution_clock::time_point;
+
+#if !defined(INCL_NOWARN) && !defined(INCL_WARN)
+    #ifdef _MSC_VER
+        #define INCL_NOWARN __pragma(warning(push, 0))
+        #define INCL_WARN __pragma(warning(pop))
+    #endif
+#endif

@@ -5,12 +5,17 @@
 #include <inttypes.h>
 #include <list>
 #include <vector>
-#include <glm/glm.hpp>
 
 #include "debug/debug.hpp"
 #include "map/map_aware_entity.hpp"
 #include "physics/methods.hpp"
 #include "physics/sat_collisions.hpp"
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
+#include <glm/glm.hpp>
+INCL_WARN
 
 
 template <int MaxEntities, int MaxDepth>
@@ -58,7 +63,7 @@ QuadTree<MaxEntities, MaxDepth>::QuadTree(int depth, glm::vec4 bounds) :
 {
     auto width = _bounds.z - _bounds.x;
     auto height = _bounds.w - _bounds.y;
-    
+
     _vertices.push_back({ bounds.x, bounds.y });
     _vertices.push_back({ bounds.x, bounds.y + height });
     _vertices.push_back({ bounds.x + width, bounds.y + height });
@@ -90,7 +95,7 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
         for (auto it = _entities.begin(); it != _entities.end();)
         {
             auto entity = *it;
-            
+
             int index = getIndex(entity->boundingBox()->asRect());
             if (index != -1)
             {
@@ -172,7 +177,7 @@ int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
         return true;
     }
 
-    // Check segments 
+    // Check segments
     auto width = _bounds.z - _bounds.x;
     auto height = _bounds.w - _bounds.y;
 
@@ -180,7 +185,7 @@ int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
     {
         return true;
     }
-    
+
     if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))
     {
         return true;

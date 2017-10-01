@@ -10,7 +10,12 @@
 #include <initializer_list>
 #include <vector>
 #include <utility>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 class SAT : public CollisionsFramework

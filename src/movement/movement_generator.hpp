@@ -4,7 +4,12 @@
 
 #include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 class Bezier;

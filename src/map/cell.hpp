@@ -3,7 +3,6 @@
 #pragma once
 
 #include "map/offset.hpp"
-#include "defs/common.hpp"
 #include "debug/debug.hpp"
 
 #include <array>
@@ -12,8 +11,12 @@
 #include <unordered_map>
 #include <vector>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
+INCL_WARN
 
 
 class Cell;

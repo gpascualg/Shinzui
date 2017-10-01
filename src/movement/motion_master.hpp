@@ -3,7 +3,12 @@
 #pragma once
 
 #include <utility>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 class MapAwareEntity;
 class MovementGenerator;

@@ -7,8 +7,12 @@
 
 #include <algorithm>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
+INCL_WARN
 
 
 CircularBoundingBox::CircularBoundingBox(MotionMaster* motionMaster, glm::vec3 center, float radius) :
@@ -39,10 +43,10 @@ glm::vec4 CircularBoundingBox::asRect()
 {
     const auto pos = position();
 
-    return { 
-        _center.x + pos.x - _radius, 
-        _center.y + pos.y - _radius, 
-        _center.x + pos.x + _radius, 
+    return {
+        _center.x + pos.x - _radius,
+        _center.y + pos.y - _radius,
+        _center.x + pos.x + _radius,
         _center.y + pos.y + _radius
     };
 }

@@ -3,17 +3,21 @@
 #pragma once
 
 #include "map/offset.hpp"
-#include "boost/lockfree/lockfree_forward.hpp"
-#include "boost/pool/pool_forward.hpp"
 
 #include <inttypes.h>
 #include <list>
 #include <vector>
 #include <unordered_map>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include "defs/intrusive.hpp"
+#include <boost/lockfree/lockfree_forward.hpp>
+#include <boost/pool/pool_forward.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 class Cell;

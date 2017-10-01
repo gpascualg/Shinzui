@@ -13,9 +13,14 @@
 #include <list>
 #include <utility>
 #include <vector>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <boost/lockfree/queue.hpp>
 #include <boost/pool/pool.hpp>
 #include <boost/pool/object_pool.hpp>
+INCL_WARN
 
 
 Map::Map(boost::object_pool<Cell>* cellAllocator)

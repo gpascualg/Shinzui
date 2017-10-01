@@ -4,7 +4,11 @@
 
 #include "debug/queue_with_size.hpp"
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <threadpool11/threadpool11.hpp>
+INCL_WARN
 
 #include <array>
 #include <functional>
@@ -16,7 +20,7 @@
 
 struct ClusterOperation;
 class Cell;
-class ClusterCenter;
+struct ClusterCenter;
 class Map;
 class MapAwareEntity;
 

@@ -2,13 +2,20 @@
 
 #pragma once
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include "boost/lockfree/lockfree_forward.hpp"
+INCL_WARN
 
 #include <inttypes.h>
 
 
 #if BUILD_TESTS == ON
+    INCL_NOWARN
     #include <boost/lockfree/queue.hpp>
+    INCL_WARN
+
     #include <atomic>
 
     template <typename T>

@@ -9,8 +9,12 @@
 
 #include <list>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
+INCL_WARN
 
 
 Server* Server::_instance = nullptr;

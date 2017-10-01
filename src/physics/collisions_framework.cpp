@@ -3,8 +3,12 @@
 #include "movement/motion_master.hpp"
 #include "physics/collisions_framework.hpp"
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp>
+INCL_WARN
 
 
 glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis)

@@ -6,8 +6,13 @@
 
 #include <algorithm>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+INCL_WARN
 
 
 BoundingBox::BoundingBox(MotionMaster* motionMaster, BoundingBoxType type) :

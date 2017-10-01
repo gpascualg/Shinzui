@@ -8,9 +8,13 @@
 #include <functional>
 #include <type_traits>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <boost/asio.hpp>
 #include "defs/intrusive.hpp"
 #include <boost/intrusive_ptr.hpp>
+INCL_WARN
 
 
 class Packet;

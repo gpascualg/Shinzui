@@ -8,8 +8,12 @@
 
 #include <algorithm>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
+INCL_WARN
 
 
 RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices) :

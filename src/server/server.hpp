@@ -4,9 +4,11 @@
 
 #include "defs/common.hpp"
 
+INCL_NOWARN
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
 #include <boost/lockfree/queue.hpp>
+INCL_WARN
 
 #include <inttypes.h>
 #include <cstddef>
@@ -71,7 +73,7 @@ private:
     boost::asio::io_service _service;
     boost::asio::ip::tcp::acceptor _acceptor;
     boost::asio::ip::tcp::socket _socket;
-    
+
     Map* _map;
     TimePoint _now;
 

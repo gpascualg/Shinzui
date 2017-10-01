@@ -8,7 +8,11 @@
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <boost/bind.hpp>
+INCL_WARN
 
 
 using tcp = boost::asio::ip::tcp;

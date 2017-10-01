@@ -2,13 +2,17 @@
 
 #pragma once
 
+#include <inttypes.h>
+#include <algorithm>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <boost/asio.hpp>
 #include <boost/pool/object_pool.hpp>
 #include <boost/intrusive_ptr.hpp>
-
-#include <inttypes.h>
-#include <algorithm>
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 union f2u

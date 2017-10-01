@@ -5,9 +5,13 @@
 
 #include <algorithm>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/norm.hpp>
+INCL_WARN
 
 
 SAT* SAT::_instance = nullptr;

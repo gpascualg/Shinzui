@@ -10,8 +10,12 @@
 
 #include <utility>
 
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
+INCL_WARN
 
 
 MotionMaster::MotionMaster(MapAwareEntity* owner) :

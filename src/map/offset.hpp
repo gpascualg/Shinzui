@@ -9,7 +9,12 @@
 #include <algorithm>
 #include <unordered_map>
 #include <utility>
+
+#include "defs/common.hpp"
+
+INCL_NOWARN
 #include <glm/glm.hpp>
+INCL_WARN
 
 
 #ifdef _MSC_VER
@@ -77,7 +82,7 @@ public:
     }
 
     cond_constexpr glm::vec2 center() const
-    { 
+    {
         return { cellSize_x * 3.0f / 2.0f * _q, cellSize_y * std::sqrt(3.0f) * (_r + _q / 2.0f) };
     }
 
