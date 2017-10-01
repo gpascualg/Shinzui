@@ -71,11 +71,12 @@ protected:
     inline void cell(Cell* cell) { _cell = cell; }
 
 protected:
-    MotionMaster* _motionMaster;
-	BoundingBox* _boundingBox;
     Client* _client;
-    Cell* _cell;
     uint64_t _id;
+    Cell* _cell;
+    BoundingBox* _boundingBox;
+
+    MotionMaster* _motionMaster;
 
     std::priority_queue<Schedulable*, std::vector<Schedulable*>, Comp> _scheduledTasks;
     bool _isUpdater;

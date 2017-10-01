@@ -11,10 +11,18 @@
 #include <random>
 
 
+MovementGenerator::~MovementGenerator()
+{}
+
 RandomMovement::RandomMovement() :
     _hasPoint(false),
     _bezier(nullptr)
 {}
+
+RandomMovement::~RandomMovement()
+{
+    delete _bezier;
+}
 
 boost::intrusive_ptr<Packet> RandomMovement::packet()
 {
@@ -117,6 +125,10 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
         owner->motionMaster()->stop();
 
         LOG(LOG_MOVEMENT_GENERATOR, "Movement End");
+
+        // TODO(gpascualg): Assert this works
+        delete _bezier;
+        _bezier = nullptr;
     }
 
     return{ nextPoint.x, owner->motionMaster()->position().y, nextPoint.y };
@@ -126,3 +138,7 @@ bool RandomMovement::hasNext()
 {
     return _bezier != nullptr;
 }
+
+Bezier::~Bezier()
+{}
+

@@ -132,11 +132,11 @@ private:
     Packet();
 
 private:
-    uint8_t _buffer[1024];
-    uint16_t _size;
     uint16_t _read;
+    uint16_t _size;
     uint16_t _write;
     uint16_t _refs;
+    uint8_t _buffer[1024];
 
     static boost::object_pool<Packet> _pool;
 };

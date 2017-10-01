@@ -14,6 +14,8 @@ class Packet;
 class MovementGenerator
 {
 public:
+    virtual ~MovementGenerator();
+
     virtual boost::intrusive_ptr<Packet> packet() = 0;
     virtual glm::vec3 update(MapAwareEntity* owner, float elapsed) = 0;
     virtual bool hasNext() = 0;
@@ -24,6 +26,7 @@ class RandomMovement : public MovementGenerator
 {
 public:
     RandomMovement();
+    virtual ~RandomMovement();
 
     boost::intrusive_ptr<Packet> packet() override;
     glm::vec3 update(MapAwareEntity* owner, float elapsed) override;
@@ -44,6 +47,8 @@ public:
     Bezier(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d) :
         _a(a), _b(b), _c(c), _d(d)
     {}
+
+    virtual ~Bezier();
 
     virtual glm::vec2 next(float t) = 0;
     virtual float increase(float t, float speed) = 0;
