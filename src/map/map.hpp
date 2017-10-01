@@ -16,6 +16,7 @@ INCL_NOWARN
 #include <boost/lockfree/lockfree_forward.hpp>
 #include <boost/pool/pool_forward.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/functional/hash.hpp>
 #include <glm/glm.hpp>
 INCL_WARN
 
@@ -27,6 +28,19 @@ class Map;
 class MapAwareEntity;
 struct MapOperation;
 
+namespace std
+{
+    template<typename S, typename T> struct hash<pair<S, T>>
+    {
+        inline size_t operator()(const pair<S, T> & v) const
+        {
+            size_t seed = 0;
+            boost::hash_combine(seed, v.first);
+            boost::hash_combine(seed, v.second);
+            return seed;
+        }
+    };
+}
 
 static inline void dummy(Cell* cell) {}
 
@@ -104,6 +118,6 @@ private:
     boost::object_pool<Cell>* _cellAllocator;
     Cluster* _cluster;
 
-    std::unordered_map<uint64_t /*hash*/, Cell*> _cells;
+    std::unordered_map<std::pair<int32_t, int32_t> /*hash*/, Cell*> _cells;
     boost::lockfree::queue<MapOperation*>* _scheduledOperations;
 };

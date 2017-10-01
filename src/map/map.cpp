@@ -238,8 +238,7 @@ Cell* Map::get(int32_t q, int32_t r)
 
 Cell* Map::get(const Offset& offset)
 {
-    auto it = _cells.find(offset.hash());
-
+    auto it = _cells.find(std::make_pair(offset.q(), offset.r())); 
     if (it == _cells.end())
     {
         return nullptr;
@@ -259,7 +258,7 @@ Cell* Map::getOrCreate(const Offset& offset)
     if (!cell)
     {
         // Allocate cell
-        auto result = _cells.emplace(offset.hash(), _cellAllocator->construct(this, offset));
+        auto result = _cells.emplace(std::make_pair(offset.q(), offset.r()), _cellAllocator->construct(this, offset));
         cell = (*result.first).second;
     }
 

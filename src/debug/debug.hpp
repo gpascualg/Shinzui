@@ -19,7 +19,7 @@
 #define LOG_FIRE_LOGIC_EXT      0x0000000000001000
 #define LOG_QUADTREE            0x0000000000002000
 
-#define LOG_LEVEL               LOG_FIRE_LOGIC
+#define LOG_LEVEL               LOG_SERVER_LOOP | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT
 
 #define STR(a)                  STR_(a)
 #define STR_(a)                 #a

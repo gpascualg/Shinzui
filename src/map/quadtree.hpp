@@ -212,6 +212,7 @@ void QuadTree<MaxEntities, MaxDepth>::split()
     int x = static_cast<int>(_bounds.x);
     int y = static_cast<int>(_bounds.y);
 
+    _nodes.reserve(4);
     _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y, subWidth, subHeight }));
     _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y, subWidth, subHeight }));
     _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y + subHeight, subWidth, subHeight }));
@@ -226,10 +227,10 @@ void QuadTree<MaxEntities, MaxDepth>::clear()
     for (auto*& node : _nodes)
     {
         node->clear();
-        delete node;
+        //delete node;
     }
 
-    _nodes.clear();
+    //_nodes.clear();
 }
 
 template <int MaxEntities, int MaxDepth>
