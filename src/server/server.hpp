@@ -68,14 +68,14 @@ public:
     virtual void destroyMapAwareEntity(MapAwareEntity* entity) = 0;
 
 private:
-    static Server* _instance;
-
-    Map* _map;
-
-    TimePoint _now;
     boost::asio::io_service _service;
-    boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::acceptor _acceptor;
+    boost::asio::ip::tcp::socket _socket;
+    
+    Map* _map;
+    TimePoint _now;
 
     boost::lockfree::queue<Operation*, boost::lockfree::capacity<1024>> _operations;
+
+    static Server* _instance;
 };

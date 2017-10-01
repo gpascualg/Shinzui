@@ -20,7 +20,7 @@ Client::Client(boost::asio::io_service* io_service, uint64_t id) :
     _packet = Packet::create();
     _entity = Server::get()->newMapAwareEntity(id, this);
 
-    LOG(LOG_CLIENT_LIFECYCLE, "New client %p", this);
+    LOG(LOG_CLIENT_LIFECYCLE, "New client %" PRId64, id);
 }
 
 Client::~Client()

@@ -41,18 +41,22 @@ void Cluster::update(uint64_t elapsed)
     // Try to update unique clusters only
     for (auto id : _uniqueIdsList)
     {
-        pool.postWork([elapsed]() { updateCluster({ this, id, elapsed, &Cell::update }); }); // NOLINT(whitespace/braces)
+        _pool.postWork<void>([this, id, elapsed]() { 
+            Cluster::updateCluster({ this, id, elapsed, &Cell::update }); 
+        }); // NOLINT(whitespace/braces)
     }
 
-    pool.waitAll();
+    _pool.waitAll();
 
     // Update physics
     for (auto id : _uniqueIdsList)
     {
-        pool.postWork([elapsed]() { updateCluster({ this, id, elapsed, &Cell::physics }); }); // NOLINT(whitespace/braces)
+        _pool.postWork<void>([this, id, elapsed]() { 
+            Cluster::updateCluster({ this, id, elapsed, &Cell::physics }); 
+        }); // NOLINT(whitespace/braces)
     }
 
-    pool.waitAll();
+    _pool.waitAll();
 }
 
 
@@ -61,10 +65,12 @@ void Cluster::cleanup(uint64_t elapsed)
     // Cleanup
     for (auto id : _uniqueIdsList)
     {
-        pool.postWork([elapsed]() { updateCluster({ this, id, elapsed, &Cell::cleanup }); }); // NOLINT(whitespace/braces)
+        _pool.postWork<void>([this, id, elapsed]() { 
+            Cluster::updateCluster({ this, id, elapsed, &Cell::cleanup }); 
+        }); // NOLINT(whitespace/braces)
     }
     
-    pool.waitAll();
+    _pool.waitAll();
 }
 
 void Cluster::updateCluster(UpdateStructure&& updateStructure)

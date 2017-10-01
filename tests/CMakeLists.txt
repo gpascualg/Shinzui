@@ -1,4 +1,5 @@
-if (SHINZUI_BUILD_TESTS)
+ResolveExternal(TARGET Shinzui)
+if (Shinzui_IS_RESOLVED AND SHINZUI_BUILD_TESTS)
     project(ShinzuiTests)
 
     RequireExternal(

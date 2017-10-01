@@ -42,7 +42,6 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
         uint8_t newSpeed = static_cast<uint8_t>(speedDist(randomEngine));
 
-        auto coinValue = coin(randomEngine);
         auto position = owner->motionMaster()->position();
         auto forward = owner->motionMaster()->forward();
 

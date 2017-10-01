@@ -86,7 +86,7 @@ void Server::startAccept()
 void Server::handleAccept(Client* client, const boost::system::error_code& error)
 {
     LOG(LOG_CLIENT_LIFECYCLE, "Client accepted");
-};
+}
 
 void Server::handleClose(Client* client)
 {

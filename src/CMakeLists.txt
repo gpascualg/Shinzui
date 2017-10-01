@@ -27,7 +27,6 @@ else()
             TARGET Shinzui
             EXCLUDE
             SKIP_BUILD
-            SKIP_LINK
             MODULE "boostorg/${dep}:develop"
             INC_PATH "include"
         )
@@ -39,7 +38,6 @@ RequireExternal(
     TARGET Shinzui
     EXCLUDE
     SKIP_BUILD
-    SKIP_LINK
     MODULE "g-truc/glm:0.9.8"
     INC_PATH "."
 )
@@ -48,8 +46,9 @@ RequireExternal(
 RequireExternal(
     TARGET Shinzui
     EXCLUDE
-    SKIP_LINK
-    MODULE "tghosgor/threadpool11:2.0"
+    LINK_SUBDIR "threadpool11"
+    LINK_NAME "threadpool11"
+    MODULE "gpascualg/threadpool11:2.0"
     INC_PATH "threadpool11/include"
 )
 
@@ -98,6 +97,13 @@ if (Shinzui_IS_RESOLVED)
         AddDependency(
             TARGET Shinzui
             DEPENDENCY gcov
+        )
+    endif()
+
+    if (UNIX)
+        AddDependency(
+            TARGET Shinzui
+            DEPENDENCY pthread
         )
     endif()
 
