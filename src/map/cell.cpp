@@ -63,13 +63,18 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
 
 std::vector<Cell*> Cell::inRadius(uint16_t radius)
 {
+    // Calculate size needed
+    int size = 1;
+    for (int i = 1; i < radius; ++i)
+    {
+        size += i * 6;
+    }
+
+    // Reserve
     std::vector<Cell*> results;
-    // This is overestimating the size, but should be fine
     results.reserve(radius * radius * 6 + 1);
 
-    int32_t q = _offset.q() + directions[4].q * radius;
-    int32_t r = _offset.r() + directions[4].r * radius;
-
+    // Fetch all cells (might not exist!)
     for (int dx = -radius; dx <= radius; ++dx)
     {
         int rmin = std::min<int>(radius, -dx + radius);
@@ -78,7 +83,6 @@ std::vector<Cell*> Cell::inRadius(uint16_t radius)
             results.push_back(_map->get(dx + _offset.q(), dy + _offset.r()));
         }
     }
-
 
     return results;
 }

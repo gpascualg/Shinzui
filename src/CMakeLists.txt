@@ -44,6 +44,15 @@ RequireExternal(
     INC_PATH "."
 )
 
+# Require Threadpool
+RequireExternal(
+    TARGET Shinzui
+    EXCLUDE
+    SKIP_LINK
+    MODULE "tghosgor/threadpool11:2.0"
+    INC_PATH "threadpool11/include"
+)
+
 ResolveExternal(TARGET Shinzui)
 if (Shinzui_IS_RESOLVED)
     string(LENGTH ${CMAKE_SOURCE_DIR} BASE_DIR_LEN)

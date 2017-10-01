@@ -4,6 +4,8 @@
 
 #include "debug/queue_with_size.hpp"
 
+#include <threadpool11/threadpool11.hpp>
+
 #include <array>
 #include <functional>
 #include <map>
@@ -50,6 +52,8 @@ private:
 private:
     uint32_t _numClusters = 0;
     uint32_t _fetchCurrent = 0;
+
+    threadpool11::Pool _pool;
 
     QueueWithSize<ClusterOperation*>* _scheduledOperations;
 

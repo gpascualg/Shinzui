@@ -232,7 +232,7 @@ RadialQuadTree<MaxEntities, MaxDepth>::RadialQuadTree(glm::vec2 center, float ra
     QuadTree<MaxEntities, MaxDepth>(0, { center.x - radius, center.y - radius, center.x + radius, center.y + radius }),
     _center(center),
     _radiusSqr(std::pow(radius, 2))
-{};
+{}
 
 template <int MaxEntities, int MaxDepth>
 bool RadialQuadTree<MaxEntities, MaxDepth>::contains(glm::vec2 pos)

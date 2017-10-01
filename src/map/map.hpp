@@ -38,7 +38,7 @@ public:
     void runScheduledOperations();
 
     // Broadcast operations
-    template <template <typename, typename> typename T, class A, class C>
+    template <template <typename, typename> class T, class A, class C>
     void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet, C callback)
     {
         for (auto cell : cells)
@@ -48,7 +48,7 @@ public:
         }
     }
 
-    template <template <typename, typename> typename T, class A>
+    template <template <typename, typename> class T, class A>
     void broadcast(const T<Cell*, A>& cells, boost::intrusive_ptr<Packet> packet)
     {
         broadcast(cells, packet, dummy);

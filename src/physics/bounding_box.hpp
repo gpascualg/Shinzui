@@ -35,7 +35,6 @@ public:
     // Collisions
     virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const = 0;
     
-    //inline MotionMaster* motionMaster() const { return _motionMaster; }
     inline const glm::vec2& position() const { return _position; }
 
 protected:
@@ -46,6 +45,5 @@ public:
     const BoundingBoxType Type;
 
 private:
-    MotionMaster* _motionMaster;
     const glm::vec2& _position;
 };
