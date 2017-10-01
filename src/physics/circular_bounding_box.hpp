@@ -24,7 +24,7 @@ class CircularBoundingBox : public BoundingBox
 
 public:
     CircularBoundingBox(MotionMaster* motionMaster, glm::vec3 center, float radius);
-    CircularBoundingBox(const glm::vec2& position, glm::vec3 center, float radius);
+    CircularBoundingBox(const glm::vec3& position, glm::vec3 center, float radius);
 
     void rotate(float angle) override;
     glm::vec4 asRect() override;

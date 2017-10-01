@@ -48,6 +48,7 @@ public:
     {
         auto packet = _pool.construct();
         memcpy(packet->_buffer, from->_buffer, size);
+        packet->_size = size;
         return packet;
     }
 

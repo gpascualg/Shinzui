@@ -21,7 +21,7 @@ CircularBoundingBox::CircularBoundingBox(MotionMaster* motionMaster, glm::vec3 c
     _radius(radius)
 {}
 
-CircularBoundingBox::CircularBoundingBox(const glm::vec2& position, glm::vec3 center, float radius) :
+CircularBoundingBox::CircularBoundingBox(const glm::vec3& position, glm::vec3 center, float radius) :
     BoundingBox{ position, BoundingBoxType::CIRCULAR },
     _center(center),
     _radius(radius)
@@ -41,7 +41,7 @@ const std::vector<glm::vec2>& CircularBoundingBox::normals()
 
 glm::vec4 CircularBoundingBox::asRect()
 {
-    const auto pos = position();
+    const auto pos = position2D();
 
     return {
         _center.x + pos.x - _radius,
@@ -65,8 +65,11 @@ bool CircularBoundingBox::intersects(glm::vec2 p0, glm::vec2 p1, float* dist)
         return false;
     }
 
-    float B = 2 * (dx * (p0.x - _center.x) + dy * (p0.y - _center.y));
-    float C = std::pow(p0.x - _center.x, 2) + std::pow(p0.y - _center.y, 2) - std::pow(_radius, 2);
+    float cx = position2D().x + _center.x;
+    float cy = position2D().y + _center.y;
+
+    float B = 2 * (dx * (p0.x - cx) + dy * (p0.y - cy));
+    float C = std::pow(p0.x - cx, 2) + std::pow(p0.y - cy, 2) - std::pow(_radius, 2);
     float det = std::pow(B, 2) - 4 * A * C;
 
     if (det < 0)

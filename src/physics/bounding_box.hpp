@@ -26,7 +26,7 @@ class BoundingBox
 {
 public:
 	BoundingBox(MotionMaster* motionMaster, BoundingBoxType type);
-    BoundingBox(const glm::vec2& position, BoundingBoxType type);
+    BoundingBox(const glm::vec3& position, BoundingBoxType type);
 
     // Rotate with motion master
 	virtual void rotate(float angle) = 0;
@@ -40,7 +40,8 @@ public:
     // Collisions
     virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const = 0;
 
-    inline const glm::vec2& position() const { return _position; }
+    inline const glm::vec3& position() const { return _position; }
+    inline const glm::vec2 position2D() const { return { _position.x, _position.z }; }
 
 protected:
     // Normals of the edges (if any)
@@ -50,5 +51,5 @@ public:
     const BoundingBoxType Type;
 
 private:
-    const glm::vec2& _position;
+    const glm::vec3& _position;
 };

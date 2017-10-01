@@ -20,7 +20,7 @@ BoundingBox::BoundingBox(MotionMaster* motionMaster, BoundingBoxType type) :
     _position(motionMaster->position())
 {}
 
-BoundingBox::BoundingBox(const glm::vec2& position, BoundingBoxType type) :
+BoundingBox::BoundingBox(const glm::vec3& position, BoundingBoxType type) :
     Type(type),
     _position(position)
 {}
