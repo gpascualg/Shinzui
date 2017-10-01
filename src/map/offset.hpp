@@ -27,6 +27,12 @@ union HashConverter
 #undef max
 #undef min
 
+#define cond_constexpr
+
+#else
+
+#define cond_constexpr constexpr
+
 #endif
 
 // Windows does not define "cos" as constexpr yet... :(
@@ -62,7 +68,7 @@ public:
         return (HashConverter { { (uint32_t)r(), (uint32_t)q() } }).b64;  // NOLINT(whitespace/braces)
     }
 
-    /*constexpr*/ int distance(const Offset& offset) const
+    cond_constexpr int distance(const Offset& offset) const
     {
         int32_t dq = std::abs(q() - offset.q());
         int32_t dr = std::abs(r() - offset.r());
@@ -70,9 +76,9 @@ public:
         return std::max(std::max(dq, dr), ds);
     }
 
-    constexpr glm::vec2 center() const 
+    cond_constexpr glm::vec2 center() const
     { 
-        return { cellSize_x * 3.0 / 2.0 * _q, cellSize_y * std::sqrt(3.0) * (_r + _q / 2.0) };
+        return { cellSize_x * 3.0f / 2.0f * _q, cellSize_y * std::sqrt(3.0f) * (_r + _q / 2.0f) };
     }
 
 private:
@@ -80,7 +86,7 @@ private:
     const int32_t _r;
 };
 
-inline Offset offsetOf(float x, float y)
+cond_constexpr inline Offset offsetOf(float x, float y)
 {
     float q = x * 2.0f / 3.0f / cellSize_x;
     float r = (-x / 3.0f + std::sqrt(3.0f) / 3.0f * y) / cellSize_y;
