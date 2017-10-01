@@ -14,14 +14,14 @@
         #define INCL_WARN __pragma(warning(pop))
     #else
         #define INCL_NOWARN \
-            _Pragma(diagnostic push) \
-            _Pragma(diagnostic ignored "-Wpedantic") \
-            _Pragma(diagnostic ignored "-Wunused-variable") \
-            _Pragma(diagnostic ignored "-Wunused-result") \
-            _Pragma(diagnostic ignored "-Wstrict-aliasing") \
-            _Pragma(diagnostic ignored "-Wunreachable-code") \
-            _Pragma(diagnostic ignored "-Wuninitialized")
-        #define INCL_WARN _Pragma(diagnostic pop)
+            _Pragma("GCC diagnostic push") \
+            _Pragma("GCC diagnostic ignored \"-Wpedantic\"") \
+            _Pragma("GCC diagnostic ignored \"-Wunused-variable\"") \
+            _Pragma("GCC diagnostic ignored \"-Wunused-result\"") \
+            _Pragma("GCC diagnostic ignored \"-Wstrict-aliasing\"") \
+            _Pragma("GCC diagnostic ignored \"-Wunreachable-code\"") \
+            _Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
+        #define INCL_WARN _Pragma("GCC diagnostic pop")
     #endif
 #endif
 
