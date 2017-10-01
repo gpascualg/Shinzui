@@ -46,6 +46,8 @@ RequireExternal(
 RequireExternal(
     TARGET Shinzui
     EXCLUDE
+    ENSURE_ORDER
+    CONFIGURE_COMMAND "cmake -DOVERRIDE_THIRD_PARTY=${CMAKE_BINARY_DIR}/third_party ../gpascualg_threadpool11_2.0"
     LINK_SUBDIR "threadpool11"
     LINK_NAME "threadpool11"
     MODULE "gpascualg/threadpool11:2.0"
