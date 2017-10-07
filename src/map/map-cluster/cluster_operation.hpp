@@ -12,12 +12,12 @@ struct ClusterCenter;
 
 enum class ClusterOperationType
 {
-    DESTROY,
-    COMPACT
+    KEEP,
+    UNKEEP
 };
 
 struct ClusterOperation
 {
     ClusterOperationType type;
-    uint64_t clusterId;
+    MapAwareEntity* entity;
 };

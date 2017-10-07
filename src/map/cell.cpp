@@ -2,7 +2,7 @@
 
 #include "map/cell.hpp"
 #include "server/client.hpp"
-#include "map/map-cluster/cluster_center.hpp"
+#include "map/map-cluster/cluster.hpp"
 #include "debug/debug.hpp"
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
@@ -20,8 +20,7 @@
 
 Cell::Cell(Map* map, const Offset& offset) :
     _offset(std::move(offset)),
-    _map(map),
-    _clusterId(0)
+    _map(map)
 {
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
 

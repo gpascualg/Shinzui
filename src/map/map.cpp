@@ -41,12 +41,12 @@ void Map::update(uint64_t elapsed)
 {
     runScheduledOperations();
     cluster()->update(elapsed);
-    cluster()->runScheduledOperations();
 }
 
 void Map::cleanup(uint64_t elapsed)
 {
     cluster()->cleanup(elapsed);
+    cluster()->runScheduledOperations();
 }
 
 void Map::runScheduledOperations()
@@ -55,6 +55,7 @@ void Map::runScheduledOperations()
     while (_scheduledOperations->pop(operation))
     {
         Cell* cell = nullptr;
+        auto entity = operation->entity;
 
         switch (operation->type)
         {
@@ -62,15 +63,15 @@ void Map::runScheduledOperations()
                 cell = getOrCreate(std::move(operation->offset));
                 if (cell)
                 {
-                    operation->entity->cell(cell);
-                    cell->_entities.emplace(operation->entity->id(), operation->entity);
+                    entity->cell(cell);
+                    cell->_entities.emplace(entity->id(), entity);
 
-                    if (operation->entity->isUpdater())
+                    if (entity->isUpdater())
                     {
-                        cluster()->add(operation->entity, createSiblings(cell));
+                        cluster()->add(entity, createSiblings(cell));
                     }
 
-                    operation->entity->onAdded(cell, operation->param);
+                    entity->onAdded(cell, operation->param);
                 }
                 break;
 
@@ -78,14 +79,14 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    cell->_entities.erase(operation->entity->id());
+                    cell->_entities.erase(entity->id());
 
-                    if (operation->entity->isUpdater())
+                    if (entity->isUpdater())
                     {
-                        cluster()->remove(operation->entity);
+                        cluster()->remove(entity);
                     }
 
-                    operation->entity->onRemoved(cell, operation->param);
+                    entity->onRemoved(cell, operation->param);
                 }
                 break;
 
@@ -244,7 +245,8 @@ Cell* Map::get(const Offset& offset)
         return nullptr;
     }
 
-    return (*it).second;
+    auto cell = (*it).second;
+    return cell;
 }
 
 Cell* Map::getOrCreate(int32_t q, int32_t r)

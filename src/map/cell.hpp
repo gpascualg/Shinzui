@@ -75,7 +75,6 @@ protected:
     const Offset _offset;
 
     Map* _map;
-    uint64_t _clusterId;
 
     RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>* _quadTree;
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _entities;

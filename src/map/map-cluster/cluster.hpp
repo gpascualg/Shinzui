@@ -5,9 +5,13 @@
 #include "debug/queue_with_size.hpp"
 
 #include "defs/common.hpp"
+#include "map/map-cluster/cluster_operation.hpp"
 
 INCL_NOWARN
 #include <threadpool11/threadpool11.hpp>
+#include <boost/lockfree/queue.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 INCL_WARN
 
 #include <array>
@@ -18,7 +22,6 @@ INCL_WARN
 #include <unordered_map>
 
 
-struct ClusterOperation;
 class Cell;
 struct ClusterCenter;
 class Map;
@@ -45,24 +48,26 @@ public:
     void update(uint64_t elapsed);
     void cleanup(uint64_t elapsed);
     void runScheduledOperations();
-
-    static void updateCluster(UpdateStructure&& updateStructure);
-
-    inline std::size_t size() { return _uniqueIdsList.size(); }
+    
+    inline std::size_t size() { return 0; }
 
 private:
     Cluster();
 
+    void touch(Cell* cell);
+    void connect(Cell* a, Cell* b);
+
 private:
-    uint32_t _numClusters = 0;
-    uint32_t _fetchCurrent = 0;
-
     threadpool11::Pool _pool;
+    boost::lockfree::queue<ClusterOperation, boost::lockfree::capacity<4096>> _scheduledOperations;
+    
+    using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Cell*>;
+    Graph _graph;
 
-    QueueWithSize<ClusterOperation*>* _scheduledOperations;
+    std::unordered_map<Cell*, boost::graph_traits<Graph>::vertex_descriptor> _vertices;
+    std::unordered_map<boost::graph_traits<Graph>::vertex_descriptor, Cell*> _mappings;
+    std::list<MapAwareEntity*> _keepers;
 
-    // List of unique cluster IDs
-    std::set<uint64_t> _uniqueIdsList;
-    // Cluster ID to Centers
-    std::unordered_map<uint64_t, ClusterCenter*> _clusterCenters;
+    int _num_components;
+    std::vector<boost::graph_traits<Graph>::vertex_descriptor> _components;
 };

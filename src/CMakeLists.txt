@@ -20,6 +20,14 @@ else()
 
         # Pool dependencies
         pool integer
+
+        # Graph
+        graph unordered move iterator tuple property_map concept_check
+        multi_index foreach serialization optional range typeof conversion
+        tti function_types
+
+        # Bimap
+        bimap
     )
 
     foreach (dep ${BOOST_DEPENDENCIES})
