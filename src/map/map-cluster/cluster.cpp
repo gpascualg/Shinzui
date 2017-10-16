@@ -19,11 +19,14 @@
 #include <vector>
 
 
-Cluster::Cluster()
+Cluster::Cluster():
+    _num_components(0)
 {}
 
 Cluster::~Cluster()
-{}
+{
+    _pool.joinAll();
+}
 
 void Cluster::update(uint64_t elapsed)
 {

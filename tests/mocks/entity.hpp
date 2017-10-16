@@ -14,6 +14,12 @@ public:
 
     uint32_t id() { return _id; }
 
+    inline Entity* asDefault()
+    {
+        setupBoundingBox({ {-0.5, -0.5}, {-0.5, 0.5}, {0.5, 0.5}, {0.5, -0.5} });
+        return this;
+    }
+
     std::vector<Cell*> onAdded(Cell* cell, Cell* old) override
     {
         hasBeenAdded = true;

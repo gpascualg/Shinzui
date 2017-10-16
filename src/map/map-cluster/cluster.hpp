@@ -49,7 +49,7 @@ public:
     void cleanup(uint64_t elapsed);
     void runScheduledOperations();
     
-    inline std::size_t size() { return 0; }
+    inline std::size_t size() { return _num_components; }
 
 private:
     Cluster();

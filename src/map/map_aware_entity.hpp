@@ -51,11 +51,11 @@ public:
     explicit MapAwareEntity(uint64_t id, Client* client = nullptr);
     virtual ~MapAwareEntity();
 
-    inline Cell* cell() { return _cell; }
-    inline Client* client() { return _client; }
-    inline MotionMaster* motionMaster() { return _motionMaster; }
-	inline BoundingBox* boundingBox() { return _boundingBox; }
-    inline uint64_t id() { return _id; }
+    inline Cell* cell();
+    inline Client* client();
+    inline MotionMaster* motionMaster();
+	inline BoundingBox* boundingBox();
+    inline uint64_t id();
 
     void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
 
@@ -84,6 +84,33 @@ protected:
     std::priority_queue<Schedulable*, std::vector<Schedulable*>, Comp> _scheduledTasks;
     bool _isUpdater;
 };
+
+
+Cell* MapAwareEntity::cell() 
+{ 
+    return _cell; 
+}
+
+Client* MapAwareEntity::client()
+{ 
+    return _client; 
+}
+
+MotionMaster* MapAwareEntity::motionMaster() 
+{
+    return _motionMaster;
+}
+
+BoundingBox* MapAwareEntity::boundingBox()
+{ 
+    assert(("Calling boundingBox without previous setup!", _boundingBox != nullptr));
+    return _boundingBox; 
+}
+
+uint64_t MapAwareEntity::id()
+{
+    return _id;
+}
 
 
 class DummyUpdater : public MapAwareEntity
