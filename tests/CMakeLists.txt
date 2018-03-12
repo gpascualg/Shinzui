@@ -4,7 +4,7 @@ if (Shinzui_IS_RESOLVED AND SHINZUI_BUILD_TESTS)
 
     RequireExternal(
         TARGET ShinzuiTests
-        MODULE philsquared/Catch:master
+        MODULE catchorg/Catch2:Catch1.x
         EXCLUDE
         SKIP_LINK
         INC_PATH "include"
