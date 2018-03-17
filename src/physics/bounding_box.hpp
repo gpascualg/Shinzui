@@ -25,11 +25,11 @@ enum class BoundingBoxType
 class BoundingBox
 {
 public:
-	BoundingBox(MotionMaster* motionMaster, BoundingBoxType type);
+    BoundingBox(MotionMaster* motionMaster, BoundingBoxType type);
     BoundingBox(const glm::vec3& position, BoundingBoxType type);
 
     // Rotate with motion master
-	virtual void rotate(float angle) = 0;
+    virtual void rotate(float angle) = 0;
 
     // Returns the minimum rect that contains the OBB
     virtual glm::vec4 asRect() = 0;

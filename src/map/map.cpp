@@ -239,7 +239,7 @@ Cell* Map::get(int32_t q, int32_t r)
 
 Cell* Map::get(const Offset& offset)
 {
-    auto it = _cells.find(std::make_pair(offset.q(), offset.r())); 
+    auto it = _cells.find(std::make_pair(offset.q(), offset.r()));
     if (it == _cells.end())
     {
         return nullptr;

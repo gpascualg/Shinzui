@@ -80,7 +80,7 @@ void Server::startAccept()
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
         {
-            _operations.push(new Operation{ OperationType::ACCEPT, client, error });
+            _operations.push(new Operation{ OperationType::ACCEPT, client, error });  // NOLINT (whitespace/braces)
 
             this->startAccept();
         }
@@ -94,7 +94,7 @@ void Server::handleAccept(Client* client, const boost::system::error_code& error
 
 void Server::handleClose(Client* client)
 {
-    _operations.push(new Operation{ OperationType::CLOSE, client, boost::system::error_code() });
+    _operations.push(new Operation{ OperationType::CLOSE, client, boost::system::error_code() });  // NOLINT (whitespace/braces)
 }
 
 Client* Server::newClient(boost::asio::io_service* service, uint64_t id)

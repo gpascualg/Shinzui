@@ -23,8 +23,8 @@ class QuadTree
 {
 public:
     void insert(MapAwareEntity* entity);
-    void retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect);
-    void trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end);
+    void retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect);  // NOLINT(runtime/references)
+    void trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end);  // NOLINT(runtime/references)
     void clear();
 
 protected:
@@ -39,7 +39,7 @@ protected:
 
 private:
     const int _depth;
-    const glm::vec4 _bounds; // (x0, y0, x1, y1) ~ (x, y, z, w)
+    const glm::vec4 _bounds;  // (x0, y0, x1, y1) ~ (x, y, z, w)
     std::vector<glm::vec2> _vertices;
 };
 
@@ -64,10 +64,10 @@ QuadTree<MaxEntities, MaxDepth>::QuadTree(int depth, glm::vec4 bounds) :
     auto width = _bounds.z - _bounds.x;
     auto height = _bounds.w - _bounds.y;
 
-    _vertices.push_back({ bounds.x, bounds.y });
-    _vertices.push_back({ bounds.x, bounds.y + height });
-    _vertices.push_back({ bounds.x + width, bounds.y + height });
-    _vertices.push_back({ bounds.x + width, bounds.y });
+    _vertices.push_back({ bounds.x, bounds.y });                   // NOLINT(whitespace/braces)
+    _vertices.push_back({ bounds.x, bounds.y + height });          // NOLINT(whitespace/braces)
+    _vertices.push_back({ bounds.x + width, bounds.y + height });  // NOLINT(whitespace/braces)
+    _vertices.push_back({ bounds.x + width, bounds.y });           // NOLINT(whitespace/braces)
 }
 
 template <int MaxEntities, int MaxDepth>
@@ -123,7 +123,7 @@ void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entit
 }
 
 template <int MaxEntities, int MaxDepth>
-void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)
+void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)  // NOLINT(runtime/references)
 {
     LOG(LOG_QUADTREE, "Trace call from (%f, %f) to (%f, %f)", start.x, start.y, end.x, end.y);
 
@@ -181,22 +181,22 @@ int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
     auto width = _bounds.z - _bounds.x;
     auto height = _bounds.w - _bounds.y;
 
-    if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))
+    if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))  // NOLINT(whitespace/braces)
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))
+    if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))  // NOLINT(whitespace/braces)
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x + width, _bounds.y + height }, { _bounds.x + width, _bounds.y }, start, end))
+    if (::intersects({ _bounds.x + width, _bounds.y + height }, { _bounds.x + width, _bounds.y }, start, end))  // NOLINT(whitespace/braces)
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x + width, _bounds.y }, { _bounds.x, _bounds.y }, start, end))
+    if (::intersects({ _bounds.x + width, _bounds.y }, { _bounds.x, _bounds.y }, start, end))  // NOLINT(whitespace/braces)
     {
         return true;
     }
@@ -213,10 +213,10 @@ void QuadTree<MaxEntities, MaxDepth>::split()
     int y = static_cast<int>(_bounds.y);
 
     _nodes.reserve(4);
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y, subWidth, subHeight }));
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y, subWidth, subHeight }));
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y + subHeight, subWidth, subHeight }));
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y + subHeight, subWidth, subHeight }));
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y + subHeight, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y + subHeight, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_height)
 }
 
 template <int MaxEntities, int MaxDepth>
@@ -227,10 +227,10 @@ void QuadTree<MaxEntities, MaxDepth>::clear()
     for (auto*& node : _nodes)
     {
         node->clear();
-        //delete node;
+        // delete node;
     }
 
-    //_nodes.clear();
+    // _nodes.clear();
 }
 
 template <int MaxEntities, int MaxDepth>

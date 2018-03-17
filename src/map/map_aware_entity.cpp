@@ -10,14 +10,14 @@
 
 #include <list>
 #include <vector>
-
+#include <list>
 
 
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _client(client),
     _id(id),
     _cell(nullptr),
-	_boundingBox(nullptr)
+    _boundingBox(nullptr)
 {
     _motionMaster = new MotionMaster(this);
     _isUpdater = client != nullptr;
@@ -60,13 +60,13 @@ std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
 
     Packet* packet = spawnPacket();
 
-	LOG(LOG_CELL_CHANGES, "MapAwareEntity::onAdded (%" PRId64 ")", id());
+    LOG(LOG_CELL_CHANGES, "MapAwareEntity::onAdded (%" PRId64 ")", id());
 
     // Broadcast all packets
     auto newCells = cell->map()->getCellsExcluding(cell, old);
     Server::get()->map()->broadcast(newCells, packet, [this](Cell* cell)
         {
-			LOG(LOG_CELL_CHANGES, "RequestType::SPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
+            LOG(LOG_CELL_CHANGES, "RequestType::SPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
             if (client())
             {
                 cell->request(this, RequestType::SPAWN);
@@ -83,13 +83,13 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 
     Packet* packet = despawnPacket();
 
-	LOG(LOG_CELL_CHANGES, "MapAwareEntity::onRemoved (%" PRId64 ")", id());
+    LOG(LOG_CELL_CHANGES, "MapAwareEntity::onRemoved (%" PRId64 ")", id());
 
     // Broadcast all packets
     auto oldCells = cell->map()->getCellsExcluding(cell, to);
     Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
         {
-			LOG(LOG_CELL_CHANGES, "RequestType::DESPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
+            LOG(LOG_CELL_CHANGES, "RequestType::DESPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
             if (client())
             {
                 cell->request(this, RequestType::DESPAWN);
@@ -102,5 +102,5 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 
 void MapAwareEntity::schedule(SchedulableTask&& task, TimePoint when)
 {
-    _scheduledTasks.emplace(new Schedulable{ task, when });
+    _scheduledTasks.emplace(new Schedulable{ task, when });  // NOLINT(whitespace/braces)
 }

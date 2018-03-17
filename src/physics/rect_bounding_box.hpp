@@ -26,7 +26,7 @@ public:
     RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
     RectBoundingBox(const glm::vec3& position, std::initializer_list<glm::vec2>&& vertices);
 
-	void rotate(float angle) override;
+    void rotate(float angle) override;
     glm::vec4 asRect() override;
     bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr) override;
     glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const override;

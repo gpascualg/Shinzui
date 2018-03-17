@@ -19,7 +19,7 @@
 #define LOG_FIRE_LOGIC_EXT      0x0000000000001000
 #define LOG_QUADTREE            0x0000000000002000
 
-#define LOG_LEVEL               LOG_SERVER_LOOP | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT
+#define LOG_LEVEL               LOG_CLIENT_LIFECYCLE | LOG_PACKET_LIFECYCLE | LOG_PACKET_SEND | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT
 
 #define STR(a)                  STR_(a)
 #define STR_(a)                 #a
@@ -48,7 +48,7 @@
 #endif
 
 #define LOG_HELPER(lvl, fmt, ...) \
-    EXPAND(printf("\x1B[01;44m[%.2X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))
+    EXPAND(printf("\x1B[01;44m[%.2X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
 #define LOG_ALWAYS(...)             EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
 

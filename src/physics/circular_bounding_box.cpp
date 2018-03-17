@@ -6,6 +6,7 @@
 #include "movement/motion_master.hpp"
 
 #include <algorithm>
+#include <vector>
 
 #include "defs/common.hpp"
 
@@ -29,7 +30,7 @@ CircularBoundingBox::CircularBoundingBox(const glm::vec3& position, glm::vec3 ce
 
 void CircularBoundingBox::rotate(float angle)
 {
-	// No need to do anything! Rotating does not change the center
+    // No need to do anything! Rotating does not change the center
 }
 
 const std::vector<glm::vec2>& CircularBoundingBox::normals()
@@ -43,7 +44,7 @@ glm::vec4 CircularBoundingBox::asRect()
 {
     const auto pos = position2D();
 
-    return {
+    return {  // NOLINT (whitespace/braces)
         _center.x + pos.x - _radius,
         _center.y + pos.y - _radius,
         _center.x + pos.x + _radius,
