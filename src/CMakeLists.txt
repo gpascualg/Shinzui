@@ -24,7 +24,7 @@ else()
         # Graph
         graph unordered move iterator tuple property_map concept_check
         multi_index foreach serialization optional range typeof conversion
-        tti function_types
+        tti function_types numeric_conversion
 
         # Bimap
         bimap
