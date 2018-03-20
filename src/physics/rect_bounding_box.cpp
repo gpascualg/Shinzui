@@ -7,6 +7,8 @@
 #include "movement/motion_master.hpp"
 
 #include <algorithm>
+#include <utility>
+#include <vector>
 
 #include "defs/common.hpp"
 
@@ -55,7 +57,7 @@ const std::vector<glm::vec2>& RectBoundingBox::normals()
             if (i < 2)
             {
                 auto tmp = _vertices[i] - _vertices[i + 1];
-                _normals[i] = glm::vec2(-tmp.y, tmp.x); // (-y, x) || (y, -x)
+                _normals[i] = glm::vec2(-tmp.y, tmp.x);  // (-y, x) || (y, -x)
             }
 
             if (i > 0)
@@ -77,7 +79,7 @@ const std::vector<glm::vec2>& RectBoundingBox::normals()
 glm::vec4 RectBoundingBox::asRect()
 {
     const auto pos = position2D();
-    normals(); // Force recalc
+    normals();  // Force recalc
 
     return { _min.x + pos.x, _min.y + pos.y, _max.x + pos.x, _max.y + pos.y };
 }
@@ -112,7 +114,7 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
                 float d = std::sqrt(std::pow(s0_e.y - s0_s.y, 2) + std::pow(s0_e.x - s0_s.x, 2));
                 if (std::abs(d) <= glm::epsilon<float>())
                 {
-                    float tmp = ((s0_e.y - s0_s.y) * s1_s.x - (s0_e.x - s0_s.x) * s1_s.y + s0_e.x * s0_s.y - s0_e.y * s0_s.x) / d;
+                    float tmp = ((s0_e.y - s0_s.y) * s1_s.x - (s0_e.x - s0_s.x) * s1_s.y + s0_e.x * s0_s.y - s0_e.y * s0_s.x) / d;  // NOLINT (whitespace/line_length)
                     if (!check || tmp < *dist)
                     {
                         *dist = tmp;

@@ -113,11 +113,11 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
     glm::vec3 forward3{ forward.x, oldForward.y, forward.y };
     owner->motionMaster()->forward(forward3);
 
-	if (auto bb = owner->boundingBox())
-	{
-		float elapsedAngle = atan2(forward.y - oldForward.y, forward.x - oldForward.x);
-		bb->rotate(elapsedAngle);
-	}
+    if (auto bb = owner->boundingBox())
+    {
+        float elapsedAngle = atan2(forward.y - oldForward.y, forward.x - oldForward.x);
+        bb->rotate(elapsedAngle);
+    }
 
     if (_t >= 1)
     {
@@ -128,7 +128,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
         // TODO(gpascualg): Assert this works
         delete _bezier;
-        _bezier = nullptr;
+        _bezier = nullptr;  
     }
 
     return{ nextPoint.x, owner->motionMaster()->position().y, nextPoint.y };

@@ -13,7 +13,7 @@ else()
         # Lockfree dependencies
         lockfree core config assert static_assert type_traits mpl preprocessor
         array throw_exception functional align parameter atomic detail
-        utility predef winapi
+        utility predef winapi 
 
         # Asio dependencies
         asio system date_time smart_ptr bind regex
@@ -24,7 +24,7 @@ else()
         # Graph
         graph unordered move iterator tuple property_map concept_check
         multi_index foreach serialization optional range typeof conversion
-        tti function_types
+        tti function_types numeric_conversion container_hash
 
         # Bimap
         bimap

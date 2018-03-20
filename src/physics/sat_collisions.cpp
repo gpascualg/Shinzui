@@ -4,6 +4,7 @@
 #include "movement/motion_master.hpp"
 
 #include <algorithm>
+#include <vector>
 
 #include "defs/common.hpp"
 
@@ -71,7 +72,7 @@ bool SAT::collides(RectBoundingBox& a, const CircularBoundingBox& b)
     }
 
     // Collision based on circle normal?
-    if (!collides({ minVertex - b.center2D() }, &a, &b))
+    if (!collides({ minVertex - b.center2D() }, &a, &b))  // NOLINT (whitespace/braces)
     {
         return false;
     }
@@ -82,7 +83,7 @@ bool SAT::collides(RectBoundingBox& a, const CircularBoundingBox& b)
 
 bool SAT::collides(const CircularBoundingBox& a, const CircularBoundingBox& b)
 {
-    return collides({ a.center2D() - b.center2D() }, &a, &b);
+    return collides({ a.center2D() - b.center2D() }, &a, &b);  // NOLINT (whitespace/braces)
 }
 
 bool SAT::collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, const BoundingBox* b)

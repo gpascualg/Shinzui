@@ -16,6 +16,7 @@ INCL_WARN
 
 #include <array>
 #include <functional>
+#include <list>
 #include <map>
 #include <set>
 #include <vector>
@@ -48,7 +49,7 @@ public:
     void update(uint64_t elapsed);
     void cleanup(uint64_t elapsed);
     void runScheduledOperations();
-    
+
     inline std::size_t size() { return _num_components; }
 
 private:
@@ -60,7 +61,7 @@ private:
 private:
     threadpool11::Pool _pool;
     boost::lockfree::queue<ClusterOperation, boost::lockfree::capacity<4096>> _scheduledOperations;
-    
+
     using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Cell*>;
     Graph _graph;
 

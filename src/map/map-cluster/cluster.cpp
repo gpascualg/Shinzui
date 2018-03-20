@@ -37,7 +37,8 @@ void Cluster::update(uint64_t elapsed)
 
         for (int cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]() {
+            _pool.postWork<void>([this, cid, elapsed]()
+            {
                 for (auto pair : this->_vertices)
                 {
                     if (this->_components[pair.second] == cid)
@@ -45,14 +46,15 @@ void Cluster::update(uint64_t elapsed)
                         pair.first->update(elapsed);
                     }
                 }
-            });
+            });  // NOLINT (whitespace/braces)
         }
 
         _pool.waitAll();
 
         for (int cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]() {
+            _pool.postWork<void>([this, cid, elapsed]() 
+            {
                 for (auto pair : this->_vertices)
                 {
                     if (this->_components[pair.second] == cid)
@@ -60,7 +62,7 @@ void Cluster::update(uint64_t elapsed)
                         pair.first->physics(elapsed);
                     }
                 }
-            });
+            });  // NOLINT (whitespace/braces)
         }
 
         _pool.waitAll();
@@ -74,7 +76,8 @@ void Cluster::cleanup(uint64_t elapsed)
     {
         for (int cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]() {
+            _pool.postWork<void>([this, cid, elapsed]() 
+            {
                 for (auto pair : this->_vertices)
                 {
                     if (this->_components[pair.second] == cid)
@@ -82,7 +85,7 @@ void Cluster::cleanup(uint64_t elapsed)
                         pair.first->cleanup(elapsed);
                     }
                 }
-            });
+            });  // NOLINT (whitespace/braces)
         }
 
         _pool.waitAll();
@@ -98,10 +101,10 @@ void Cluster::cleanup(uint64_t elapsed)
 
 void Cluster::runScheduledOperations()
 {
-    _scheduledOperations.consume_all([this](ClusterOperation op) {
+    _scheduledOperations.consume_all([this](ClusterOperation op) 
+    {
         switch (op.type)
         {
-
             case ClusterOperationType::KEEP:
                 this->_keepers.push_back(op.entity);
                 break;
@@ -110,8 +113,8 @@ void Cluster::runScheduledOperations()
                 this->_keepers.erase(std::find(this->_keepers.begin(), this->_keepers.end(), op.entity));
                 break;
         }
-    });
-    
+    });  // NOLINT (whitespace/braces)
+
     for (auto entity : _keepers)
     {
         touch(entity->cell());
@@ -146,10 +149,10 @@ void Cluster::add(MapAwareEntity* entity, std::vector<Cell*> const& siblings)
 {
     if (entity->isUpdater())
     {
-        _scheduledOperations.push({
+        _scheduledOperations.push({  // NOLINT (whitespace/braces)
             ClusterOperationType::KEEP,
             entity
-        });
+        });  // NOLINT (whitespace/braces)
     }
 }
 
@@ -157,9 +160,9 @@ void Cluster::remove(MapAwareEntity* entity)
 {
     if (entity->isUpdater())
     {
-        _scheduledOperations.push({
+        _scheduledOperations.push({  // NOLINT (whitespace/braces)
             ClusterOperationType::UNKEEP,
             entity
-        });
+        });  // NOLINT (whitespace/braces)
     }
 }

@@ -54,7 +54,7 @@ public:
     inline Cell* cell();
     inline Client* client();
     inline MotionMaster* motionMaster();
-	inline BoundingBox* boundingBox();
+    inline BoundingBox* boundingBox();
     inline uint64_t id();
 
     void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
@@ -86,25 +86,25 @@ protected:
 };
 
 
-Cell* MapAwareEntity::cell() 
-{ 
-    return _cell; 
+Cell* MapAwareEntity::cell()
+{
+    return _cell;
 }
 
 Client* MapAwareEntity::client()
-{ 
-    return _client; 
+{
+    return _client;
 }
 
-MotionMaster* MapAwareEntity::motionMaster() 
+MotionMaster* MapAwareEntity::motionMaster()
 {
     return _motionMaster;
 }
 
 BoundingBox* MapAwareEntity::boundingBox()
-{ 
+{
     assert(("Calling boundingBox without previous setup!", _boundingBox != nullptr));
-    return _boundingBox; 
+    return _boundingBox;
 }
 
 uint64_t MapAwareEntity::id()
