@@ -128,7 +128,7 @@ glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 
         // TODO(gpascualg): Assert this works
         delete _bezier;
-        _bezier = nullptr;  
+        _bezier = nullptr;
     }
 
     return{ nextPoint.x, owner->motionMaster()->position().y, nextPoint.y };

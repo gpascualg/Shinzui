@@ -53,7 +53,7 @@ void Cluster::update(uint64_t elapsed)
 
         for (int cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]() 
+            _pool.postWork<void>([this, cid, elapsed]()
             {
                 for (auto pair : this->_vertices)
                 {
@@ -76,7 +76,7 @@ void Cluster::cleanup(uint64_t elapsed)
     {
         for (int cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]() 
+            _pool.postWork<void>([this, cid, elapsed]()
             {
                 for (auto pair : this->_vertices)
                 {
@@ -101,7 +101,7 @@ void Cluster::cleanup(uint64_t elapsed)
 
 void Cluster::runScheduledOperations()
 {
-    _scheduledOperations.consume_all([this](ClusterOperation op) 
+    _scheduledOperations.consume_all([this](ClusterOperation op)
     {
         switch (op.type)
         {

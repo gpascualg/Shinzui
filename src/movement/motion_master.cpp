@@ -48,13 +48,13 @@ void MotionMaster::update(uint64_t elapsed)
 
     if (isRotating())
     {
-		float elapsedAngle = _rotationAngle * elapsed;
+        float elapsedAngle = _rotationAngle * elapsed;
 
         _forward = glm::normalize(glm::rotateY(_forward, elapsedAngle));
-		if (auto bb = _owner->boundingBox())
-		{
-			bb->rotate(elapsedAngle);
-		}
+        if (auto bb = _owner->boundingBox())
+        {
+            bb->rotate(elapsedAngle);
+        }
     }
 
     if (!_generator && isMoving())

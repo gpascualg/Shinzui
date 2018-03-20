@@ -111,7 +111,7 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
 }
 
 template <int MaxEntities, int MaxDepth>
-void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect)
+void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect)  // NOLINT
 {
     int index = getIndex(rect);
     if (index != -1 && !_nodes.empty())
@@ -123,7 +123,7 @@ void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entit
 }
 
 template <int MaxEntities, int MaxDepth>
-void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)  // NOLINT(runtime/references)
+void QuadTree<MaxEntities, MaxDepth>::trace(std::list<MapAwareEntity*>& entities, glm::vec2 start, glm::vec2 end)  // NOLINT
 {
     LOG(LOG_QUADTREE, "Trace call from (%f, %f) to (%f, %f)", start.x, start.y, end.x, end.y);
 
@@ -181,22 +181,22 @@ int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
     auto width = _bounds.z - _bounds.x;
     auto height = _bounds.w - _bounds.y;
 
-    if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))  // NOLINT(whitespace/braces)
+    if (::intersects({ _bounds.x, _bounds.y }, { _bounds.x, _bounds.y + height }, start, end))  // NOLINT
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))  // NOLINT(whitespace/braces)
+    if (::intersects({ _bounds.x, _bounds.y + height }, { _bounds.x + width, _bounds.y + height }, start, end))  // NOLINT
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x + width, _bounds.y + height }, { _bounds.x + width, _bounds.y }, start, end))  // NOLINT(whitespace/braces)
+    if (::intersects({ _bounds.x + width, _bounds.y + height }, { _bounds.x + width, _bounds.y }, start, end))  // NOLINT
     {
         return true;
     }
 
-    if (::intersects({ _bounds.x + width, _bounds.y }, { _bounds.x, _bounds.y }, start, end))  // NOLINT(whitespace/braces)
+    if (::intersects({ _bounds.x + width, _bounds.y }, { _bounds.x, _bounds.y }, start, end))  // NOLINT
     {
         return true;
     }
@@ -213,10 +213,10 @@ void QuadTree<MaxEntities, MaxDepth>::split()
     int y = static_cast<int>(_bounds.y);
 
     _nodes.reserve(4);
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y + subHeight, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_length)
-    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y + subHeight, subWidth, subHeight }));  // NOLINT(whitespace/braces,whitespace/line_height)
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y, subWidth, subHeight }));              // NOLINT
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y, subWidth, subHeight }));                         // NOLINT
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x, y + subHeight, subWidth, subHeight }));             // NOLINT
+    _nodes.emplace_back(new QuadTree<MaxEntities, MaxDepth>(_depth + 1, { x + subWidth, y + subHeight, subWidth, subHeight }));  // NOLINT
 }
 
 template <int MaxEntities, int MaxDepth>
@@ -235,7 +235,7 @@ void QuadTree<MaxEntities, MaxDepth>::clear()
 
 template <int MaxEntities, int MaxDepth>
 RadialQuadTree<MaxEntities, MaxDepth>::RadialQuadTree(glm::vec2 center, float radius) :
-    QuadTree<MaxEntities, MaxDepth>(0, { center.x - radius, center.y - radius, center.x + radius, center.y + radius }),
+    QuadTree<MaxEntities, MaxDepth>(0, { center.x - radius, center.y - radius, center.x + radius, center.y + radius }),  // NOLINT
     _center(center),
     _radiusSqr(std::pow(radius, 2))
 {}

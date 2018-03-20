@@ -9,8 +9,8 @@
 #include "server/server.hpp"
 
 #include <list>
+#include <utility>
 #include <vector>
-#include <list>
 
 
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :

@@ -36,7 +36,7 @@ protected:
 
 private:
     bool _recalcNormals;
-	std::vector<glm::vec2> _vertices;
+    std::vector<glm::vec2> _vertices;
     std::vector<glm::vec2> _normals;
 
     glm::vec2 _min;
