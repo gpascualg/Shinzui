@@ -25,5 +25,15 @@
     #endif
 #endif
 
+#if defined(_MSC_VER)
+    #undef max
+    #undef min
+    #define cond_constexpr
+#elif defined(__clang__)
+    #define cond_constexpr
+#else
+    #define cond_constexpr constexpr
+#endif
+
 #include <chrono>
 using TimePoint = std::chrono::high_resolution_clock::time_point;

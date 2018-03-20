@@ -28,16 +28,6 @@ union HashConverter
     b32;
     uint64_t b64;
 };
-
-#undef max
-#undef min
-
-#define cond_constexpr
-
-#else
-
-#define cond_constexpr constexpr
-
 #endif
 
 // Windows does not define "cos" as constexpr yet... :(
@@ -101,9 +91,9 @@ cond_constexpr inline Offset offsetOf(float x, float y)
     int r_int = static_cast<int>(round(r));
     int s_int = static_cast<int>(round(s));
 
-    float q_diff = abs(q_int - q);
-    float r_diff = abs(r_int - r);
-    float s_diff = abs(s_int - s);
+    float q_diff = std::abs(q_int - q);
+    float r_diff = std::abs(r_int - r);
+    float s_diff = std::abs(s_int - s);
 
     if (q_diff > r_diff && q_diff > s_diff)
     {
