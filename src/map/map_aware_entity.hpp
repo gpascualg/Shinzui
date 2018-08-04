@@ -9,6 +9,7 @@
 #include <initializer_list>
 
 #include "defs/common.hpp"
+#include "executor/executor.hpp"
 
 INCL_NOWARN
 #include <glm/glm.hpp>
@@ -22,28 +23,10 @@ class MapAwareEntity;
 class MotionMaster;
 class Packet;
 
-// TODO(gpascualg): Most probably, this should be moved somewhere else
-using SchedulableTask = void(*)(MapAwareEntity*);
-struct Schedulable
-{
-    bool operator<(const Schedulable& other) const
-    {
-        return when < other.when;
-    }
 
-    SchedulableTask task;
-    TimePoint when;
-};
-
-struct Comp
-{
-    bool operator()(const Schedulable* a, const Schedulable* b)
-    {
-        return a->when < b->when;
-    }
-};
-
-class MapAwareEntity
+// Using 16-queued jobs per-cicle&client should be more than enough
+constexpr const uint16_t ExecutorQueueMax = 16;
+class MapAwareEntity : public Executor<ExecutorQueueMax>
 {
     friend class Map;
 
@@ -63,8 +46,6 @@ public:
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
     virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
 
-    void schedule(SchedulableTask&& task, TimePoint when);
-
     virtual Packet* spawnPacket() = 0;
     virtual Packet* despawnPacket() = 0;
 
@@ -81,7 +62,6 @@ protected:
 
     MotionMaster* _motionMaster;
 
-    std::priority_queue<Schedulable*, std::vector<Schedulable*>, Comp> _scheduledTasks;
     bool _isUpdater;
 };
 
