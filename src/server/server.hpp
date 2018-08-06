@@ -17,9 +17,9 @@ INCL_WARN
 
 
 class Client;
-class Packet;
 class Map;
 class MapAwareEntity;
+class Packet;
 
 // TODO(gpascualg): Is 8192 too much?
 class Server : public Executor<8192>
@@ -72,10 +72,12 @@ public:
     virtual void destroyMapAwareEntity(MapAwareEntity* entity) = 0;
 
 private:
+    // Sockets io
     boost::asio::io_service _service;
     boost::asio::ip::tcp::acceptor _acceptor;
     boost::asio::ip::tcp::socket _socket;
 
+    // Map
     Map* _map;
 
     // Timing related attributes
@@ -83,6 +85,7 @@ private:
     TimePoint _now;
     TimeBase _prevSleepTime;
 
+    // Sync operations
     boost::lockfree::queue<Operation*, boost::lockfree::capacity<1024>> _operations;
 
     static Server* _instance;

@@ -43,6 +43,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # -[ Sources
+CreateTarget(TARGET Shinzui)
+add_subdirectory(dep)
 add_subdirectory(src)
 
 # -[ Tests
