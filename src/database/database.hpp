@@ -33,7 +33,7 @@ using bsoncxx::builder::stream::finalize;
 class Database
 {
 	template <typename T>
-	using Work = std::function<T(mongocxx::database&)>;
+	using Work = std::function<T(const mongocxx::database&)>;
 	using InternalWork = std::function<void(mongocxx::client&)>;
 
 public:

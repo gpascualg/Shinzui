@@ -132,6 +132,11 @@ void Server::handleClose(Client* client)
     _operations.push(new Operation{ OperationType::CLOSE, client, boost::system::error_code() });  // NOLINT (whitespace/braces)
 }
 
+void Server::onWorkError(AbstractWork* work)
+{
+    work->executor()->close();
+}
+
 Client* Server::newClient(boost::asio::io_service* service, uint64_t id)
 {
     return new Client(service, id);

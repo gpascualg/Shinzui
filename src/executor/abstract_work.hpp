@@ -13,24 +13,35 @@ template <uint16_t MaxQueued> class Executor;
 struct AbstractWork;
 template <class T> struct FutureWork;
 
-using ExecutorWork = std::function<bool(AbstractWork*)>;
+using ExecutorWork = std::function<AbstractWork*(AbstractWork*)>;
 
 
 struct AbstractWork
 {
 public:
-	virtual ~AbstractWork()
-	{}
+	virtual ~AbstractWork();
 
-	bool call()
+	template <uint16_t MaxQueued>
+	bool call(Executor<MaxQueued>* who)
 	{
-		return _handler(this);
+		try
+    	{
+			AbstractWork* next = _handler(this);
+			if (next)
+			{
+				who->schedule(next);
+			}
+		}
+		catch (ReadOutOfBounds& e)
+		{
+			triggerError();
+		}
+
+		return true;
 	}
 
-    virtual bool ready()
-    {
-        return true;
-    }
+	void triggerError();
+	virtual bool ready();
 
 	inline Client* executor()
 	{
@@ -38,10 +49,7 @@ public:
 	}
 
 protected:
-	AbstractWork(ExecutorWork handler, Client* executor) :
-		_handler(handler),
-		_executor(executor)
-	{}
+	AbstractWork(ExecutorWork handler, Client* executor);
 
 protected:
 	ExecutorWork _handler;
@@ -51,15 +59,8 @@ protected:
 struct ClientWork : public AbstractWork
 {
 public:
-	ClientWork(ExecutorWork handler, Client* executor, Packet* packet) :
-		AbstractWork(handler, executor),
-		_packet(packet)
-	{}
-
-	virtual ~ClientWork()
-	{
-		_packet->destroy();
-	}
+	ClientWork(ExecutorWork handler, Client* executor, Packet* packet);
+	virtual ~ClientWork();
 
 	inline Packet* packet()
 	{

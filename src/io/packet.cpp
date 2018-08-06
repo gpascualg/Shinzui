@@ -39,3 +39,11 @@ glm::vec3 Packet::read()
 {
     return{ read<float>(), read<float>(), read<float>() };
 }
+
+template <>
+std::string Packet::read()
+{
+    uint16_t length = read<uint16_t>();
+    char* str = static_cast<char*>(read(length));
+    return std::string(str, (std::size_t)length);
+}

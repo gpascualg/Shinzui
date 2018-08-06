@@ -65,6 +65,7 @@ public:
     virtual void handleRead(Client* client, const boost::system::error_code& error, size_t size) = 0;
     virtual void handleClose(Client* client);
 
+    virtual void onWorkError(AbstractWork* work);
     virtual Client* newClient(boost::asio::io_service* service, uint64_t id);
     virtual void destroyClient(Client* client);
 

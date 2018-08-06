@@ -4,6 +4,8 @@
 
 #include <inttypes.h>
 #include <algorithm>
+#include <iostream>
+#include <exception>
 
 #include "defs/common.hpp"
 
@@ -14,6 +16,14 @@ INCL_NOWARN
 #include <glm/glm.hpp>
 INCL_WARN
 
+
+struct ReadOutOfBounds : public std::exception
+{
+	const char* what() const noexcept
+    {
+    	return "Attempted read would go out of bounds";
+    }
+};
 
 union f2u
 {
@@ -82,6 +92,16 @@ public:
         return *this;
     }
 
+    Packet& operator<<(const std::string& str)
+    {
+        *this << (uint16_t)(str.length());
+
+        for (int i = 0; i < str.length(); ++i)
+        {
+            *this << (uint8_t)str[i];
+        }
+    }
+
     Packet& operator<<(Packet* packet)
     {
         uint16_t end = (uint16_t)std::max({ packet->totalRead(),   // NOLINT(whitespace/braces)
@@ -104,6 +124,11 @@ public:
     template <typename T>
     T peek(uint16_t offset)
     {
+        if (offset + sizeof(T) > _size)
+        {
+            throw ReadOutOfBounds();
+        }
+        
         return *reinterpret_cast<T*>(_buffer + offset);
     }
 
@@ -113,6 +138,18 @@ public:
         T v = peek<T>(_read);
         _read += sizeof(T);
         return v;
+    }
+
+    void* read(uint16_t length)
+    {
+        if (_read + length > _size)
+        {
+            throw ReadOutOfBounds();
+        }
+
+        void* buffer = reinterpret_cast<void*>(buffer + _read);
+        _read += length;
+        return buffer;
     }
 
     inline void reset() { _read = _write = _size = 0; }

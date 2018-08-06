@@ -18,7 +18,7 @@ void Executor<MaxQueued>::executeJobs()
                 return;
             }
 
-            job->call();
+            job->call(this);
             delete job;
         }
     );
