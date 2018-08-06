@@ -8,8 +8,9 @@ if (Shinzui_IS_RESOLVED)
             BOOST_ERROR_CODE_HEADER_ONLY
             BOOST_SYSTEM_NO_DEPRECATED
             BOOST_ALL_NO_LIB
-            BASE_DIR_LEN=${BASE_DIR_LEN}
             _WIN32_WINNT=0x0501
+            PRIVATE 
+                BASE_DIR_LEN=${BASE_DIR_LEN}
     )
 
     AddToSources(
