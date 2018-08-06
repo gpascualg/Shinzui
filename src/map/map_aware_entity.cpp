@@ -14,11 +14,11 @@
 
 
 MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
+    Executor<ExecutorQueueMax>(),
     _client(client),
     _id(id),
     _cell(nullptr),
-    _boundingBox(nullptr),
-    Executor<ExecutorQueueMax>()
+    _boundingBox(nullptr)
 {
     _motionMaster = new MotionMaster(this);
     _isUpdater = client != nullptr;

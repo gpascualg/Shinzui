@@ -15,7 +15,7 @@ Packet::Packet() :
 
 Packet::~Packet()
 {
-    LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", *reinterpret_cast<uint16_t*>(_buffer));
+    LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", peek<uint16_t>(0));
 }
 
 

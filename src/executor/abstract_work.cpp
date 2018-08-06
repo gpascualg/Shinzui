@@ -1,10 +1,8 @@
-#pragma once
-
 #include <inttypes.h>
 #include <functional>
 #include <future>
 
-#include "io/packet.hpp"
+#include "executor/abstract_work.hpp"
 #include "server/server.hpp"
 
 

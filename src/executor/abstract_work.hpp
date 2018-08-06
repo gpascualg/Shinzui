@@ -35,6 +35,7 @@ public:
 		catch (ReadOutOfBounds& e)
 		{
 			triggerError();
+			return false;
 		}
 
 		return true;

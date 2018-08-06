@@ -35,7 +35,7 @@ void Cluster::update(uint64_t elapsed)
         _components.resize(_vertices.size());
         _num_components = boost::connected_components(_graph, &_components[0]);
 
-        for (int cid = 0; cid < _num_components; ++cid)
+        for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
             _pool.postWork<void>([this, cid, elapsed]()
             {
@@ -51,7 +51,7 @@ void Cluster::update(uint64_t elapsed)
 
         _pool.waitAll();
 
-        for (int cid = 0; cid < _num_components; ++cid)
+        for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
             _pool.postWork<void>([this, cid, elapsed]()
             {
@@ -74,7 +74,7 @@ void Cluster::cleanup(uint64_t elapsed)
 {
     if (!_vertices.empty())
     {
-        for (int cid = 0; cid < _num_components; ++cid)
+        for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
             _pool.postWork<void>([this, cid, elapsed]()
             {

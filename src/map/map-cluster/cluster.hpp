@@ -69,6 +69,6 @@ private:
     std::unordered_map<boost::graph_traits<Graph>::vertex_descriptor, Cell*> _mappings;
     std::list<MapAwareEntity*> _keepers;
 
-    int _num_components;
+    uint16_t _num_components;
     std::vector<boost::graph_traits<Graph>::vertex_descriptor> _components;
 };

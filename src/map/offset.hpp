@@ -119,7 +119,7 @@ struct Direction
 };
 
 // Index to direction
-static Direction directions[] =
+constexpr const Direction directions[] =
 {
     {+1, -1}, {+1, +0}, {+0, +1},
     {-1, +1}, {-1, +0}, {+0, -1}

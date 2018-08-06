@@ -94,12 +94,15 @@ public:
 
     Packet& operator<<(const std::string& str)
     {
-        *this << (uint16_t)(str.length());
+        uint16_t length = str.length();
+        *this << length;
 
-        for (int i = 0; i < str.length(); ++i)
+        for (uint16_t i = 0; i < length; ++i)
         {
             *this << (uint8_t)str[i];
         }
+
+        return *this;
     }
 
     Packet& operator<<(Packet* packet)
@@ -147,7 +150,7 @@ public:
             throw ReadOutOfBounds();
         }
 
-        void* buffer = reinterpret_cast<void*>(buffer + _read);
+        void* buffer = reinterpret_cast<void*>(_buffer + _read);
         _read += length;
         return buffer;
     }
