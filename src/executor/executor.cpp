@@ -5,10 +5,10 @@
 
 
 template <uint16_t MaxQueued>
-void Executor<MaxQueued>::runScheduled()
+void Executor<MaxQueued>::executeJobs()
 {
     // First do all async tasks
-    std::vector<AbstractWork<MaxQueued>*> reschedule;
+    std::vector<AbstractWork*> reschedule;
     
     _jobs.consume_all([this, &reschedule](auto job)
         {
@@ -18,12 +18,12 @@ void Executor<MaxQueued>::runScheduled()
                 return;
             }
 
-            job->call(Server::get(), this);
+            job->call();
             delete job;
         }
     );
 
-    for (AbstractWork<MaxQueued>* job : reschedule)
+    for (AbstractWork* job : reschedule)
     {
         _jobs.push(job);
     }
@@ -44,6 +44,12 @@ void Executor<MaxQueued>::runScheduled()
 }
 
 template <uint16_t MaxQueued>
+void Executor<MaxQueued>::schedule(AbstractWork* job)
+{
+    _jobs.push(job);
+}
+
+template <uint16_t MaxQueued>
 void Executor<MaxQueued>::schedule(SchedulableTask<MaxQueued>&& task, TimePoint when)
 {
     _scheduledTasks.emplace(new Schedulable<MaxQueued>{ task, when });  // NOLINT(whitespace/braces)
@@ -56,3 +62,8 @@ template class Executor<32>;
 template class Executor<64>;
 template class Executor<128>;
 template class Executor<256>;
+template class Executor<512>;
+template class Executor<1024>;
+template class Executor<2048>;
+template class Executor<4096>;
+template class Executor<8192>;

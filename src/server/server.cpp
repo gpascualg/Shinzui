@@ -18,6 +18,8 @@ INCL_WARN
 
 
 Server* Server::_instance = nullptr;
+const TimeBase WORLD_HEART_BEAT = TimeBase(50);
+
 
 Server::Server(uint16_t port) :
     _service(),
@@ -72,6 +74,39 @@ void Server::runScheduledOperations()
     {
         _operations.push(op);
     }
+}
+
+void Server::update()
+{ 
+    // Update timebase
+    _now = std::chrono::high_resolution_clock::now();
+    auto diff = std::chrono::duration_cast<TimeBase>(_now - _lastUpdate);
+    _lastUpdate = _now;
+    
+    // First update map
+    map()->update(diff.count());
+    
+    // Run scheduled tasks, which might include packets
+    Executor<8192>::executeJobs();
+
+    // Last, server wide operations (ie. accept/close clients)
+    runScheduledOperations();
+
+    // Now cleanup map
+    map()->cleanup(diff.count());
+
+    // Wait for a constant update time
+    if (diff <= WORLD_HEART_BEAT + _prevSleepTime)
+    {
+        _prevSleepTime = WORLD_HEART_BEAT + _prevSleepTime - diff;
+        std::this_thread::sleep_for(_prevSleepTime);
+    }
+    else
+    {
+        _prevSleepTime = _prevSleepTime.zero();
+    }
+
+    LOG(LOG_SERVER_LOOP, "DIFF: %" PRId64 " - SLEEP: %" PRId64, diff.count(), _prevSleepTime.count());
 }
 
 void Server::startAccept()

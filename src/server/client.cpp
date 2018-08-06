@@ -18,6 +18,7 @@ INCL_WARN
 using tcp = boost::asio::ip::tcp;
 
 Client::Client(boost::asio::io_service* io_service, uint64_t id) :
+    _status(Status::INITIALIZED),
     _socket(*io_service),
     _timer(*io_service)
 {
@@ -94,7 +95,7 @@ void Client::send(boost::intrusive_ptr<Packet> packet)
     boost::asio::async_write(socket(), packet->sendBuffer(),
         [packet](const boost::system::error_code & error, std::size_t size)
         {
-            LOG(LOG_PACKET_SEND, "\tPacket sent!");
+            LOG(LOG_PACKET_SEND, "\tPacket %04X sent!", packet->peek<uint16_t>(0));
         }
     );  // NOLINT(whitespace/parens)
 }
@@ -114,6 +115,9 @@ void Client::close()
     {
         cell->map()->removeFrom(cell, entity(), nullptr);
     }
+
+    // Flag me
+    _status = Status::CLOSED;
 
     // Recycle client
     Server::get()->handleClose(this);

@@ -23,6 +23,14 @@ class MapAwareEntity;
 class Client
 {
 public:
+    enum class Status
+    {
+        INITIALIZED,
+        IN_WORLD,
+        CLOSED
+    };
+
+public:
     Client(boost::asio::io_service* io_service, uint64_t id);
     Client(const Client& client) = delete;
     virtual ~Client();
@@ -37,11 +45,15 @@ public:
     inline uint8_t readPhase() { return _readTimes; }
     inline boost::asio::ip::tcp::socket& socket() { return _socket; }
 
+    inline Status status() { return _status; }
+    inline void status(Status status) { _status = status; }
+
     inline MapAwareEntity* entity() { return _entity; }
 
     virtual void close();
 
 private:
+    Status _status;
     MapAwareEntity* _entity;
     boost::asio::ip::tcp::socket _socket;
     boost::asio::deadline_timer _timer;

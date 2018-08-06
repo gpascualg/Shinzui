@@ -3,6 +3,7 @@
 #pragma once
 
 #include "defs/common.hpp"
+#include "executor/executor.hpp"
 
 INCL_NOWARN
 #include <boost/asio.hpp>
@@ -20,7 +21,8 @@ class Packet;
 class Map;
 class MapAwareEntity;
 
-class Server
+// TODO(gpascualg): Is 8192 too much?
+class Server : public Executor<8192>
 {
 private:
     enum class OperationType
@@ -56,7 +58,7 @@ public:
 
     inline Map* map() { return _map; }
     inline TimePoint now() { return _now; }
-    inline void update() { _now = std::chrono::high_resolution_clock::now(); }
+    void update();
 
     void startAccept();
     virtual void handleAccept(Client* client, const boost::system::error_code& error);
@@ -75,7 +77,11 @@ private:
     boost::asio::ip::tcp::socket _socket;
 
     Map* _map;
+
+    // Timing related attributes
+    TimePoint _lastUpdate;
     TimePoint _now;
+    TimeBase _prevSleepTime;
 
     boost::lockfree::queue<Operation*, boost::lockfree::capacity<1024>> _operations;
 

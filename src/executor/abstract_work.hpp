@@ -4,25 +4,27 @@
 #include <functional>
 #include <future>
 
+#include "io/packet.hpp"
 
+
+class Client;
 class Server;
 template <uint16_t MaxQueued> class Executor;
-template <uint16_t MaxQueued> struct AbstractWork;
-template <typename T, uint16_t MaxQueued> struct FutureWork;
+struct AbstractWork;
+template <class T> struct FutureWork;
 
-template <uint16_t MaxQueued> using ExecutorWork = std::function<bool(Server*, Executor<MaxQueued>*, AbstractWork<MaxQueued>*)>;
+using ExecutorWork = std::function<bool(AbstractWork*)>;
 
 
-template <uint16_t MaxQueued>
 struct AbstractWork
 {
 public:
 	virtual ~AbstractWork()
 	{}
 
-	bool call(Server* server, Executor<MaxQueued>* executor)
+	bool call()
 	{
-		return _handler(server, executor, this);
+		return _handler(this);
 	}
 
     virtual bool ready()
@@ -30,33 +32,50 @@ public:
         return true;
     }
 
+	inline Client* executor()
+	{
+		return _executor;
+	}
+
 protected:
-	AbstractWork(ExecutorWork<MaxQueued> handler) :
-		_handler(handler)
+	AbstractWork(ExecutorWork handler, Client* executor) :
+		_handler(handler),
+		_executor(executor)
 	{}
 
 protected:
-	ExecutorWork<MaxQueued> _handler;
+	ExecutorWork _handler;
+	Client* _executor;
 };
 
-template <uint16_t MaxQueued>
-struct ClientWork : public AbstractWork<MaxQueued>
+struct ClientWork : public AbstractWork
 {
 public:
-	ClientWork(ExecutorWork<MaxQueued> handler) :
-		AbstractWork<MaxQueued>(handler)
+	ClientWork(ExecutorWork handler, Client* executor, Packet* packet) :
+		AbstractWork(handler, executor),
+		_packet(packet)
 	{}
 
 	virtual ~ClientWork()
-	{}
+	{
+		_packet->destroy();
+	}
+
+	inline Packet* packet()
+	{
+		return _packet;
+	}
+
+protected:
+	Packet* _packet;
 };
 
-template <typename T, uint16_t MaxQueued>
-struct FutureWork : public AbstractWork<MaxQueued>
+template <typename T>
+struct FutureWork : public AbstractWork
 {
 public:
-	FutureWork(ExecutorWork<MaxQueued> handler, std::future<T>&& future) :
-		AbstractWork<MaxQueued>(handler)
+	FutureWork(ExecutorWork handler, Client* executor, std::future<T>&& future) :
+		AbstractWork(handler, executor)
 	{
         _future = std::move(future);
     }

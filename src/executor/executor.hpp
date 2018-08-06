@@ -18,12 +18,13 @@ public:
     Executor() {}
     virtual ~Executor() {}
 
-    void runScheduled();
+    void executeJobs();
+    void schedule(AbstractWork* job);
     void schedule(SchedulableTask<MaxQueued>&& task, TimePoint when);
 
 private:
     // Can be used for async jobs
-    boost::lockfree::queue<AbstractWork<MaxQueued>*, boost::lockfree::capacity<MaxQueued>> _jobs;
+    boost::lockfree::queue<AbstractWork*, boost::lockfree::capacity<MaxQueued>> _jobs;
 
     // Purely sequential ant time-stamped jobs
     std::priority_queue<Schedulable<MaxQueued>*, std::vector<Schedulable<MaxQueued>*>, SchedulableComparator<MaxQueued>> _scheduledTasks;

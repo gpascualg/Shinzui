@@ -31,7 +31,7 @@ MapAwareEntity::~MapAwareEntity()
 
 void MapAwareEntity::update(uint64_t elapsed)
 {
-    Executor<ExecutorQueueMax>::runScheduled();
+    Executor<ExecutorQueueMax>::executeJobs();
 
     // Update motion
     _motionMaster->update(elapsed);
