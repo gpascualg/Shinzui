@@ -11,6 +11,8 @@
 #include <rxterm/components/maxwidth.hpp>
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <thread>
 #include <chrono>
 #include <memory>
@@ -29,6 +31,25 @@ auto renderToTerm = [](auto const& vt, unsigned const w, Component const& c) {
   // TODO: get actual terminal width
   return vt.flip(c.render(w).toString());
 };
+
+void Reactive::onPacketCreated() 
+{ 
+    ++_numAlivePackets; 
+}
+
+void Reactive::onPacketWritten(uint16_t opcode) 
+{
+    ++_packetCount[opcode];
+}
+
+void Reactive::onPacketDestroyed(uint16_t opcode) 
+{
+    --_numAlivePackets; 
+    if (opcode)
+    {
+        --_packetCount[opcode];
+    }
+}
 
 void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 {
@@ -64,8 +85,27 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
             FlowLayout<>{
                 Text(Style::Default(), "Alive packets: "),
                 Text(Style::Default(), _numAlivePackets)
-            },
+            }
+        };
 
+    for (auto pair : _packetCount)
+    {
+        if (pair.second > 0)
+        {
+            std::stringstream stream;
+            stream << std::setfill('0') << std::setw(4) << std::hex << pair.first;
+
+            component.children.emplace_back(
+                FlowLayout<>{
+                    Text(Style::Default(), "    ["),
+                    Text(Style::Default(), stream.str()),
+                    Text(Style::Default(), "]: "),
+                    Text(Style::Default(), pair.second)
+                });
+        }
+    }
+
+    component.children.emplace_back(
             FlowLayout<>{
                 Text(Style::Default(), "Clients (accepting/playing/closing): "),
                 Text(Style::Default(), _pendingAcceptClient),
@@ -73,15 +113,15 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
                 Text(Style::Default(), _numClients),
                 Text(Style::Default(), "/"),
                 Text(Style::Default(), _pendingCloseClient)
-            },
+            });
 
+    component.children.emplace_back(
             FlowLayout<>{
                 Text(Style::Default(), "Map (clusters/cells): "),
                 Text(Style::Default(), _numClusters),
                 Text(Style::Default(), "/"),
                 Text(Style::Default(), _numCells)
-            }
-        };
+            });
 
     // superProgressBar(0.01 * _i, 0.02 * _i, 0.03 * _i);
     *_vt = renderToTerm(*_vt, 80, component);

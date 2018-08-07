@@ -2,11 +2,13 @@
 
 #include "defs/common.hpp"
 
+#include <unordered_map>
 
 namespace rxterm
 {
     class VirtualTerminal;
 }
+
 
 class Reactive
 {
@@ -23,8 +25,9 @@ public:
 
     void update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep);
 
-    inline void onPacketCreated() { ++_numAlivePackets; }
-    inline void onPacketDestroyed() { --_numAlivePackets; }
+    void onPacketCreated();
+    void onPacketWritten(uint16_t opcode);
+    void onPacketDestroyed(uint16_t opcode);
 
     inline void onClientCreated() { ++_pendingAcceptClient; }
     inline void onClientAccepted() { ++_numClients; --_pendingAcceptClient; }
@@ -45,6 +48,7 @@ private:
     rxterm::VirtualTerminal* _vt;
     
     uint16_t _numAlivePackets;
+    std::unordered_map<uint16_t, uint16_t> _packetCount;
     
     uint16_t _pendingAcceptClient;
     uint16_t _pendingCloseClient;

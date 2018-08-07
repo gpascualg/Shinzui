@@ -19,14 +19,15 @@ Packet::~Packet()
 {
     if (bufferLen() >= 2)
     {
-        LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", peek<uint16_t>(0));
+        uint16_t opcode = peek<uint16_t>(0);
+        LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", opcode);
+        Reactive::get()->onPacketDestroyed(opcode);
     }
     else
     {
         LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed [EMPTY]");
+        Reactive::get()->onPacketDestroyed(0x0);
     }
-
-    Reactive::get()->onPacketDestroyed();
 }
 
 

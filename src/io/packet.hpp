@@ -8,6 +8,7 @@
 #include <exception>
 
 #include "defs/common.hpp"
+#include "debug/reactive.hpp"
 
 INCL_NOWARN
 #include <boost/asio.hpp>
@@ -51,6 +52,9 @@ public:
         auto packet = _pool.construct();
         *packet << opcode;
         *packet << uint16_t{ 0x0000 };
+        
+        Reactive::get()->onPacketWritten(opcode);
+
         return packet;
     }
 
@@ -59,6 +63,12 @@ public:
         auto packet = _pool.construct();
         memcpy(packet->_buffer, from->_buffer, size);
         packet->_size = size;
+
+        if (size >= 2)
+        {
+            Reactive::get()->onPacketWritten(packet->peek<uint16_t>(0));
+        }
+
         return packet;
     }
 
