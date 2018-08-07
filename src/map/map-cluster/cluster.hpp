@@ -65,8 +65,11 @@ private:
     using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Cell*>;
     Graph _graph;
 
+    std::vector<Cell*> _verticesBuffer_1;
+    std::vector<Cell*> _verticesBuffer_2;
+    std::vector<Cell*>* _verticesCells;
+
     std::unordered_map<Cell*, boost::graph_traits<Graph>::vertex_descriptor> _vertices;
-    std::unordered_map<boost::graph_traits<Graph>::vertex_descriptor, Cell*> _mappings;
     std::list<MapAwareEntity*> _keepers;
 
     uint16_t _num_components;

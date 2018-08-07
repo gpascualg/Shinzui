@@ -34,10 +34,11 @@ public:
     inline void onClientClosed() { ++_pendingCloseClient; }
     inline void onClientDestroyed() { --_pendingCloseClient; --_numClients;}
 
-    inline void onClusterUpdate(uint16_t numClusters, uint16_t numCells)
+    inline void onClusterUpdate(uint16_t numClusters, uint16_t numCells, uint16_t numStall)
     {
         _numClusters = numClusters;
         _numCells = numCells;
+        _numStall = numStall;
     }
 
 private:
@@ -56,4 +57,5 @@ private:
     
     uint16_t _numClusters;
     uint16_t _numCells;
+    uint16_t _numStall;
 };

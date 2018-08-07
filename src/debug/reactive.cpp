@@ -117,10 +117,12 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 
     component.children.emplace_back(
             FlowLayout<>{
-                Text(Style::Default(), "Map (clusters/cells): "),
+                Text(Style::Default(), "Map (clusters/cells/stall): "),
                 Text(Style::Default(), _numClusters),
                 Text(Style::Default(), "/"),
-                Text(Style::Default(), _numCells)
+                Text(Style::Default(), _numCells),
+                Text(Style::Default(), "/"),
+                Text(Style::Default(), _numStall)
             });
 
     // superProgressBar(0.01 * _i, 0.02 * _i, 0.03 * _i);

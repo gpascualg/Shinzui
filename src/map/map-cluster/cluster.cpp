@@ -22,7 +22,9 @@
 
 Cluster::Cluster():
     _num_components(0)
-{}
+{
+    _verticesCells = &_verticesBuffer_1;
+}
 
 Cluster::~Cluster()
 {
@@ -31,12 +33,22 @@ Cluster::~Cluster()
 
 void Cluster::update(uint64_t elapsed)
 {
+    // Compute diff between buffers
+    std::vector<Cell*> result;
+    std::set_difference(_verticesBuffer_1.begin(), _verticesBuffer_1.end(), _verticesBuffer_2.begin(), _verticesBuffer_2.end(), std::inserter(result, result.end()));
+
+    // Insert old-now-missing cells
+    for (Cell* cell : result)
+    {
+        touch(cell);
+    }
+
     if (!_vertices.empty())
     {
         _components.resize(_vertices.size());
         _num_components = boost::connected_components(_graph, &_components[0]);
 
-        Reactive::get()->onClusterUpdate(_num_components, _vertices.size());
+        Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - result.size(), result.size());
 
         for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
@@ -96,9 +108,10 @@ void Cluster::cleanup(uint64_t elapsed)
         // Reinitialize
         _graph = {};
 
-        // Clear everything
+        // Switch buffer and clean
+        _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
+        _verticesCells->clear();
         _vertices.clear();
-        _mappings.clear();
     }
 }
 
@@ -138,8 +151,8 @@ void Cluster::touch(Cell* cell)
     if (_vertices.find(cell) == _vertices.end())
     {
         auto v = boost::add_vertex(_graph);
+        _verticesCells->push_back(cell);
         _vertices[cell] = v;
-        _mappings[v] = cell;
     }
 }
 
