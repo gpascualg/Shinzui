@@ -4,6 +4,7 @@
 #include "defs/atomic_autoincrement.hpp"
 #include "defs/common.hpp"
 #include "debug/debug.hpp"
+#include "debug/reactive.hpp"
 #include "map/cell.hpp"
 #include "map/map-cluster/cluster.hpp"
 #include "map/map-cluster/cluster_center.hpp"
@@ -34,6 +35,8 @@ void Cluster::update(uint64_t elapsed)
     {
         _components.resize(_vertices.size());
         _num_components = boost::connected_components(_graph, &_components[0]);
+
+        Reactive::get()->onClusterUpdate(_num_components, _vertices.size());
 
         for (uint16_t cid = 0; cid < _num_components; ++cid)
         {

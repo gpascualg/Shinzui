@@ -5,23 +5,63 @@
 
 
 template <uint16_t MaxQueued>
+Executor<MaxQueued>::Executor()
+{}
+
+template <uint16_t MaxQueued>
+Executor<MaxQueued>::~Executor()
+{
+    // Free async jobs memory
+    AbstractWork* job = nullptr;
+    while (_jobs.pop(job)) 
+    {
+        delete job;
+    }
+
+    // Free sync jobs memory
+    while (!_scheduledTasks.empty())
+    {
+        auto st = _scheduledTasks.top();
+        _scheduledTasks.pop();
+        delete st;
+    }
+}
+
+template <uint16_t MaxQueued>
 void Executor<MaxQueued>::executeJobs()
 {
     // First do all async tasks
     std::vector<AbstractWork*> reschedule;
-    
-    _jobs.consume_all([this, &reschedule](auto job)
-        {
-            if (!job->ready())
-            {
-                reschedule.emplace_back(job);
-                return;
-            }
+    bool success = true;
 
-            job->call(this);
-            delete job;
+    AbstractWork* job = nullptr;
+    while (success && _jobs.pop(job)) 
+    {
+        // FutureWork(s) might now be ready yet
+        if (!job->ready())
+        {
+            reschedule.emplace_back(job);
+            continue;
         }
-    );
+
+        // Execute next and get next task, if any
+        // If success is false, next iteration won't go through
+        AbstractWork* next = nullptr;
+        success = job->call(this, &next);
+        if (success && next)
+        {
+            reschedule.emplace_back(next);
+        }
+
+        // Free memory
+        delete job;
+    }
+
+    // No need to continue if the client has been errored out
+    if (!success)
+    {
+        return;
+    }
 
     for (AbstractWork* job : reschedule)
     {

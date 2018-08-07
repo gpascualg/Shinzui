@@ -102,3 +102,10 @@ RequireExternal(
         PACKAGE_NAME libmongocxx-static
         PACKAGE_TARGET LIBMONGOCXX_STATIC
     )
+
+# Other deps
+AddToIncludes(
+    TARGET Shinzui
+    INCLUDES
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)

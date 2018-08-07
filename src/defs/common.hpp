@@ -38,3 +38,4 @@
 #include <chrono>  // NOLINT(build/c++11)
 using TimePoint = std::chrono::high_resolution_clock::time_point;
 using TimeBase = std::chrono::milliseconds;
+constexpr auto TimeScale = TimeBase(std::chrono::seconds(1)).count();

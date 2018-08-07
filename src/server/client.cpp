@@ -102,23 +102,25 @@ void Client::send(boost::intrusive_ptr<Packet> packet)
 
 void Client::close()
 {
-    LOG(LOG_CLIENT_LIFECYCLE, "Closed client %" PRId64, id());
-
-    // Cancel all IO
-    _timer.cancel();
-    _socket.cancel();
-    _socket.close();
-
-    // Remove from map
-    auto cell = entity()->cell();
-    if (cell)
+    if (_status != Status::CLOSED)
     {
-        cell->map()->removeFrom(cell, entity(), nullptr);
+        LOG(LOG_CLIENT_LIFECYCLE, "Closed client %" PRId64, id());
+
+        // Cancel all IO
+        _timer.cancel();
+        _socket.close();
+
+        // Remove from map
+        auto cell = entity()->cell();
+        if (cell)
+        {
+            cell->map()->removeFrom(cell, entity(), nullptr);
+        }
+
+        // Flag me
+        _status = Status::CLOSED;
+
+        // Recycle client
+        Server::get()->handleClose(this);
     }
-
-    // Flag me
-    _status = Status::CLOSED;
-
-    // Recycle client
-    Server::get()->handleClose(this);
 }

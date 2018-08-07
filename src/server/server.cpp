@@ -4,6 +4,7 @@
 #include "defs/atomic_autoincrement.hpp"
 #include "server/client.hpp"
 #include "debug/debug.hpp"
+#include "debug/reactive.hpp"
 #include "map/map.hpp"
 #include "map/map_aware_entity.hpp"
 
@@ -18,7 +19,7 @@ INCL_WARN
 
 
 Server* Server::_instance = nullptr;
-const TimeBase WORLD_HEART_BEAT = TimeBase(50);
+constexpr const TimeBase WORLD_HEART_BEAT = TimeBase(50);
 
 
 Server::Server(uint16_t port) :
@@ -62,6 +63,7 @@ void Server::runScheduledOperations()
                     else
                     {
                         destroyClient(op->client);
+                        Reactive::get()->onClientDestroyed();
                         delete op;
                     }
                     break;
@@ -95,6 +97,9 @@ void Server::update()
     // Now cleanup map
     map()->cleanup(diff.count());
 
+    // Debug info
+    Reactive::get()->update(WORLD_HEART_BEAT, diff, _prevSleepTime);
+
     // Wait for a constant update time
     if (diff <= WORLD_HEART_BEAT + _prevSleepTime)
     {
@@ -115,6 +120,7 @@ void Server::startAccept()
 
     _acceptor.async_accept(client->socket(), [this, client](const auto error)
         {
+            Reactive::get()->onClientCreated();
             _operations.push(new Operation{ OperationType::ACCEPT, client, error });  // NOLINT (whitespace/braces)
 
             this->startAccept();
@@ -125,10 +131,12 @@ void Server::startAccept()
 void Server::handleAccept(Client* client, const boost::system::error_code& error)
 {
     LOG(LOG_CLIENT_LIFECYCLE, "Client accepted");
+    Reactive::get()->onClientAccepted();
 }
 
 void Server::handleClose(Client* client)
 {
+    Reactive::get()->onClientClosed();
     _operations.push(new Operation{ OperationType::CLOSE, client, boost::system::error_code() });  // NOLINT (whitespace/braces)
 }
 

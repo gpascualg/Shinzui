@@ -15,8 +15,8 @@ template <uint16_t MaxQueued>
 class Executor
 {
 public:
-    Executor() {}
-    virtual ~Executor() {}
+    Executor();
+    virtual ~Executor();
 
     void executeJobs();
     void schedule(AbstractWork* job);

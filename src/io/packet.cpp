@@ -2,7 +2,7 @@
 
 #include "io/packet.hpp"
 #include "debug/debug.hpp"
-
+#include "debug/reactive.hpp"
 
 boost::object_pool<Packet> Packet::_pool(2048);
 
@@ -11,11 +11,22 @@ Packet::Packet() :
     _size(0),
     _write(0),
     _refs(0)
-{}
+{
+    Reactive::get()->onPacketCreated();
+}
 
 Packet::~Packet()
 {
-    LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", peek<uint16_t>(0));
+    if (bufferLen() >= 2)
+    {
+        LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed %.4X", peek<uint16_t>(0));
+    }
+    else
+    {
+        LOG(LOG_PACKET_LIFECYCLE, "Packet destroyed [EMPTY]");
+    }
+
+    Reactive::get()->onPacketDestroyed();
 }
 
 

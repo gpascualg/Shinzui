@@ -127,7 +127,7 @@ public:
     template <typename T>
     T peek(uint16_t offset)
     {
-        if (offset + sizeof(T) > _size)
+        if (offset + sizeof(T) > bufferLen())
         {
             throw ReadOutOfBounds();
         }
@@ -145,7 +145,7 @@ public:
 
     void* read(uint16_t length)
     {
-        if (_read + length > _size)
+        if (_read + length > bufferLen())
         {
             throw ReadOutOfBounds();
         }
@@ -157,6 +157,7 @@ public:
 
     inline void reset() { _read = _write = _size = 0; }
 
+    inline uint16_t bufferLen() { return std::max(_size, _write); }
     inline uint16_t size() { return _size; }
     inline uint16_t totalRead() { return _read; }
     inline uint16_t written() { return _write; }

@@ -22,23 +22,19 @@ public:
 	virtual ~AbstractWork();
 
 	template <uint16_t MaxQueued>
-	bool call(Executor<MaxQueued>* who)
+	bool call(Executor<MaxQueued>* who, AbstractWork** next)
 	{
 		try
     	{
-			AbstractWork* next = _handler(this);
-			if (next)
-			{
-				who->schedule(next);
-			}
+			*next = _handler(this);
+			return true;
 		}
-		catch (ReadOutOfBounds& e)
+		catch (const ReadOutOfBounds& e)
 		{
 			triggerError();
-			return false;
 		}
 
-		return true;
+		return false;
 	}
 
 	void triggerError();

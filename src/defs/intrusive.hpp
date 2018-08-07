@@ -3,6 +3,7 @@
 #pragma once
 
 #include "io/packet.hpp"
+#include "debug/debug.hpp"
 
 
 inline void intrusive_ptr_add_ref(Packet* x)
