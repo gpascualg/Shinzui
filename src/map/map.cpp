@@ -262,6 +262,9 @@ Cell* Map::getOrCreate(const Offset& offset)
         // Allocate cell
         auto result = _cells.emplace(std::make_pair(offset.q(), offset.r()), _cellAllocator->construct(this, offset));
         cell = (*result.first).second;
+
+        // TODO(gpascualg): Is it safe doing Cluster::onCellCreated here?
+        cluster()->onCellCreated(cell);
     }
 
     return cell;

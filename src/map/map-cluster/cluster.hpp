@@ -50,6 +50,8 @@ public:
     void cleanup(uint64_t elapsed);
     void runScheduledOperations();
 
+    void onCellCreated(Cell* cell);
+
     inline std::size_t size() { return _num_components; }
 
 private:

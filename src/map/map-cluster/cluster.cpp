@@ -148,6 +148,11 @@ void Cluster::runScheduledOperations()
     }
 }
 
+void Cluster::onCellCreated(Cell* cell)
+{
+    touchWithNeighbours(cell);
+}
+
 void Cluster::touchWithNeighbours(Cell* cell)
 {
     touch(cell);
