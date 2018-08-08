@@ -56,6 +56,7 @@ private:
     Cluster();
 
     void touch(Cell* cell);
+    void touchWithNeighbours(Cell* cell);
     void connect(Cell* a, Cell* b);
 
 private:
@@ -69,6 +70,7 @@ private:
     std::vector<Cell*> _verticesBuffer_2;
     std::vector<Cell*>* _verticesCells;
 
+    std::unordered_map<boost::graph_traits<Graph>::vertex_descriptor, std::vector<Cell*>> _cellsByCluster;
     std::unordered_map<Cell*, boost::graph_traits<Graph>::vertex_descriptor> _vertices;
     std::list<MapAwareEntity*> _keepers;
 

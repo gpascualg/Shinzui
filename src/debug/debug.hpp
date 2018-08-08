@@ -18,8 +18,10 @@
 #define LOG_FIRE_LOGIC          0x0000000000000800
 #define LOG_FIRE_LOGIC_EXT      0x0000000000001000
 #define LOG_QUADTREE            0x0000000000002000
+#define LOG_SPAWNS              0x0000000000004000
 
-#define LOG_LEVEL               LOG_CLIENT_LIFECYCLE | LOG_PACKET_LIFECYCLE | LOG_PACKET_RECV | LOG_PACKET_SEND | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT  // NOLINT
+// #define LOG_LEVEL               LOG_CLIENT_LIFECYCLE | LOG_PACKET_LIFECYCLE | LOG_PACKET_RECV | LOG_PACKET_SEND | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT  // NOLINT
+#define LOG_LEVEL               LOG_ALL & ~LOG_SERVER_LOOP
 
 #define STR(a)                  STR_(a)
 #define STR_(a)                 #a
@@ -69,7 +71,9 @@ bool nop(First firstValue, Rest... rest)
 
 #define LOG_ALWAYS(...)             EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
 
-#if defined(FORCE_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
+//#define FORCE_ASCII_DEBUG
+
+#if defined(FORCE_ASCII_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
     #define IF_LOG(lvl)         (lvl & (LOG_LEVEL))  // NOLINT
     #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(LOG_HELPER(lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(NOP_HELPER(lvl, __VA_ARGS__, ""))))  // NOLINT
 #else

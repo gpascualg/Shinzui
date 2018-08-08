@@ -1,4 +1,5 @@
 #include "debug/reactive.hpp"
+#include "debug/debug.hpp"
 
 #include <rxterm/terminal.hpp>
 #include <rxterm/style.hpp>
@@ -125,7 +126,8 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
                 Text(Style::Default(), _numStall)
             });
 
-    // superProgressBar(0.01 * _i, 0.02 * _i, 0.03 * _i);
+#ifndef FORCE_ASCII_DEBUG
     *_vt = renderToTerm(*_vt, 80, component);
-    // _i += 1;
+    // std::cout << _numClusters << "/" << _numCells << "/" << _numStall << std::endl;
+#endif
 }

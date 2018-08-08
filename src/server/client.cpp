@@ -92,6 +92,9 @@ void Client::scheduleRead(uint16_t bytesToRead, bool reset)
 
 void Client::send(boost::intrusive_ptr<Packet> packet)
 {
+    uint16_t opcode = packet->peek<uint16_t>(0);
+    LOG(LOG_PACKET_SEND, "Sending %04X", opcode);
+
     boost::asio::async_write(socket(), packet->sendBuffer(),
         [packet](const boost::system::error_code & error, std::size_t size)
         {

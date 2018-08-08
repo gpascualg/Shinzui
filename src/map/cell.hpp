@@ -61,6 +61,9 @@ public:
     virtual void physics(uint64_t elapsed);
     virtual void cleanup(uint64_t elapsed);
 
+    void addEntity(MapAwareEntity* entity);
+    void removeEntity(MapAwareEntity* entity);
+
     void request(MapAwareEntity* who, RequestType type);
     void broadcast(boost::intrusive_ptr<Packet> packet);
     void clearQueues();
@@ -78,6 +81,7 @@ protected:
 
     RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>* _quadTree;
     std::unordered_map<uint64_t /*id*/, MapAwareEntity*> _entities;
+    uint16_t _clientsCount;
 
     // Use double lists to avoid locking and/or non-desired cleanups
     std::list<boost::intrusive_ptr<Packet>> _broadcastQueue1;

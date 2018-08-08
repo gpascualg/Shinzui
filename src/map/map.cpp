@@ -64,7 +64,7 @@ void Map::runScheduledOperations()
                 if (cell)
                 {
                     entity->cell(cell);
-                    cell->_entities.emplace(entity->id(), entity);
+                    cell->addEntity(entity);
 
                     if (entity->isUpdater())
                     {
@@ -79,7 +79,7 @@ void Map::runScheduledOperations()
                 cell = get(std::move(operation->offset));
                 if (cell)
                 {
-                    cell->_entities.erase(entity->id());
+                    cell->removeEntity(entity);
 
                     if (entity->isUpdater())
                     {

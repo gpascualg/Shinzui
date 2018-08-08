@@ -115,9 +115,9 @@ void Cell::update(uint64_t elapsed)
         _quadTree->insert(updater);
 
         // Try to insert into neighbours
-        for (auto&& cell : _map->getSiblings(this))
+        for (auto cell : _map->getSiblings(this))
         {
-            if (cell->_quadTree->contains(updater->motionMaster()->position2D()))
+            if (cell && cell->_quadTree->contains(updater->motionMaster()->position2D()))
             {
                 cell->_quadTree->insert(updater);
             }
@@ -160,6 +160,28 @@ void Cell::cleanup(uint64_t elapsed)
     _quadTree->clear();
 }
 
+void Cell::addEntity(MapAwareEntity* entity)
+{
+    _entities.emplace(entity->id(), entity);
+    
+    if (entity->client())
+    {
+        ++_clientsCount;
+    }
+}
+
+void Cell::removeEntity(MapAwareEntity* entity)
+{
+    _entities.erase(entity->id());
+
+    if (entity->client())
+    {
+        --_clientsCount;
+    }
+}
+
+// TODO: If player spawns at the same time as a mob, a double spawn is sent
+
 void Cell::processRequests(MapAwareEntity* entity)
 {
     for (auto request : _requests)
@@ -168,12 +190,16 @@ void Cell::processRequests(MapAwareEntity* entity)
         {
             if (request.type == RequestType::SPAWN)
             {
+                LOG(LOG_SPAWNS, "(%d, %d) Serving SPAWN request from %" PRId64 " with entity %" PRId64, offset().q(), offset().r(), request.who->id(), entity->id());
+
                 // 0x0AAx are reserved packets
                 auto packet = entity->spawnPacket();
                 request.who->client()->send(packet);
             }
             else if (request.type == RequestType::DESPAWN)
             {
+                LOG(LOG_SPAWNS, "(%d, %d) Serving DESPAWN request from %" PRId64 " with entity %" PRId64, offset().q(), offset().r(), request.who->id(), entity->id());
+
                 // 0x0AAx are reserved packets
                 auto packet = entity->despawnPacket();
                 request.who->client()->send(packet);
@@ -187,12 +213,19 @@ void Cell::request(MapAwareEntity* who, RequestType type)
     // TODO(gpascualg): Macro/debug friendly assert
     assert(who->client());
 
+    LOG(LOG_SPAWNS, "(%d, %d) Request from %" PRId64, offset().q(), offset().r(), who->id());
     _requests.push_back({ who, type });  // NOLINT(whitespace/braces)
 }
 
 void Cell::broadcast(boost::intrusive_ptr<Packet> packet)
 {
-    _broadcast->push_back(packet);
+    // There is nothing to broadcast if there is no plalyer at all
+    if (_clientsCount > 0)
+    {
+        LOG(LOG_SPAWNS, "(%d, %d) Broadcast requested", offset().q(), offset().r());
+
+        _broadcast->push_back(packet);
+    }
 }
 
 void Cell::clearQueues()

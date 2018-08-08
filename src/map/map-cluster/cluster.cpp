@@ -35,12 +35,19 @@ void Cluster::update(uint64_t elapsed)
 {
     // Compute diff between buffers
     std::vector<Cell*> result;
-    std::set_difference(_verticesBuffer_1.begin(), _verticesBuffer_1.end(), _verticesBuffer_2.begin(), _verticesBuffer_2.end(), std::inserter(result, result.end()));
+    if (_verticesCells == &_verticesBuffer_1)
+    {
+        std::set_difference(_verticesBuffer_2.begin(), _verticesBuffer_2.end(), _verticesBuffer_1.begin(), _verticesBuffer_1.end(), std::inserter(result, result.end()));
+    }
+    else
+    {
+        std::set_difference(_verticesBuffer_1.begin(), _verticesBuffer_1.end(), _verticesBuffer_2.begin(), _verticesBuffer_2.end(), std::inserter(result, result.end()));
+    }
 
     // Insert old-now-missing cells
     for (Cell* cell : result)
     {
-        touch(cell);
+        touchWithNeighbours(cell);
     }
 
     if (!_vertices.empty())
@@ -48,18 +55,19 @@ void Cluster::update(uint64_t elapsed)
         _components.resize(_vertices.size());
         _num_components = boost::connected_components(_graph, &_components[0]);
 
-        Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - result.size(), result.size());
+        // Order by cluster
+        for (auto const& pair : this->_vertices)
+        {
+            _cellsByCluster[_components[pair.second]].push_back(pair.first);
+        }
 
         for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]()
+            _pool.postWork<void>([this, elapsed, cells = _cellsByCluster[cid]]()
             {
-                for (auto pair : this->_vertices)
+                for (auto cell : cells)
                 {
-                    if (this->_components[pair.second] == cid)
-                    {
-                        pair.first->update(elapsed);
-                    }
+                    cell->update(elapsed);
                 }
             });  // NOLINT (whitespace/braces)
         }
@@ -68,20 +76,19 @@ void Cluster::update(uint64_t elapsed)
 
         for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]()
+            _pool.postWork<void>([this, elapsed, cells = _cellsByCluster[cid]]()
             {
-                for (auto pair : this->_vertices)
+                for (auto cell : cells)
                 {
-                    if (this->_components[pair.second] == cid)
-                    {
-                        pair.first->physics(elapsed);
-                    }
+                    cell->physics(elapsed);
                 }
             });  // NOLINT (whitespace/braces)
         }
 
         _pool.waitAll();
     }
+
+    Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - result.size(), result.size());
 }
 
 
@@ -91,14 +98,11 @@ void Cluster::cleanup(uint64_t elapsed)
     {
         for (uint16_t cid = 0; cid < _num_components; ++cid)
         {
-            _pool.postWork<void>([this, cid, elapsed]()
+            _pool.postWork<void>([this, elapsed, cells = _cellsByCluster[cid]]()
             {
-                for (auto pair : this->_vertices)
+                for (auto cell : cells)
                 {
-                    if (this->_components[pair.second] == cid)
-                    {
-                        pair.first->cleanup(elapsed);
-                    }
+                    cell->cleanup(elapsed);
                 }
             });  // NOLINT (whitespace/braces)
         }
@@ -107,12 +111,19 @@ void Cluster::cleanup(uint64_t elapsed)
 
         // Reinitialize
         _graph = {};
-
-        // Switch buffer and clean
-        _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
-        _verticesCells->clear();
-        _vertices.clear();
     }
+
+    // Switch buffers and clean
+    _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
+    _verticesCells->clear();
+    _vertices.clear();
+
+    for (uint16_t cid = 0; cid < _num_components; ++cid)
+    {
+        _cellsByCluster[cid].clear();
+    }
+
+    _num_components = 0;
 }
 
 void Cluster::runScheduledOperations()
@@ -133,15 +144,20 @@ void Cluster::runScheduledOperations()
 
     for (auto entity : _keepers)
     {
-        touch(entity->cell());
+        touchWithNeighbours(entity->cell());
+    }
+}
 
-        for (auto nn : entity->cell()->inRadius(2))
+void Cluster::touchWithNeighbours(Cell* cell)
+{
+    touch(cell);
+
+    for (auto nn : cell->inRadius(1))
+    {
+        if (nn && nn != cell)
         {
-            if (nn && nn != entity->cell())
-            {
-                touch(nn);
-                connect(entity->cell(), nn);
-            }
+            touch(nn);
+            connect(cell, nn);
         }
     }
 }
@@ -151,8 +167,8 @@ void Cluster::touch(Cell* cell)
     if (_vertices.find(cell) == _vertices.end())
     {
         auto v = boost::add_vertex(_graph);
-        _verticesCells->push_back(cell);
         _vertices[cell] = v;
+        _verticesCells->push_back(cell);
     }
 }
 
