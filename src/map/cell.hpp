@@ -48,6 +48,13 @@ class Cell
     static constexpr const int MaxQuadrantEntities = 5;
     static constexpr const int MaxQuadtreeDepth = 10;
 
+    struct StallInformation
+    {
+        bool isRegistered;
+        bool isOnCooldown;
+        uint64_t remaining;
+    };
+
 public:
     explicit Cell(Map* map, const Offset& offset);
     virtual ~Cell();
@@ -89,4 +96,8 @@ protected:
     std::list<boost::intrusive_ptr<Packet>>* _broadcast;
 
     std::list<Request> _requests;
+
+public:
+    // TODO(gpascualg): Better encapsulation for stall information?
+    StallInformation stall;
 };

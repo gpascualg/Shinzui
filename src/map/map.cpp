@@ -72,6 +72,7 @@ void Map::runScheduledOperations()
                     }
 
                     entity->onAdded(cell, operation->param);
+                    cluster()->checkStall(operation->param, cell);
                 }
                 break;
 

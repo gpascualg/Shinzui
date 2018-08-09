@@ -1,5 +1,12 @@
 #include "debug/reactive.hpp"
+#include "debug/cpu.hpp"
 #include "debug/debug.hpp"
+#include "server/client.hpp"
+#include "server/server.hpp"
+#include "map/map.hpp"
+#include "map/cell.hpp"
+#include "map/map_aware_entity.hpp"
+#include "map/map-cluster/cluster.hpp"
 
 #include <rxterm/terminal.hpp>
 #include <rxterm/style.hpp>
@@ -22,11 +29,19 @@ using namespace rxterm;
 
 
 Reactive* Reactive::_instance = nullptr;
+constexpr const float alpha = 0.1f;
+// Otherwise there are double-includes
+static VirtualTerminal _vt; 
 
-Reactive::Reactive()
+Reactive::Reactive():
+    _cpuUsage(0)
 {
-    _vt = new VirtualTerminal();
+    initCPUDebugger();
+    _lastUpdate = Server::get()->now();
 }
+
+Reactive::~Reactive()
+{}
 
 auto renderToTerm = [](auto const& vt, unsigned const w, Component const& c) {
   // TODO: get actual terminal width
@@ -54,6 +69,13 @@ void Reactive::onPacketDestroyed(uint16_t opcode)
 
 void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 {
+    if (std::chrono::duration_cast<TimeBase>(Server::get()->now() - _lastUpdate) < std::chrono::duration_cast<TimeBase>(std::chrono::seconds(1)))
+    {
+        return;
+    }
+    
+    _lastUpdate = Server::get()->now();
+
     using namespace std::chrono_literals;
     using namespace std::string_literals;
 
@@ -69,9 +91,15 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
         progress = std::min(1.0f, (diff - prevSleep).count() / float(heartBeat.count()));
     }
 
+    _cpuUsage = (alpha * getCurrentCPUUsage()) + (1.0 - alpha) * _cpuUsage;
+
     auto component =
         StackLayout<>{
-            Text(Style::Default(), "AuraServer debug information: "),
+            FlowLayout<>{
+                Text(Style::Default(), "AuraServer debug information [CPU "),
+                Text(Style{Color::None, FontColor::Red}, int(_cpuUsage)),
+                Text(Style::Default(), "]")
+            },
             
             FlowLayout<>{
                 Text(Style::Default(), "Diff: "),
@@ -116,18 +144,65 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
                 Text(Style::Default(), _pendingCloseClient)
             });
 
+    for (Client* client : clients)
+    {
+        if (client->entity() && client->entity()->cell())
+        {
+            component.children.emplace_back(
+                FlowLayout<>{
+                    Text(Style::Default(), "    ["),
+                    Text(Style::Default(), client->entity()->cell()->offset().q()),
+                    Text(Style::Default(), ","),
+                    Text(Style::Default(), client->entity()->cell()->offset().r()),
+                    Text(Style::Default(), "]: "),
+                    Text(Style::Default(), client->id())
+                });
+        }
+    }
+
     component.children.emplace_back(
             FlowLayout<>{
-                Text(Style::Default(), "Map (clusters/cells/stall): "),
+                Text(Style::Default(), "Map (clusters/cells/stall [candidates]): "),
                 Text(Style::Default(), _numClusters),
                 Text(Style::Default(), "/"),
                 Text(Style::Default(), _numCells),
                 Text(Style::Default(), "/"),
-                Text(Style::Default(), _numStall)
+                Text(Style::Default(), _numStall),
+                Text(Style::Default(), " ["),
+                Text(Style::Default(), _numStallCandidates),
+                Text(Style::Default(), "]")
             });
 
+    for (const auto& cell : Server::get()->map()->cluster()->cells())
+    {
+        auto style = Style::Default();
+        if (cell->stall.isOnCooldown)
+        {
+            style = Style{ Color::None, FontColor::Yellow };
+        }
+        else if (!cell->stall.isRegistered)
+        {
+            // Do not display non-stall&non-cooldown cells
+            continue;
+            // style = Style{ Color::None, FontColor::Red };
+        }
+
+        component.children.emplace_back(
+            FlowLayout<>{
+                Text(style, "    ["),
+                Text(style, cell->offset().q()),
+                Text(style, ","),
+                Text(style, cell->offset().r()),
+                Text(style, "]: "),
+                Text(style, std::chrono::duration_cast<std::chrono::seconds>(TimeBase(cell->stall.remaining)).count()),
+                Text(style, " ("),
+                Text(style, cell->stall.isOnCooldown),
+                Text(style, ")")
+            });
+    }
+
 #ifndef FORCE_ASCII_DEBUG
-    *_vt = renderToTerm(*_vt, 80, component);
+    _vt = renderToTerm(_vt, 80, component);
     // std::cout << _numClusters << "/" << _numCells << "/" << _numStall << std::endl;
 #endif
 }

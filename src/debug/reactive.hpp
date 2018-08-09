@@ -3,16 +3,21 @@
 #include "defs/common.hpp"
 
 #include <unordered_map>
+#include <vector>
+
 
 namespace rxterm
 {
     class VirtualTerminal;
 }
 
+class Client;
 
 class Reactive
 {
 public:
+    ~Reactive();
+    
     static Reactive* get()
     {
         if (!_instance)
@@ -34,19 +39,23 @@ public:
     inline void onClientClosed() { ++_pendingCloseClient; }
     inline void onClientDestroyed() { --_pendingCloseClient; --_numClients;}
 
-    inline void onClusterUpdate(uint16_t numClusters, uint16_t numCells, uint16_t numStall)
+    inline void onClusterUpdate(uint16_t numClusters, uint16_t numCells, uint16_t numStall, uint16_t numStallCandidates)
     {
         _numClusters = numClusters;
         _numCells = numCells;
         _numStall = numStall;
+        _numStallCandidates = numStallCandidates;
     }
+
+    std::vector<Client*> clients;
 
 private:
     Reactive();
 
 private:
     static Reactive* _instance;
-    rxterm::VirtualTerminal* _vt;
+    TimePoint _lastUpdate;
+    float _cpuUsage;
     
     uint16_t _numAlivePackets;
     std::unordered_map<uint16_t, uint16_t> _packetCount;
@@ -58,4 +67,5 @@ private:
     uint16_t _numClusters;
     uint16_t _numCells;
     uint16_t _numStall;
+    uint16_t _numStallCandidates;
 };

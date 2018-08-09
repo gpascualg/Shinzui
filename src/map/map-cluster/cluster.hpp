@@ -18,7 +18,7 @@ INCL_WARN
 #include <functional>
 #include <list>
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include <unordered_map>
 
@@ -33,12 +33,12 @@ class Cluster
     friend class Map;
 
 private:
-    struct UpdateStructure
+    struct StallCell
     {
-        Cluster* cluster;
-        uint64_t id;
-        uint64_t elapsed;
-        void (Cell::*fun)(uint64_t);
+        bool isRegistered;
+        bool isOnCooldown;
+        uint64_t remaining;
+        // TODO(gpasualg): Can we reduce it to uint32_t?
     };
 
 public:
@@ -51,14 +51,18 @@ public:
     void runScheduledOperations();
 
     void onCellCreated(Cell* cell);
+    void checkStall(Cell* from, Cell* to);
+    inline const std::unordered_set<Cell*>& cells() { return _verticesCells == &_verticesBuffer_1 ? _verticesBuffer_2 : _verticesBuffer_1; }
 
     inline std::size_t size() { return _num_components; }
 
 private:
     Cluster();
 
-    void touch(Cell* cell);
-    void touchWithNeighbours(Cell* cell);
+    uint16_t processStallCells(uint64_t elapsed);
+
+    bool touchWithNeighbours(Cell* cell, bool isStall = false);
+    bool touch(Cell* cell, bool isStall = false);
     void connect(Cell* a, Cell* b);
 
 private:
@@ -68,9 +72,12 @@ private:
     using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Cell*>;
     Graph _graph;
 
-    std::vector<Cell*> _verticesBuffer_1;
-    std::vector<Cell*> _verticesBuffer_2;
-    std::vector<Cell*>* _verticesCells;
+    std::unordered_set<Cell*> _verticesBuffer_1;
+    std::unordered_set<Cell*> _verticesBuffer_2;
+    std::unordered_set<Cell*>* _verticesCells;
+
+    uint16_t _numStall;
+    uint16_t _numStallCandidates;
 
     std::unordered_map<boost::graph_traits<Graph>::vertex_descriptor, std::vector<Cell*>> _cellsByCluster;
     std::unordered_map<Cell*, boost::graph_traits<Graph>::vertex_descriptor> _vertices;

@@ -34,21 +34,7 @@ Cluster::~Cluster()
 void Cluster::update(uint64_t elapsed)
 {
     // Compute diff between buffers
-    std::vector<Cell*> result;
-    if (_verticesCells == &_verticesBuffer_1)
-    {
-        std::set_difference(_verticesBuffer_2.begin(), _verticesBuffer_2.end(), _verticesBuffer_1.begin(), _verticesBuffer_1.end(), std::inserter(result, result.end()));
-    }
-    else
-    {
-        std::set_difference(_verticesBuffer_1.begin(), _verticesBuffer_1.end(), _verticesBuffer_2.begin(), _verticesBuffer_2.end(), std::inserter(result, result.end()));
-    }
-
-    // Insert old-now-missing cells
-    for (Cell* cell : result)
-    {
-        touchWithNeighbours(cell);
-    }
+    _numStall = processStallCells(elapsed);
 
     if (!_vertices.empty())
     {
@@ -88,7 +74,41 @@ void Cluster::update(uint64_t elapsed)
         _pool.waitAll();
     }
 
-    Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - result.size(), result.size());
+    Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - _numStall, _numStall, _numStallCandidates);
+}
+
+uint16_t Cluster::processStallCells(uint64_t elapsed)
+{
+    const std::unordered_set<Cell*>& candidates = (_verticesCells == &_verticesBuffer_1) ? _verticesBuffer_2 : _verticesBuffer_1;
+    _numStallCandidates = candidates.size();
+    uint16_t addCount = 0;
+
+    // Insert old-now-missing cells
+    for (auto const& cell : candidates)
+    {
+        if (cell->stall.isRegistered)
+        {
+            if (elapsed < cell->stall.remaining)
+            {
+                cell->stall.remaining -= elapsed;
+            }
+            else
+            {
+                cell->stall.isOnCooldown = true;
+                cell->stall.isRegistered = false;
+            }
+        }
+        
+        if (!cell->stall.isOnCooldown)
+        {
+            if (touchWithNeighbours(cell, true))
+            {
+                ++addCount;
+            }
+        }
+    }
+
+    return addCount;
 }
 
 
@@ -111,19 +131,19 @@ void Cluster::cleanup(uint64_t elapsed)
 
         // Reinitialize
         _graph = {};
+
+        // Switch buffers and clean
+        _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
+        _verticesCells->clear();
+        _vertices.clear();
+
+        for (uint16_t cid = 0; cid < _num_components; ++cid)
+        {
+            _cellsByCluster[cid].clear();
+        }
+
+        _num_components = 0;
     }
-
-    // Switch buffers and clean
-    _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
-    _verticesCells->clear();
-    _vertices.clear();
-
-    for (uint16_t cid = 0; cid < _num_components; ++cid)
-    {
-        _cellsByCluster[cid].clear();
-    }
-
-    _num_components = 0;
 }
 
 void Cluster::runScheduledOperations()
@@ -148,33 +168,69 @@ void Cluster::runScheduledOperations()
     }
 }
 
+void Cluster::checkStall(Cell* from, Cell* to)
+{
+    if (!from)
+    {
+        return;
+    }
+
+    if (!from->stall.isRegistered && !from->stall.isOnCooldown)
+    {
+        to->stall.isRegistered = false;
+        to->stall.isOnCooldown = false;
+    }
+}
+
 void Cluster::onCellCreated(Cell* cell)
 {
     touchWithNeighbours(cell);
 }
 
-void Cluster::touchWithNeighbours(Cell* cell)
+bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 {
-    touch(cell);
+    // If we can't touch the center, and it was stall, do not continue
+    // that means it has already been processed as part of a
+    // keeper operation
+    bool firstInserted = touch(cell, isStall);
+    if (!firstInserted && isStall)
+    {
+        return false;
+    }
 
     for (auto nn : cell->inRadius(1))
     {
         if (nn && nn != cell)
         {
-            touch(nn);
+            touch(nn, isStall);
             connect(cell, nn);
         }
     }
+
+    return true;
 }
 
-void Cluster::touch(Cell* cell)
+bool Cluster::touch(Cell* cell, bool isStall)
 {
-    if (_vertices.find(cell) == _vertices.end())
+    auto insertion = _verticesCells->insert(cell);
+    if (insertion.second)
     {
         auto v = boost::add_vertex(_graph);
         _vertices[cell] = v;
-        _verticesCells->push_back(cell);
+
+        if (isStall && !cell->stall.isRegistered && !cell->stall.isOnCooldown)
+        {
+            cell->stall.isRegistered = true;
+            cell->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
+        }
+        else if (!isStall)
+        {
+            cell->stall.isRegistered = false;
+            cell->stall.isOnCooldown = false;
+        }
     }
+
+    return insertion.second;
 }
 
 void Cluster::connect(Cell* a, Cell* b)
