@@ -48,7 +48,7 @@ public:
     void remove(MapAwareEntity* entity);
     void update(uint64_t elapsed);
     void cleanup(uint64_t elapsed);
-    void runScheduledOperations();
+    void runScheduledOperations(uint64_t elapsed);
 
     void onCellCreated(Cell* cell);
     void checkStall(Cell* from, Cell* to);
@@ -75,6 +75,7 @@ private:
     std::unordered_set<Cell*> _verticesBuffer_1;
     std::unordered_set<Cell*> _verticesBuffer_2;
     std::unordered_set<Cell*>* _verticesCells;
+    std::unordered_set<Cell*>* _oldCells;
 
     uint16_t _numStall;
     uint16_t _numStallCandidates;

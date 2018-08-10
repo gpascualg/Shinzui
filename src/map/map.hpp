@@ -93,6 +93,9 @@ public:
     void removeFrom(const Offset&& offset, MapAwareEntity* e, Cell* to);
     void removeFrom(Cell* cell, MapAwareEntity* e, Cell* to);
 
+    // Cell memory freeing
+    void destroyCell(Cell* cell);
+
     // NOT thread-safe
     // Gets a cell from the map
     Cell* get(int32_t q, int32_t r);

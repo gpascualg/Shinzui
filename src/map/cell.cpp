@@ -21,7 +21,8 @@
 
 Cell::Cell(Map* map, const Offset& offset) :
     _offset(std::move(offset)),
-    _map(map)
+    _map(map),
+    stall{false, false, 0}
 {
     LOG(LOG_CELLS, "Created (%4d, %4d, %4d)", _offset.q(), _offset.r(), _offset.s());
 

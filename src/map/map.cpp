@@ -46,7 +46,7 @@ void Map::update(uint64_t elapsed)
 void Map::cleanup(uint64_t elapsed)
 {
     cluster()->cleanup(elapsed);
-    cluster()->runScheduledOperations();
+    cluster()->runScheduledOperations(elapsed);
 }
 
 void Map::runScheduledOperations()
@@ -92,7 +92,9 @@ void Map::runScheduledOperations()
                 break;
 
             case MapOperationType::DESTROY:
-                // TODO(gpascualg): Not implemented yet
+                _cells.erase(std::make_pair(operation->offset.q(), operation->offset.r()));
+                _cellAllocator->destroy(operation->param);
+                // TODO: When a cell is destroyed, entities inside should be also deleted
                 break;
 
             default:
@@ -230,6 +232,16 @@ void Map::removeFrom(Cell* cell, MapAwareEntity* e, Cell* to)
         cell->offset(),
         e,
         to
+    });  // NOLINT(whitespace/braces)
+}
+
+void Map::destroyCell(Cell* cell)
+{
+    _scheduledOperations->push(new MapOperation{  // NOLINT(whitespace/braces)
+        MapOperationType::DESTROY,
+        cell->offset(),
+        nullptr,
+        cell
     });  // NOLINT(whitespace/braces)
 }
 

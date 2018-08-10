@@ -24,6 +24,7 @@ Cluster::Cluster():
     _num_components(0)
 {
     _verticesCells = &_verticesBuffer_1;
+    _oldCells = &_verticesBuffer_2;
 }
 
 Cluster::~Cluster()
@@ -33,9 +34,6 @@ Cluster::~Cluster()
 
 void Cluster::update(uint64_t elapsed)
 {
-    // Compute diff between buffers
-    _numStall = processStallCells(elapsed);
-
     if (!_vertices.empty())
     {
         _components.resize(_vertices.size());
@@ -77,41 +75,6 @@ void Cluster::update(uint64_t elapsed)
     Reactive::get()->onClusterUpdate(_num_components, _vertices.size() - _numStall, _numStall, _numStallCandidates);
 }
 
-uint16_t Cluster::processStallCells(uint64_t elapsed)
-{
-    const std::unordered_set<Cell*>& candidates = (_verticesCells == &_verticesBuffer_1) ? _verticesBuffer_2 : _verticesBuffer_1;
-    _numStallCandidates = candidates.size();
-    uint16_t addCount = 0;
-
-    // Insert old-now-missing cells
-    for (auto const& cell : candidates)
-    {
-        if (cell->stall.isRegistered)
-        {
-            if (elapsed < cell->stall.remaining)
-            {
-                cell->stall.remaining -= elapsed;
-            }
-            else
-            {
-                cell->stall.isOnCooldown = true;
-                cell->stall.isRegistered = false;
-            }
-        }
-        
-        if (!cell->stall.isOnCooldown)
-        {
-            if (touchWithNeighbours(cell, true))
-            {
-                ++addCount;
-            }
-        }
-    }
-
-    return addCount;
-}
-
-
 void Cluster::cleanup(uint64_t elapsed)
 {
     if (!_vertices.empty())
@@ -123,6 +86,20 @@ void Cluster::cleanup(uint64_t elapsed)
                 for (auto cell : cells)
                 {
                     cell->cleanup(elapsed);
+                    
+                    // Calculate stall condition, if needed
+                    if (cell->stall.isRegistered)
+                    {
+                        if (elapsed < cell->stall.remaining)
+                        {
+                            cell->stall.remaining -= elapsed;
+                        }
+                        else
+                        {
+                            cell->stall.isOnCooldown = true;
+                            cell->stall.isRegistered = false;
+                        }
+                    }
                 }
             });  // NOLINT (whitespace/braces)
         }
@@ -132,9 +109,7 @@ void Cluster::cleanup(uint64_t elapsed)
         // Reinitialize
         _graph = {};
 
-        // Switch buffers and clean
-        _verticesCells = (_verticesCells == &_verticesBuffer_1) ? &_verticesBuffer_2 : &_verticesBuffer_1;
-        _verticesCells->clear();
+        // Clean graph structures
         _vertices.clear();
 
         for (uint16_t cid = 0; cid < _num_components; ++cid)
@@ -144,9 +119,50 @@ void Cluster::cleanup(uint64_t elapsed)
 
         _num_components = 0;
     }
+
+    // Switch buffers and clean (always, to avoid keeping old cells)
+    auto temp = _oldCells;
+    _oldCells = _verticesCells;
+    _verticesCells = temp;
+    
+    _verticesCells->clear();
 }
 
-void Cluster::runScheduledOperations()
+uint16_t Cluster::processStallCells(uint64_t elapsed)
+{
+    const std::unordered_set<Cell*>& candidates = *_oldCells;
+    _numStallCandidates = candidates.size();
+    uint16_t addCount = 0;
+    
+    // Insert old-now-missing cells
+    for (auto const& cell : candidates)
+    {
+        // If its on cooldown it means that it has already exhausted
+        // stall time, it can be freed up. Otherwise, try to add it to
+        // the update queue (it might have already been added as a
+        // nons-stall cell)
+        if (!cell->stall.isOnCooldown)
+        {
+            if (touchWithNeighbours(cell, true))
+            {
+                ++addCount;
+            }
+        }
+        else
+        {
+            // Memory can be freed up
+            Server::get()->map()->destroyCell(cell);
+
+            // Make sure it does not get accessed on next round (it would be an invalid pointer)
+            // TODO(gpascualg): Is there any way we can improve this?
+            _verticesCells->erase(cell);
+        }
+    }
+
+    return addCount;
+}
+
+void Cluster::runScheduledOperations(uint64_t elapsed)
 {
     _scheduledOperations.consume_all([this](ClusterOperation op)
     {
@@ -162,10 +178,14 @@ void Cluster::runScheduledOperations()
         }
     });  // NOLINT (whitespace/braces)
 
+    // Flag cells that must be updated (because they have keepers)
     for (auto entity : _keepers)
     {
         touchWithNeighbours(entity->cell());
     }
+
+    // Compute diff between buffers
+    _numStall = processStallCells(elapsed);
 }
 
 void Cluster::checkStall(Cell* from, Cell* to)
@@ -212,13 +232,19 @@ bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 
 bool Cluster::touch(Cell* cell, bool isStall)
 {
+    // Avoid reinserting cells on cooldown to avoid double frees
+    if (isStall && cell->stall.isOnCooldown)
+    {
+        return false;
+    }
+
     auto insertion = _verticesCells->insert(cell);
     if (insertion.second)
     {
         auto v = boost::add_vertex(_graph);
         _vertices[cell] = v;
 
-        if (isStall && !cell->stall.isRegistered && !cell->stall.isOnCooldown)
+        if (isStall && !cell->stall.isRegistered)
         {
             cell->stall.isRegistered = true;
             cell->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
