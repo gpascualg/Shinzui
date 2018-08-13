@@ -64,13 +64,6 @@ std::vector<Cell*> Cell::ring(uint16_t radius)
 
 std::vector<Cell*> Cell::inRadius(uint16_t radius)
 {
-    // Calculate size needed
-    int size = 1;
-    for (int i = 1; i < radius; ++i)
-    {
-        size += i * 6;
-    }
-
     // Reserve
     std::vector<Cell*> results;
     results.reserve(radius * radius * 6 + 1);

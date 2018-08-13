@@ -130,13 +130,14 @@ void Cluster::cleanup(uint64_t elapsed)
 
 uint16_t Cluster::processStallCells(uint64_t elapsed)
 {
-    const std::unordered_set<Cell*>& candidates = *_oldCells;
-    _numStallCandidates = candidates.size();
+    _numStallCandidates = _stallCells.size();
     uint16_t addCount = 0;
     
     // Insert old-now-missing cells
-    for (auto const& cell : candidates)
+    for (auto it = _stallCells.begin(); it != _stallCells.end();)
     {
+        auto cell = *it;
+
         // If its on cooldown it means that it has already exhausted
         // stall time, it can be freed up. Otherwise, try to add it to
         // the update queue (it might have already been added as a
@@ -147,15 +148,18 @@ uint16_t Cluster::processStallCells(uint64_t elapsed)
             {
                 ++addCount;
             }
+
+            ++it;
         }
         else
         {
             // Memory can be freed up
             Server::get()->map()->destroyCell(cell);
+            it = _stallCells.erase(it);
 
-            // Make sure it does not get accessed on next round (it would be an invalid pointer)
-            // TODO(gpascualg): Is there any way we can improve this?
-            _verticesCells->erase(cell);
+            // TODO(gpascualg): I definately want to avoid doing this
+            // Cost O(n)
+            // _oldCells->erase(_oldCells->find(cell));
         }
     }
 
@@ -184,21 +188,44 @@ void Cluster::runScheduledOperations(uint64_t elapsed)
         touchWithNeighbours(entity->cell());
     }
 
-    // Compute diff between buffers
+    // New stall cells
+    // TODO(gpascualg): More efficient ways to do so??
+    std::vector<Cell*> candidates;
+    std::copy_if(_oldCells->begin(), _oldCells->end(), std::back_inserter(candidates), 
+        [this] (Cell* needle) { return _verticesCells->find(needle) == _verticesCells->end(); });
+
+    // Each cell here is marked as stall
+    for (auto cell : candidates)
+    {
+        // If is is not really inserted yet
+        auto insertion = _stallCells.insert(cell);
+        if (insertion.second)
+        {
+            cell->stall.isRegistered = true;
+            cell->stall.isOnCooldown = false;
+            cell->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
+        }
+    }
+
+    // Candiadtes already stalled from previous runs
     _numStall = processStallCells(elapsed);
 }
 
 void Cluster::checkStall(Cell* from, Cell* to)
 {
-    if (!from)
+    if (!from || !to->stall.isRegistered || to->stall.isOnCooldown)
     {
         return;
     }
 
     if (!from->stall.isRegistered && !from->stall.isOnCooldown)
     {
+        // It got unstalled, remove statuses
         to->stall.isRegistered = false;
         to->stall.isOnCooldown = false;
+
+        // It should be found, if it is registered, it is on vector
+        _stallCells.erase(std::find(_stallCells.cbegin(), _stallCells.cend(), to));
     }
 }
 
@@ -210,8 +237,7 @@ void Cluster::onCellCreated(Cell* cell)
 bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 {
     // If we can't touch the center, and it was stall, do not continue
-    // that means it has already been processed as part of a
-    // keeper operation
+    // that means it has already been processed as part of a keeper operation
     bool firstInserted = touch(cell, isStall);
     if (!firstInserted && isStall)
     {
@@ -222,8 +248,10 @@ bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
     {
         if (nn && nn != cell)
         {
-            touch(nn, isStall);
-            connect(cell, nn);
+            if (touch(nn, isStall))
+            {
+                connect(cell, nn);
+            }
         }
     }
 
@@ -232,31 +260,34 @@ bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 
 bool Cluster::touch(Cell* cell, bool isStall)
 {
-    // Avoid reinserting cells on cooldown to avoid double frees
-    if (isStall && cell->stall.isOnCooldown)
-    {
-        return false;
-    }
+    // It should not be non-stall and non-cooldown
+    assert(isStall || !cell->stall.isOnCooldown);
+    
+    // Only tru if the resulting vertice must be connected
+    // false otherwise (which is the case of stall cells on cooldown)
+    bool result = false;
 
-    auto insertion = _verticesCells->insert(cell);
-    if (insertion.second)
+    // Do not add if it is on cooldown (ie. to be deleted)    
+    if (!cell->stall.isOnCooldown)
     {
-        auto v = boost::add_vertex(_graph);
-        _vertices[cell] = v;
-
-        if (isStall && !cell->stall.isRegistered)
+        result = true;
+        auto insertion = _verticesCells->insert(cell);
+        if (insertion.second)
         {
-            cell->stall.isRegistered = true;
-            cell->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
-        }
-        else if (!isStall)
-        {
-            cell->stall.isRegistered = false;
-            cell->stall.isOnCooldown = false;
+            auto v = boost::add_vertex(_graph);
+            _vertices[cell] = v;
         }
     }
 
-    return insertion.second;
+    // Whatever the result, check for stallness
+    if (!isStall && (cell->stall.isRegistered || cell->stall.isOnCooldown))
+    {
+        cell->stall.isRegistered = false;
+        cell->stall.isOnCooldown = false;
+        _stallCells.erase(std::find(_stallCells.cbegin(), _stallCells.cend(), cell));
+    }
+
+    return result;
 }
 
 void Cluster::connect(Cell* a, Cell* b)
@@ -285,3 +316,4 @@ void Cluster::remove(MapAwareEntity* entity)
         });  // NOLINT (whitespace/braces)
     }
 }
+

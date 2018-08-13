@@ -52,7 +52,7 @@ public:
 
     void onCellCreated(Cell* cell);
     void checkStall(Cell* from, Cell* to);
-    inline const std::unordered_set<Cell*>& cells() { return _verticesCells == &_verticesBuffer_1 ? _verticesBuffer_2 : _verticesBuffer_1; }
+    inline const std::unordered_set<Cell*>& cells() { return _stallCells; }
 
     inline std::size_t size() { return _num_components; }
 
@@ -76,6 +76,8 @@ private:
     std::unordered_set<Cell*> _verticesBuffer_2;
     std::unordered_set<Cell*>* _verticesCells;
     std::unordered_set<Cell*>* _oldCells;
+    // TODO(gpascualg): Do we really need to keep track of so much lists??
+    std::unordered_set<Cell*> _stallCells;
 
     uint16_t _numStall;
     uint16_t _numStallCandidates;
@@ -87,3 +89,7 @@ private:
     uint16_t _num_components;
     std::vector<boost::graph_traits<Graph>::vertex_descriptor> _components;
 };
+
+// template <> uint16_t Cluster::processStallCells(uint64_t elapsed, const std::vector<Cell*>& candidates);
+// template <> uint16_t Cluster::processStallCells(uint64_t elapsed, const std::unordered_set<Cell*>& candidates);
+
