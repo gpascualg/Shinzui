@@ -25,6 +25,13 @@
         memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
     }
 
+    int getCurrentRAMUsage()
+    {
+        PROCESS_MEMORY_COUNTERS_EX pmc;
+        GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
+        return (int)pmc.WorkingSetSize;
+    }
+
     double getCurrentCPUUsage()
     {
         FILETIME ftime, fsys, fuser;
@@ -74,6 +81,31 @@
             if (strncmp(line, "processor", 9) == 0) numProcessors++;
         }
         fclose(file);
+    }
+
+    int parseLine(char* line){
+        // This assumes that a digit will be found and the line ends in " Kb".
+        int i = strlen(line);
+        const char* p = line;
+        while (*p <'0' || *p > '9') p++;
+        line[i-3] = '\0';
+        i = atoi(p);
+        return i;
+    }
+
+    int getCurrentRAMUsage(){ //Note: this value is in KB!
+        FILE* file = fopen("/proc/self/status", "r");
+        int result = -1;
+        char line[128];
+
+        while (fgets(line, 128, file) != NULL){
+            if (strncmp(line, "VmRSS:", 6) == 0){
+                result = parseLine(line);
+                break;
+            }
+        }
+        fclose(file);
+        return result;
     }
 
     double getCurrentCPUUsage()

@@ -23,6 +23,7 @@
 #define LOG_FIRE_LOGIC_EXT      0x0000000000001000
 #define LOG_QUADTREE            0x0000000000002000
 #define LOG_SPAWNS              0x0000000000004000
+#define LEADING_ZEROS           4
 
 // #define LOG_LEVEL               LOG_CLIENT_LIFECYCLE | LOG_PACKET_LIFECYCLE | LOG_PACKET_RECV | LOG_PACKET_SEND | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT  // NOLINT
 #define LOG_LEVEL               LOG_ALL & ~LOG_SERVER_LOOP
@@ -67,20 +68,32 @@ bool nop(First firstValue, Rest... rest)
     return nop(rest...);
 }
 
+#if defined(FORCE_ASCII_DEBUG)
+    #define LOG_FMT(fmt) "\x1B[01;44m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
+    #define LOG_FNC printf
+    #define ASSERT_FNC printf
+#else
+    #include "debug/reactive.hpp"
+
+    #define LOG_FMT(fmt) "  \x1B[01;44m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
+    #define LOG_FNC Reactive::get()->print
+    #define ASSERT_FNC Reactive::get()->print_now
+#endif
+
 #define EXPAND_HELPER(fnc, lvl, fmt, ...) \
-    EXPAND(fnc("\x1B[01;44m[%.2X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
+    EXPAND(fnc(LOG_FMT(fmt), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
 #define LOG_ALWAYS(...)             EXPAND(EXPAND_HELPER(printf, -1, __VA_ARGS__, ""))
 
-//#define FORCE_ASCII_DEBUG
+#define FORCE_DEBUG
 
-#if defined(FORCE_ASCII_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
+#if defined(FORCE_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
     #define IF_LOG(lvl)         (lvl & (LOG_LEVEL))  // NOLINT
-    #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(EXPAND_HELPER(printf, lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(EXPAND_HELPER(nop, lvl, __VA_ARGS__, ""))))  // NOLINT
+    #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(EXPAND_HELPER(LOG_FNC, lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(EXPAND_HELPER(nop, lvl, __VA_ARGS__, ""))))  // NOLINT
 #else
     #define IF_LOG(lvl)         false
     #define LOG(lvl, ...)       ((void)(0))
     // #define ASSERT(expr, ...)   ((void)(0))
 #endif
 
-#define LOG_ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(printf, -1, __VA_ARGS__, ""), abort()))
+#define LOG_ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(ASSERT_FNC, -1, __VA_ARGS__, ""), abort()))

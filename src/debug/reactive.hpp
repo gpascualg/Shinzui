@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 #include <vector>
+#include <queue>
+#include <mutex>
 
 
 namespace rxterm
@@ -30,6 +32,34 @@ public:
 
     void update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep);
 
+    template <typename... T>
+    bool print(const char* fmt, T... params)
+    {
+        size_t sz = snprintf(NULL, 0, fmt, params...);
+        char* buf = (char *)malloc(sz + 1);
+        if (buf)
+        {
+            snprintf(buf, sz+1, fmt, params...);
+            _messages.emplace_back(std::string{buf, sz});
+
+            std::lock_guard<std::mutex> lock(_messagesLock);
+            if (_messages.size() > 15)
+            {
+                _messages.erase(_messages.begin());
+            }
+        }
+
+        return true;
+    }
+    
+    template <typename... T>
+    bool print_now(const char* fmt, T... params)
+    {
+        print(fmt, params...);
+        update_impl(TimeBase(0), TimeBase(0), TimeBase(0));
+        return true;
+    }
+
     void onPacketCreated();
     void onPacketWritten(uint16_t opcode);
     void onPacketDestroyed(uint16_t opcode);
@@ -52,10 +82,15 @@ public:
 private:
     Reactive();
 
+    void update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep);
+
 private:
     static Reactive* _instance;
     TimePoint _lastUpdate;
     float _cpuUsage;
+
+    std::mutex _messagesLock;
+    std::vector<std::string> _messages;
     
     uint16_t _numAlivePackets;
     std::unordered_map<uint16_t, uint16_t> _packetCount;

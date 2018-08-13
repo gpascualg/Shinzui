@@ -75,7 +75,11 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
     }
     
     _lastUpdate = Server::get()->now();
+    update_impl(heartBeat, diff, prevSleep);
+}
 
+void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
+{
     using namespace std::chrono_literals;
     using namespace std::string_literals;
 
@@ -92,12 +96,15 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
     }
 
     _cpuUsage = (alpha * getCurrentCPUUsage()) + (1.0 - alpha) * _cpuUsage;
+    std::string ramUsage = std::to_string(getCurrentRAMUsage() / 1024) + "MB";
 
     auto component =
         StackLayout<>{
             FlowLayout<>{
                 Text(Style::Default(), "AuraServer debug information [CPU "),
                 Text(Style{Color::None, FontColor::Red}, int(_cpuUsage)),
+                Text(Style::Default(), ", RAM "),
+                Text(Style{Color::None, FontColor::Red}, ramUsage),
                 Text(Style::Default(), "]")
             },
             
@@ -111,11 +118,24 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
                 Text(Style::Default(), sleepStr)
             },
 
+            Text(Style::Default(), "Messages:")
+        };
+
+    _messagesLock.lock();
+    for (auto msg : _messages)
+    {
+        component.children.emplace_back(Text(Style::Default(), msg));
+    }
+    _messagesLock.unlock();
+
+    component.children.emplace_back(
+        StackLayout<>{
+            Text(Style::Default(), " "),
             FlowLayout<>{
                 Text(Style::Default(), "Alive packets: "),
                 Text(Style::Default(), _numAlivePackets)
             }
-        };
+        });
 
     for (auto pair : _packetCount)
     {
@@ -173,8 +193,14 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
                 Text(Style::Default(), "]")
             });
 
+    uint8_t count = 0;
     for (const auto& cell : Server::get()->map()->cluster()->cells())
     {
+        if (++count > 10)
+        {
+            break;
+        }
+
         auto style = Style::Default();
         if (cell->stall.isOnCooldown)
         {
@@ -202,7 +228,7 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
     }
 
 #ifndef FORCE_ASCII_DEBUG
-    _vt = renderToTerm(_vt, 80, component);
+    _vt = renderToTerm(_vt, 200, component);
     // std::cout << _numClusters << "/" << _numCells << "/" << _numStall << std::endl;
 #endif
 }

@@ -14,8 +14,12 @@ struct VirtualTerminal {
 
   std::string computeTransition(std::string const& next) const {
     if(buffer == next) return "";
+    
     unsigned const n = std::count(buffer.begin(), buffer.end(), '\n');
-    return clearLines(n) + "\e[0m;" + next;
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+
+    return clearLines(std::max((int)n, (int)w.ws_row)) + "\e[0m;" + next;
   }
 
   static std::string hide() { return "\e[0;8m"; }
