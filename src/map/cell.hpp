@@ -68,6 +68,8 @@ public:
     virtual void physics(uint64_t elapsed);
     virtual void cleanup(uint64_t elapsed);
 
+    inline const std::unordered_map<uint64_t /*id*/, MapAwareEntity*>& entities() { return _entities; }
+
     void addEntity(MapAwareEntity* entity);
     void removeEntity(MapAwareEntity* entity);
 
