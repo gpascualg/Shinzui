@@ -9,6 +9,7 @@
 #include <initializer_list>
 
 #include "defs/common.hpp"
+#include "debug/debug.hpp"
 #include "executor/executor.hpp"
 
 INCL_NOWARN
@@ -83,7 +84,8 @@ MotionMaster* MapAwareEntity::motionMaster()
 
 BoundingBox* MapAwareEntity::boundingBox()
 {
-    assert(("Calling boundingBox without previous setup!", _boundingBox != nullptr));
+    LOG_ASSERT(_boundingBox != nullptr, "Calling boundingBox without previous setup!");
+
     return _boundingBox;
 }
 

@@ -257,7 +257,7 @@ bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 bool Cluster::touch(Cell* cell, bool isStall)
 {
     // It should not be non-stall and non-cooldown
-    ASSERT(isStall || !cell->stall.isOnCooldown, "A cell is expected to either not be stall or not be in cooldown");
+    LOG_ASSERT(isStall || !cell->stall.isOnCooldown, "A cell is expected to either not be stall or not be in cooldown");
     
     // Only tru if the resulting vertice must be connected
     // false otherwise (which is the case of stall cells on cooldown)
@@ -288,8 +288,8 @@ bool Cluster::touch(Cell* cell, bool isStall)
 
 void Cluster::connect(Cell* a, Cell* b)
 {
-    ASSERT(_vertices.find(a) != _vertices.end(), "Trying to connect an untouched cell");
-    ASSERT(_vertices.find(b) != _vertices.end(), "Trying to connect an untouched cell");
+    LOG_ASSERT(_vertices.find(a) != _vertices.end(), "Trying to connect an untouched cell");
+    LOG_ASSERT(_vertices.find(b) != _vertices.end(), "Trying to connect an untouched cell");
 
     boost::add_edge(_vertices[a], _vertices[b], _graph);
 }

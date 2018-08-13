@@ -79,4 +79,4 @@ bool nop(First firstValue, Rest... rest)
     // #define ASSERT(expr, ...)   ((void)(0))
 #endif
 
-#define ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(printf, -1, __VA_ARGS__, ""), abort()))
+#define LOG_ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(printf, -1, __VA_ARGS__, ""), abort()))
