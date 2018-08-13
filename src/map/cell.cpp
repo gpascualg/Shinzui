@@ -28,10 +28,14 @@ Cell::Cell(Map* map, const Offset& offset) :
 
     _broadcast = &_broadcastQueue1;
     _quadTree = new RadialQuadTree<MaxQuadrantEntities, MaxQuadtreeDepth>(offset.center(), cellSize_x + 10);
+
+    Server::get()->onCellCreated(this);
 }
 
 Cell::~Cell()
 {
+    Server::get()->onCellDestroyed(this);
+
     delete _quadTree;
 }
 

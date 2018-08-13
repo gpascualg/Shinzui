@@ -69,6 +69,9 @@ public:
     virtual Client* newClient(boost::asio::io_service* service, uint64_t id);
     virtual void destroyClient(Client* client);
 
+    virtual void onCellCreated(Cell* cell) {};
+    virtual void onCellDestroyed(Cell* cell) {};
+
     virtual MapAwareEntity* newMapAwareEntity(uint64_t id, Client* client) = 0;
     virtual void destroyMapAwareEntity(MapAwareEntity* entity) = 0;
 
