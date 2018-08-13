@@ -23,7 +23,7 @@
 Cluster::Cluster():
     _num_components(0)
 {
-    _verticesCells = &_verticesBuffer_1;
+    _currentCells = &_verticesBuffer_1;
     _oldCells = &_verticesBuffer_2;
 }
 
@@ -122,10 +122,10 @@ void Cluster::cleanup(uint64_t elapsed)
 
     // Switch buffers and clean (always, to avoid keeping old cells)
     auto temp = _oldCells;
-    _oldCells = _verticesCells;
-    _verticesCells = temp;
+    _oldCells = _currentCells;
+    _currentCells = temp;
     
-    _verticesCells->clear();
+    _currentCells->clear();
 }
 
 uint16_t Cluster::processStallCells(uint64_t elapsed)
@@ -156,10 +156,6 @@ uint16_t Cluster::processStallCells(uint64_t elapsed)
             // Memory can be freed up
             Server::get()->map()->destroyCell(cell);
             it = _stallCells.erase(it);
-
-            // TODO(gpascualg): I definately want to avoid doing this
-            // Cost O(n)
-            // _oldCells->erase(_oldCells->find(cell));
         }
     }
 
@@ -189,25 +185,25 @@ void Cluster::runScheduledOperations(uint64_t elapsed)
     }
 
     // New stall cells
-    // TODO(gpascualg): More efficient ways to do so??
-    std::vector<Cell*> candidates;
-    std::copy_if(_oldCells->begin(), _oldCells->end(), std::back_inserter(candidates), 
-        [this] (Cell* needle) { return _verticesCells->find(needle) == _verticesCells->end(); });
-
-    // Each cell here is marked as stall
-    for (auto cell : candidates)
+    // TODO(gpascualg): More efficient ways to do so?? As of now, it is O(n^2)
+    for (const auto& candidate : *_oldCells)
     {
+        if (_currentCells->find(candidate) != _currentCells->cend())
+        {
+            continue;
+        }
+
         // If is is not really inserted yet
-        auto insertion = _stallCells.insert(cell);
+        auto insertion = _stallCells.insert(candidate);
         if (insertion.second)
         {
-            cell->stall.isRegistered = true;
-            cell->stall.isOnCooldown = false;
-            cell->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
+            candidate->stall.isRegistered = true;
+            candidate->stall.isOnCooldown = false;
+            candidate->stall.remaining = TimeBase(std::chrono::minutes(2)).count();
         }
     }
 
-    // Candiadtes already stalled from previous runs
+    // Process stalled cells, either new or old
     _numStall = processStallCells(elapsed);
 }
 
@@ -261,7 +257,7 @@ bool Cluster::touchWithNeighbours(Cell* cell, bool isStall)
 bool Cluster::touch(Cell* cell, bool isStall)
 {
     // It should not be non-stall and non-cooldown
-    assert(isStall || !cell->stall.isOnCooldown);
+    ASSERT(isStall || !cell->stall.isOnCooldown, "A cell is expected to either not be stall or not be in cooldown");
     
     // Only tru if the resulting vertice must be connected
     // false otherwise (which is the case of stall cells on cooldown)
@@ -271,7 +267,7 @@ bool Cluster::touch(Cell* cell, bool isStall)
     if (!cell->stall.isOnCooldown)
     {
         result = true;
-        auto insertion = _verticesCells->insert(cell);
+        auto insertion = _currentCells->insert(cell);
         if (insertion.second)
         {
             auto v = boost::add_vertex(_graph);
@@ -292,6 +288,9 @@ bool Cluster::touch(Cell* cell, bool isStall)
 
 void Cluster::connect(Cell* a, Cell* b)
 {
+    ASSERT(_vertices.find(a) != _vertices.end(), "Trying to connect an untouched cell");
+    ASSERT(_vertices.find(b) != _vertices.end(), "Trying to connect an untouched cell");
+
     boost::add_edge(_vertices[a], _vertices[b], _graph);
 }
 

@@ -74,7 +74,7 @@ private:
 
     std::unordered_set<Cell*> _verticesBuffer_1;
     std::unordered_set<Cell*> _verticesBuffer_2;
-    std::unordered_set<Cell*>* _verticesCells;
+    std::unordered_set<Cell*>* _currentCells;
     std::unordered_set<Cell*>* _oldCells;
     // TODO(gpascualg): Do we really need to keep track of so much lists??
     std::unordered_set<Cell*> _stallCells;

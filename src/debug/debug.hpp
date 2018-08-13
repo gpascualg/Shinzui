@@ -63,20 +63,20 @@ bool nop(First firstValue, Rest... rest)
     return nop(rest...);
 }
 
-#define LOG_HELPER(lvl, fmt, ...) \
-    EXPAND(printf("\x1B[01;44m[%.2X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
+#define EXPAND_HELPER(fnc, lvl, fmt, ...) \
+    EXPAND(fnc("\x1B[01;44m[%.2X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s", lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
-#define NOP_HELPER(lvl, fmt, ...) \
-    EXPAND(nop(lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
-
-#define LOG_ALWAYS(...)             EXPAND(LOG_HELPER(-1, __VA_ARGS__, ""))
+#define LOG_ALWAYS(...)             EXPAND(EXPAND_HELPER(printf, -1, __VA_ARGS__, ""))
 
 //#define FORCE_ASCII_DEBUG
 
 #if defined(FORCE_ASCII_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
     #define IF_LOG(lvl)         (lvl & (LOG_LEVEL))  // NOLINT
-    #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(LOG_HELPER(lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(NOP_HELPER(lvl, __VA_ARGS__, ""))))  // NOLINT
+    #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(EXPAND_HELPER(printf, lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(EXPAND_HELPER(nop, lvl, __VA_ARGS__, ""))))  // NOLINT
 #else
     #define IF_LOG(lvl)         false
-    #define LOG(lvl, ...)       EXPAND(NOP_HELPER(lvl, __VA_ARGS__, ""))
+    #define LOG(lvl, ...)       ((void)(0))
+    // #define ASSERT(expr, ...)   ((void)(0))
 #endif
+
+#define ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(printf, -1, __VA_ARGS__, ""), abort()))
