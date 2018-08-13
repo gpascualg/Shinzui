@@ -20,6 +20,7 @@ class Client;
 class Map;
 class MapAwareEntity;
 class Packet;
+class Cell;
 
 // TODO(gpascualg): Is 8192 too much?
 class Server : public Executor<8192>

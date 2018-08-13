@@ -90,3 +90,22 @@ public:
 protected:
 	std::future<T> _future;
 };
+
+template <typename... P>
+struct PackagedWork : public AbstractWork
+{
+public:
+	PackagedWork(ExecutorWork handler, Client* executor, P... package) :
+		AbstractWork(handler, executor),
+		_package(package...)
+	{}
+
+	virtual ~PackagedWork()
+	{}
+
+	template <typename T, std::size_t idx>
+	inline T get() { return std::get<idx>(_package); }
+
+protected:
+	std::tuple<P...> _package;
+};

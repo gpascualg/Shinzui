@@ -13,6 +13,15 @@ Database::Database(mongocxx::uri uri, uint8_t numThreads):
     }
 }
 
+Database::~Database()
+{
+    _stop = true;
+    for (auto&& thread : _databaseThreads)
+    {
+        thread.join();
+    }
+}
+
 void Database::run()
 {
     auto client = _pool.acquire();

@@ -10,6 +10,7 @@
 #include "map/quadtree.hpp"
 #include "movement/motion_master.hpp"
 #include "physics/bounding_box.hpp"
+#include "server/server.hpp"
 
 #include <algorithm>
 #include <array>

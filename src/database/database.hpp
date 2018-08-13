@@ -52,7 +52,7 @@ public:
 		/* evil move hack */
 		auto move_promise = threadpool11::make_move_on_copy(std::move(promise));
 		
-		auto workFunc = new InternalWork([move_callable, move_promise, &dbname, this](mongocxx::client& client) mutable {
+		auto workFunc = new InternalWork([move_callable, move_promise, dbname, this](mongocxx::client& client) mutable {
 			move_promise.value().set_value((move_callable.value())(client[dbname]));
 		});
 

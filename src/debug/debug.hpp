@@ -2,6 +2,10 @@
 
 #pragma once
 
+// For abort and printf
+#include <stdlib.h>
+#include <stdio.h>
+
 #define LOG_NOTHING             0x0000000000000000
 #define LOG_ALL                 0xFFFFFFFFFFFFFFFF
 #define LOG_DEBUG               0x0000000000000001
