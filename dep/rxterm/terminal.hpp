@@ -19,10 +19,10 @@ struct VirtualTerminal {
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);
 
-    return clearLines(std::max((int)n, (int)w.ws_row)) + "\e[0m;" + next;
+    return clearLines(std::max((int)n, (int)w.ws_row)) + "\033[0m;" + next;
   }
 
-  static std::string hide() { return "\e[0;8m"; }
+  static std::string hide() { return "\033[0;8m"; }
 
   VirtualTerminal flip(std::string const& next) const {
     auto const& transition = computeTransition(next);

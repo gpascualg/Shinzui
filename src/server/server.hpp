@@ -75,6 +75,7 @@ public:
 
     virtual MapAwareEntity* newMapAwareEntity(uint64_t id, Client* client) = 0;
     virtual void destroyMapAwareEntity(MapAwareEntity* entity) = 0;
+    virtual void iterateClients(std::function<void(Client* client)> callback) = 0;
 
 private:
     // Sockets io

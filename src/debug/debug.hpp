@@ -6,32 +6,51 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define LOG_NOTHING             0x0000000000000000
-#define LOG_ALL                 0xFFFFFFFFFFFFFFFF
-#define LOG_DEBUG               0x0000000000000001
-#define LOG_CELLS               0x0000000000000002
-#define LOG_CLUSTERS            0x0000000000000004
-#define LOG_FATAL               0x0000000000000008
-#define LOG_CLIENT_LIFECYCLE    0x0000000000000010
-#define LOG_PACKET_LIFECYCLE    0x0000000000000020
-#define LOG_PACKET_RECV         0x0000000000000040
-#define LOG_PACKET_SEND         0x0000000000000080
-#define LOG_SERVER_LOOP         0x0000000000000100
-#define LOG_MOVEMENT_GENERATOR  0x0000000000000200
-#define LOG_CELL_CHANGES        0x0000000000000400
-#define LOG_FIRE_LOGIC          0x0000000000000800
-#define LOG_FIRE_LOGIC_EXT      0x0000000000001000
-#define LOG_QUADTREE            0x0000000000002000
-#define LOG_SPAWNS              0x0000000000004000
+// We shall use up to 4 bytes (uint32_t)
+#define LOG_NOTHING             0x00000000
+#define LOG_ALL                 0xFFFFFFFF
+
+// Log levels, filters importance
+#define LOG_LEVEL_DEBUG         0x00000001
+#define LOG_LEVEL_INFO          0x00000002
+#define LOG_LEVEL_WARNING       0x00000004
+#define LOG_LEVEL_ERROR         0x00000008
+
+// Log handlers
+// #define LOG_FREE_SLOT        0x00000001
+#define LOG_CELLS               0x00000002
+#define LOG_CLUSTERS            0x00000004
+#define LOG_FATAL               0x00000008
+#define LOG_CLIENT_LIFECYCLE    0x00000010
+#define LOG_PACKET_LIFECYCLE    0x00000020
+#define LOG_PACKET_RECV         0x00000040
+#define LOG_PACKET_SEND         0x00000080
+#define LOG_SERVER_LOOP         0x00000100
+#define LOG_MOVEMENT_GENERATOR  0x00000200
+#define LOG_CELL_CHANGES        0x00000400
+#define LOG_FIRE_LOGIC          0x00000800
+#define LOG_FIRE_LOGIC_EXT      0x00001000
+#define LOG_QUADTREE            0x00002000
+#define LOG_SPAWNS              0x00004000
 #define LEADING_ZEROS           4
 
-// #define LOG_LEVEL               LOG_CLIENT_LIFECYCLE | LOG_PACKET_LIFECYCLE | LOG_PACKET_RECV | LOG_PACKET_SEND | LOG_FIRE_LOGIC | LOG_FIRE_LOGIC_EXT  // NOLINT
-#define LOG_LEVEL               LOG_ALL & ~LOG_SERVER_LOOP
+// Compile time optimizable log
+#define LOG_HANDLERS            LOG_ALL & ~LOG_SERVER_LOOP
+#define LOG_LEVEL               LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_LEVEL_WARNING | LOG_LEVEL_ERROR
+
+
+/* =====================================================
+   Inner functionality
+   Do not modify unless absolutely mandatory
+   =====================================================
+*/
+
 
 #define STR(a)                  STR_(a)
 #define STR_(a)                 #a
 
 // Expand is a trick for MSVC __VA_ARGS__ to work :(
+// TODO(gpascualg): Revisit MSVC expand macro
 #define EXPAND(x)               x
 
 #ifndef FUNCTION_NAME
@@ -68,32 +87,57 @@ bool nop(First firstValue, Rest... rest)
     return nop(rest...);
 }
 
+#define LOG_FMT(pre, fmt, color)                pre "\x1B[" color "m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
+
 #if defined(FORCE_ASCII_DEBUG)
-    #define LOG_FMT(fmt) "\x1B[01;44m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
-    #define LOG_FNC printf
-    #define ASSERT_FNC printf
+    #define LOG_PRE                             ""
+    #define LOG_FNC                             printf
+    #define ASSERT_FNC                          printf
 #else
     #include "debug/reactive.hpp"
 
-    #define LOG_FMT(fmt) "  \x1B[01;44m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
-    #define LOG_FNC Reactive::get()->print
-    #define ASSERT_FNC Reactive::get()->print_now
+    #define LOG_PRE                             "  "
+    #define LOG_FNC                             Reactive::get()->print
+    #define ASSERT_FNC                          Reactive::get()->print_now
 #endif
 
-#define EXPAND_HELPER(fnc, lvl, fmt, ...) \
-    EXPAND(fnc(LOG_FMT(fmt), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
+#define EXPAND_HELPER(fnc, pre, lvl, color, fmt, ...) \
+    EXPAND(fnc(LOG_FMT(pre, fmt, color), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
-#define LOG_ALWAYS(...)             EXPAND(EXPAND_HELPER(printf, -1, __VA_ARGS__, ""))
+#define LOG_ALWAYS(...)                         EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, -1, "01;44", __VA_ARGS__, ""))
 
-#define FORCE_DEBUG
+#if !defined(NDEBUG) || defined(_DEBUG)
+    #define _STATIC_IF_LOG(lvl, handler)        (((lvl) & (LOG_LEVEL)) && ((handler) & (LOG_HANDLERS)))  // NOLINT
 
-#if defined(FORCE_DEBUG) || ((!defined(NDEBUG) || defined(_DEBUG)) && BUILD_TESTS != ON)
-    #define IF_LOG(lvl)         (lvl & (LOG_LEVEL))  // NOLINT
-    #define LOG(lvl, ...)       (((lvl & (LOG_LEVEL)) && EXPAND(EXPAND_HELPER(LOG_FNC, lvl, __VA_ARGS__, ""))) || ((lvl & ~(LOG_LEVEL)) && EXPAND(EXPAND_HELPER(nop, lvl, __VA_ARGS__, ""))))  // NOLINT
+    #if defined(FORCE_ASCII_DEBUG)
+        #define _PP_IF_LOG(lvl, handler)        _STATIC_IF_LOG(lvl, handler)
+    #else                    
+        #define _PP_IF_LOG(lvl, handler)        _STATIC_IF_LOG(lvl, handler) && (Reactive::get()->LogLevel & lvl) && (Reactive::get()->LogHandlers & handler)
+    #endif
+
+    #define IF_LOG(lvl, handler)                if (_PP_IF_LOG(lvl, handler))
+
+    #define _LOG(lvl, handler, color, ...)      \
+        (( _PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, lvl, color, __VA_ARGS__, ""))) || \
+         (!_PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(nop,     LOG_PRE, lvl, color, __VA_ARGS__, ""))))
+
+    #define LOG(handler, ...)                   _LOG(LOG_LEVEL_INFO,    handler, "01;44", __VA_ARGS__)
+    #define LOG_DEBUG(handler, ...)             _LOG(LOG_LEVEL_DEBUG,   handler, "30;47", __VA_ARGS__)
+    #define LOG_INFO(handler, ...)              _LOG(LOG_LEVEL_INFO,    handler, "01;44", __VA_ARGS__) 
+    #define LOG_WARNING(handler, ...)           _LOG(LOG_LEVEL_WARNING, handler, "01;43", __VA_ARGS__)
+    #define LOG_ERROR(handler, ...)             _LOG(LOG_LEVEL_ERROR,   handler, "01;41", __VA_ARGS__)
+    
+    #define LOG_ASSERT(expr, ...)               ((expr) ? (void)(0) : (EXPAND_HELPER(ASSERT_FNC, LOG_PRE, -1, "01;41", __VA_ARGS__, ""), abort()))
 #else
-    #define IF_LOG(lvl)         false
-    #define LOG(lvl, ...)       ((void)(0))
-    // #define ASSERT(expr, ...)   ((void)(0))
-#endif
+    #define _STATIC_IF_LOG(lvl, handler)        false
+    #define _PP_IF_LOG(lvl, handler)            false
+    #define IF_LOG(lvl)                         if (false)
 
-#define LOG_ASSERT(expr, ...) ((expr) ? (void)(0) : (EXPAND_HELPER(ASSERT_FNC, -1, __VA_ARGS__, ""), abort()))
+    #define LOG(handler, ...)                   ((void)(0))
+    #define LOG_DEBUG(handler, ...)             ((void)(0))
+    #define LOG_INFO(handler, ...)              ((void)(0))
+    #define LOG_WARNING(handler, ...)           ((void)(0))
+    #define LOG_ERROR(handler, ...)             ((void)(0))
+
+    #define LOG_ASSERT(expr, ...)               ((void)(0))
+#endif

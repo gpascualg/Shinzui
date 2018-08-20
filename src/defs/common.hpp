@@ -11,11 +11,12 @@
 #if !defined(INCL_NOWARN) && !defined(INCL_WARN)
     #ifdef _MSC_VER
         #define INCL_NOWARN __pragma(warning(push, 0))
-        #define INCL_WARN __pragma(warning(pop))
+        #define INCL_WARN   __pragma(warning(pop))
     #else
         #define INCL_NOWARN \
             _Pragma("GCC diagnostic push") \
             _Pragma("GCC diagnostic ignored \"-Wpedantic\"") \
+            _Pragma("GCC diagnostic ignored \"-Wsign-compare\"") \
             _Pragma("GCC diagnostic ignored \"-Wunused-variable\"") \
             _Pragma("GCC diagnostic ignored \"-Wunused-result\"") \
             _Pragma("GCC diagnostic ignored \"-Wstrict-aliasing\"") \

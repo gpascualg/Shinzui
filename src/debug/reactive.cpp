@@ -8,6 +8,7 @@
 #include "map/map_aware_entity.hpp"
 #include "map/map-cluster/cluster.hpp"
 
+INCL_NOWARN
 #include <rxterm/terminal.hpp>
 #include <rxterm/style.hpp>
 #include <rxterm/image.hpp>
@@ -34,6 +35,8 @@ constexpr const float alpha = 0.1f;
 static VirtualTerminal _vt; 
 
 Reactive::Reactive():
+    LogLevel(LOG_LEVEL),
+    LogHandlers(LOG_HANDLERS),
     _cpuUsage(0)
 {
     initCPUDebugger();
@@ -80,6 +83,7 @@ void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 
 void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 {
+#if !defined(FORCE_ASCII_DEBUG)
     using namespace std::chrono_literals;
     using namespace std::string_literals;
 
@@ -164,8 +168,7 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
                 Text(Style::Default(), _pendingCloseClient)
             });
 
-    for (Client* client : clients)
-    {
+    Server::get()->iterateClients([&component](Client* client) {
         if (client->entity() && client->entity()->cell())
         {
             component.children.emplace_back(
@@ -178,7 +181,7 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
                     Text(Style::Default(), client->id())
                 });
         }
-    }
+    });
 
     component.children.emplace_back(
             FlowLayout<>{
@@ -201,33 +204,26 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
             break;
         }
 
-        auto style = Style::Default();
-        if (cell->stall.isOnCooldown)
+        // Do not display non-stall&non-cooldown cells
+        if (!cell->stall.isRegistered)
         {
-            style = Style{ Color::None, FontColor::Yellow };
-        }
-        else if (!cell->stall.isRegistered)
-        {
-            // Do not display non-stall&non-cooldown cells
             continue;
-            // style = Style{ Color::None, FontColor::Red };
         }
 
         component.children.emplace_back(
             FlowLayout<>{
-                Text(style, "    ["),
-                Text(style, cell->offset().q()),
-                Text(style, ","),
-                Text(style, cell->offset().r()),
-                Text(style, "]: "),
-                Text(style, std::chrono::duration_cast<std::chrono::seconds>(TimeBase(cell->stall.remaining)).count()),
-                Text(style, " ("),
-                Text(style, cell->stall.isOnCooldown),
-                Text(style, ")")
+                Text(Style::Default(), "    ["),
+                Text(Style::Default(), cell->offset().q()),
+                Text(Style::Default(), ","),
+                Text(Style::Default(), cell->offset().r()),
+                Text(Style::Default(), "]: "),
+                Text(Style::Default(), std::chrono::duration_cast<std::chrono::seconds>(TimeBase(cell->stall.remaining)).count()),
+                Text(Style::Default(), " ("),
+                Text(Style::Default(), cell->stall.isOnCooldown),
+                Text(Style::Default(), ")")
             });
     }
 
-#ifndef FORCE_ASCII_DEBUG
     _vt = renderToTerm(_vt, 200, component);
     // std::cout << _numClusters << "/" << _numCells << "/" << _numStall << std::endl;
 #endif

@@ -47,17 +47,23 @@ public:
             {
                 _messages.erase(_messages.begin());
             }
+
+            free(buf);
         }
 
-        return true;
+        return buf != nullptr;
     }
     
     template <typename... T>
     bool print_now(const char* fmt, T... params)
     {
-        print(fmt, params...);
-        update_impl(TimeBase(0), TimeBase(0), TimeBase(0));
-        return true;
+        if (print(fmt, params...))
+        {
+            update_impl(TimeBase(0), TimeBase(0), TimeBase(0));
+            return true;
+        }
+
+        return false;
     }
 
     void onPacketCreated();
@@ -81,8 +87,11 @@ public:
 
 private:
     Reactive();
-
     void update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep);
+
+public:
+    uint32_t LogLevel;
+    uint32_t LogHandlers;
 
 private:
     static Reactive* _instance;
