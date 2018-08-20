@@ -18,6 +18,7 @@ INCL_NOWARN
 #include <rxterm/components/flowlayout.hpp>
 #include <rxterm/components/progress.hpp>
 #include <rxterm/components/maxwidth.hpp>
+INCL_WARN
 
 #include <string>
 #include <sstream>
@@ -58,15 +59,22 @@ void Reactive::onPacketCreated()
 
 void Reactive::onPacketWritten(uint16_t opcode) 
 {
-    ++_packetCount[opcode];
+    IF_LOG(LOG_LEVEL_DEBUG, LOG_PACKET_LIFECYCLE)
+    {
+        ++_packetCount[opcode];
+    }
 }
 
 void Reactive::onPacketDestroyed(uint16_t opcode) 
 {
     --_numAlivePackets; 
-    if (opcode)
+    
+    IF_LOG(LOG_LEVEL_DEBUG, LOG_PACKET_LIFECYCLE)
     {
-        --_packetCount[opcode];
+        if (opcode)
+        {
+            --_packetCount[opcode];
+        }
     }
 }
 
@@ -141,20 +149,23 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
             }
         });
 
-    for (auto pair : _packetCount)
+    IF_LOG(LOG_LEVEL_DEBUG, LOG_PACKET_LIFECYCLE)
     {
-        if (pair.second > 0)
+        for (auto pair : _packetCount)
         {
-            std::stringstream stream;
-            stream << std::setfill('0') << std::setw(4) << std::hex << pair.first;
+            if (pair.second > 0)
+            {
+                std::stringstream opcode;
+                opcode << std::setfill('0') << std::setw(4) << std::hex << pair.first;
 
-            component.children.emplace_back(
-                FlowLayout<>{
-                    Text(Style::Default(), "    ["),
-                    Text(Style::Default(), stream.str()),
-                    Text(Style::Default(), "]: "),
-                    Text(Style::Default(), pair.second)
-                });
+                component.children.emplace_back(
+                    FlowLayout<>{
+                        Text(Style::Default(), "    ["),
+                        Text(Style::Default(), opcode.str()),
+                        Text(Style::Default(), "]: "),
+                        Text(Style::Default(), pair.second)
+                    });
+            }
         }
     }
 
@@ -168,20 +179,23 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
                 Text(Style::Default(), _pendingCloseClient)
             });
 
-    Server::get()->iterateClients([&component](Client* client) {
-        if (client->entity() && client->entity()->cell())
-        {
-            component.children.emplace_back(
-                FlowLayout<>{
-                    Text(Style::Default(), "    ["),
-                    Text(Style::Default(), client->entity()->cell()->offset().q()),
-                    Text(Style::Default(), ","),
-                    Text(Style::Default(), client->entity()->cell()->offset().r()),
-                    Text(Style::Default(), "]: "),
-                    Text(Style::Default(), client->id())
-                });
-        }
-    });
+    IF_LOG(LOG_LEVEL_DEBUG, LOG_CLIENT_LIFECYCLE)
+    {
+        Server::get()->iterateClients([&component](Client* client) {
+            if (client->entity() && client->entity()->cell())
+            {
+                component.children.emplace_back(
+                    FlowLayout<>{
+                        Text(Style::Default(), "    ["),
+                        Text(Style::Default(), client->entity()->cell()->offset().q()),
+                        Text(Style::Default(), ","),
+                        Text(Style::Default(), client->entity()->cell()->offset().r()),
+                        Text(Style::Default(), "]: "),
+                        Text(Style::Default(), client->id())
+                    });
+            }
+        });
+    }
 
     component.children.emplace_back(
             FlowLayout<>{
@@ -196,35 +210,37 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
                 Text(Style::Default(), "]")
             });
 
-    uint8_t count = 0;
-    for (const auto& cell : Server::get()->map()->cluster()->cells())
+    IF_LOG(LOG_LEVEL_DEBUG, LOG_CLUSTERS)
     {
-        if (++count > 10)
+        uint8_t count = 0;
+        for (const auto& cell : Server::get()->map()->cluster()->cells())
         {
-            break;
-        }
+            if (++count > 10)
+            {
+                break;
+            }
 
-        // Do not display non-stall&non-cooldown cells
-        if (!cell->stall.isRegistered)
-        {
-            continue;
-        }
+            // Do not display non-stall&non-cooldown cells
+            if (!cell->stall.isRegistered)
+            {
+                continue;
+            }
 
-        component.children.emplace_back(
-            FlowLayout<>{
-                Text(Style::Default(), "    ["),
-                Text(Style::Default(), cell->offset().q()),
-                Text(Style::Default(), ","),
-                Text(Style::Default(), cell->offset().r()),
-                Text(Style::Default(), "]: "),
-                Text(Style::Default(), std::chrono::duration_cast<std::chrono::seconds>(TimeBase(cell->stall.remaining)).count()),
-                Text(Style::Default(), " ("),
-                Text(Style::Default(), cell->stall.isOnCooldown),
-                Text(Style::Default(), ")")
-            });
+            component.children.emplace_back(
+                FlowLayout<>{
+                    Text(Style::Default(), "    ["),
+                    Text(Style::Default(), cell->offset().q()),
+                    Text(Style::Default(), ","),
+                    Text(Style::Default(), cell->offset().r()),
+                    Text(Style::Default(), "]: "),
+                    Text(Style::Default(), std::chrono::duration_cast<std::chrono::seconds>(TimeBase(cell->stall.remaining)).count()),
+                    Text(Style::Default(), " ("),
+                    Text(Style::Default(), cell->stall.isOnCooldown),
+                    Text(Style::Default(), ")")
+                });
+        }
     }
 
     _vt = renderToTerm(_vt, 200, component);
-    // std::cout << _numClusters << "/" << _numCells << "/" << _numStall << std::endl;
 #endif
 }

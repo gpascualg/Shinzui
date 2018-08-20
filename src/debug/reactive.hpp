@@ -41,14 +41,13 @@ public:
         {
             snprintf(buf, sz+1, fmt, params...);
             _messages.emplace_back(std::string{buf, sz});
+            free(buf);
 
             std::lock_guard<std::mutex> lock(_messagesLock);
             if (_messages.size() > 15)
             {
                 _messages.erase(_messages.begin());
             }
-
-            free(buf);
         }
 
         return buf != nullptr;

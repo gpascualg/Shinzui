@@ -131,7 +131,7 @@ bool nop(First firstValue, Rest... rest)
 #else
     #define _STATIC_IF_LOG(lvl, handler)        false
     #define _PP_IF_LOG(lvl, handler)            false
-    #define IF_LOG(lvl)                         if (false)
+    #define IF_LOG(lvl, handler)                if (false)
 
     #define LOG(handler, ...)                   ((void)(0))
     #define LOG_DEBUG(handler, ...)             ((void)(0))
