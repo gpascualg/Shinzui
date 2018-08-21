@@ -87,7 +87,7 @@ bool nop(First firstValue, Rest... rest)
     return nop(rest...);
 }
 
-#define LOG_FMT(pre, fmt, color)                pre "\x1B[" color "m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[0;34;49m\xee\x82\xb0\x1B[00m" fmt "\n%s"
+#define LOG_FMT(pre, fmt, fg, bg)                pre "\x1B[" fg "m[%." STR(LEADING_ZEROS) "X] %s:" STR(__LINE__) "(%s) \x1B[00m\x1B[" bg "m\xee\x82\xb0\x1B[00m" fmt "\n%s"
 
 #if defined(FORCE_ASCII_DEBUG)
     #define LOG_PRE                             ""
@@ -101,8 +101,8 @@ bool nop(First firstValue, Rest... rest)
     #define ASSERT_FNC                          Reactive::get()->print_now
 #endif
 
-#define EXPAND_HELPER(fnc, pre, lvl, color, fmt, ...) \
-    EXPAND(fnc(LOG_FMT(pre, fmt, color), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
+#define EXPAND_HELPER(fnc, pre, lvl, fg, bg, fmt, ...) \
+    EXPAND(fnc(LOG_FMT(pre, fmt, fg, bg), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
 #define LOG_ALWAYS(...)                         EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, -1, "01;44", __VA_ARGS__, ""))
 
@@ -117,17 +117,17 @@ bool nop(First firstValue, Rest... rest)
 
     #define IF_LOG(lvl, handler)                if (_PP_IF_LOG(lvl, handler))
 
-    #define _LOG(lvl, handler, color, ...)      \
-        (( _PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, lvl, color, __VA_ARGS__, ""))) || \
-         (!_PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(nop,     LOG_PRE, lvl, color, __VA_ARGS__, ""))))
+    #define _LOG(lvl, handler, fg, bg, ...)      \
+        (( _PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, lvl, fg, bg, __VA_ARGS__, ""))) || \
+         (!_PP_IF_LOG(lvl, handler) && EXPAND(EXPAND_HELPER(nop,     LOG_PRE, lvl, fg, bg, __VA_ARGS__, ""))))
 
-    #define LOG(handler, ...)                   _LOG(LOG_LEVEL_INFO,    handler, "01;44", __VA_ARGS__)
-    #define LOG_DEBUG(handler, ...)             _LOG(LOG_LEVEL_DEBUG,   handler, "30;47", __VA_ARGS__)
-    #define LOG_INFO(handler, ...)              _LOG(LOG_LEVEL_INFO,    handler, "01;44", __VA_ARGS__) 
-    #define LOG_WARNING(handler, ...)           _LOG(LOG_LEVEL_WARNING, handler, "01;43", __VA_ARGS__)
-    #define LOG_ERROR(handler, ...)             _LOG(LOG_LEVEL_ERROR,   handler, "01;41", __VA_ARGS__)
+    #define LOG(handler, ...)                   _LOG(LOG_LEVEL_INFO,    handler, "01;44", "0;34;49", __VA_ARGS__)
+    #define LOG_DEBUG(handler, ...)             _LOG(LOG_LEVEL_DEBUG,   handler, "30;47", "0;37;49", __VA_ARGS__)
+    #define LOG_INFO(handler, ...)              _LOG(LOG_LEVEL_INFO,    handler, "01;44", "0;34;49", __VA_ARGS__) 
+    #define LOG_WARNING(handler, ...)           _LOG(LOG_LEVEL_WARNING, handler, "01;43", "0;33;49", __VA_ARGS__)
+    #define LOG_ERROR(handler, ...)             _LOG(LOG_LEVEL_ERROR,   handler, "01;41", "0;31;49", __VA_ARGS__)
     
-    #define LOG_ASSERT(expr, ...)               ((expr) ? (void)(0) : (EXPAND_HELPER(ASSERT_FNC, LOG_PRE, -1, "01;41", __VA_ARGS__, ""), abort()))
+    #define LOG_ASSERT(expr, ...)               ((expr) ? (void)(0) : (EXPAND_HELPER(ASSERT_FNC, LOG_PRE, -1, "01;41", "0;31;49", __VA_ARGS__, ""), abort()))
 #else
     #define _STATIC_IF_LOG(lvl, handler)        false
     #define _PP_IF_LOG(lvl, handler)            false

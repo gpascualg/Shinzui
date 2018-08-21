@@ -8,6 +8,9 @@
 #include "map/map_aware_entity.hpp"
 #include "map/map-cluster/cluster.hpp"
 
+#include "config.h"
+#include "compat/kbhit.h"
+
 INCL_NOWARN
 #include <rxterm/terminal.hpp>
 #include <rxterm/style.hpp>
@@ -80,6 +83,25 @@ void Reactive::onPacketDestroyed(uint16_t opcode)
 
 void Reactive::update(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep)
 {
+    // Check for toggles
+    if (kbhit())
+    {
+        switch (getchar())
+        {
+            case 'c':
+                LogHandlers ^= LOG_CLUSTERS;
+                break;
+
+            case 'd':
+                LogLevel &= ~LOG_LEVEL_DEBUG;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    // Do not spam the terminal
     if (std::chrono::duration_cast<TimeBase>(Server::get()->now() - _lastUpdate) < std::chrono::duration_cast<TimeBase>(std::chrono::seconds(1)))
     {
         return;
@@ -241,6 +263,6 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
         }
     }
 
-    _vt = renderToTerm(_vt, 200, component);
+    // _vt = renderToTerm(_vt, 200, component);
 #endif
 }

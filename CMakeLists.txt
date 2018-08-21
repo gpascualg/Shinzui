@@ -42,8 +42,13 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-# -[ Sources
+# -[ Custom target
 CreateTarget(TARGET Shinzui)
+
+# -[ Basic checks
+CreateBuildHeader(TARGET Shinzui)
+
+# -[ Sources
 add_subdirectory(dep)
 add_subdirectory(src)
 
