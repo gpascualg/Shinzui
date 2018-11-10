@@ -112,7 +112,7 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
             {
                 // Calculate dist
                 float d = std::sqrt(std::pow(s0_e.y - s0_s.y, 2) + std::pow(s0_e.x - s0_s.x, 2));
-                if (std::abs(d) <= glm::epsilon<float>())
+                if (std::abs(d) > glm::epsilon<float>())
                 {
                     float tmp = ((s0_e.y - s0_s.y) * s1_s.x - (s0_e.x - s0_s.x) * s1_s.y + s0_e.x * s0_s.y - s0_e.y * s0_s.x) / d;  // NOLINT (whitespace/line_length)
                     if (!check || tmp < *dist)
