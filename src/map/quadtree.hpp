@@ -125,7 +125,7 @@ void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entit
 
     for (auto*& node : _nodes)
     {
-        node->retrieve(entities, start, end);
+        node->retrieve(entities, rect);
     }
 
     entities.insert(entities.end(), _entities.begin(), _entities.end());
