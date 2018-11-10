@@ -34,7 +34,7 @@ protected:
     std::list<MapAwareEntity*> _entities;
 
     int getIndex(glm::vec4 rect);
-    int intersects(glm::vec2 start, glm::vec2 end);
+    bool intersects(glm::vec2 start, glm::vec2 end);
     void split();
 
 private:
@@ -113,10 +113,19 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
 template <int MaxEntities, int MaxDepth>
 void QuadTree<MaxEntities, MaxDepth>::retrieve(std::list<MapAwareEntity*>& entities, glm::vec4 rect)  // NOLINT
 {
-    int index = getIndex(rect);
-    if (index != -1 && !_nodes.empty())
+    LOG(LOG_QUADTREE, "Retrieve call from (%f, %f) to (%f, %f)", rect.x, rect.y, rect.z, rect.w);
+
+    if (!intersects({ rect.x, rect.y }, { rect.z, rect.y }) &&  // (x0, y0) -> (x1, y0)
+        !intersects({ rect.x, rect.y }, { rect.z, rect.w }) &&  // (x0, y0) -> (x1, y1)
+        !intersects({ rect.z, rect.y }, { rect.z, rect.w }) &&  // (x1, y0) -> (x1, y1)
+        !intersects({ rect.x, rect.y }, { rect.z, rect.y }))    // (x0, y0) -> (x0, y1)
     {
-        _nodes[index]->retrieve(entities, rect);
+        return;
+    }
+
+    for (auto*& node : _nodes)
+    {
+        node->retrieve(entities, start, end);
     }
 
     entities.insert(entities.end(), _entities.begin(), _entities.end());
@@ -169,7 +178,7 @@ int QuadTree<MaxEntities, MaxDepth>::getIndex(glm::vec4 rect)
 }
 
 template <int MaxEntities, int MaxDepth>
-int QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
+bool QuadTree<MaxEntities, MaxDepth>::intersects(glm::vec2 start, glm::vec2 end)
 {
     // Check inclusion
     if (start.x > _bounds.x && start.y > _bounds.y && end.x < _bounds.z && end.y < _bounds.w)
