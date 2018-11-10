@@ -263,6 +263,6 @@ void Reactive::update_impl(TimeBase heartBeat, TimeBase diff, TimeBase prevSleep
         }
     }
 
-    // _vt = renderToTerm(_vt, 200, component);
+    _vt = renderToTerm(_vt, 200, component);
 #endif
 }
