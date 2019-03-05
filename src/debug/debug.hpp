@@ -35,9 +35,11 @@
 #define LEADING_ZEROS           4
 
 // Compile time optimizable log
-#define LOG_HANDLERS            LOG_ALL & ~LOG_SERVER_LOOP
+#define LOG_HANDLERS            LOG_ALL & ~LOG_SERVER_LOOP & ~LOG_QUADTREE & ~LOG_CELL_CHANGES
 #define LOG_LEVEL               LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_LEVEL_WARNING | LOG_LEVEL_ERROR
 
+// No Reactive debug
+#define FORCE_ASCII_DEBUG
 
 /* =====================================================
    Inner functionality

@@ -77,15 +77,22 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
 
     // Broadcast all packets
     auto oldCells = cell->map()->getCellsExcluding(cell, to);
-    Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
-        {
-            LOG(LOG_CELL_CHANGES, "RequestType::DESPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
-            if (client())
+
+    // Do not request despawn paquets from old cells if we are disconnecting
+    // or we are not a client
+    if (to && client())
+    {
+        Server::get()->map()->broadcast(oldCells, packet, [this](Cell* cell)
             {
+                LOG(LOG_CELL_CHANGES, "RequestType::DESPAWN (%d, %d)", cell->offset().q(), cell->offset().r());
                 cell->request(this, RequestType::DESPAWN);
             }
-        }
-    );  // NOLINT(whitespace/parens)
+        );  // NOLINT(whitespace/parens)
+    }
+    else
+    {
+        Server::get()->map()->broadcast(oldCells, packet);
+    }
 
     return oldCells;
 }
