@@ -14,7 +14,7 @@ else()
         # Lockfree dependencies
         lockfree core config assert static_assert type_traits mpl preprocessor
         array throw_exception functional align parameter atomic detail
-        utility predef winapi tti fusion
+        utility predef winapi tti fusion mp11
 
         # Asio dependencies
         asio system date_time smart_ptr bind regex
@@ -32,12 +32,13 @@ else()
     )
 
     foreach (dep ${BOOST_DEPENDENCIES})
+        # Most package don't yet have a CMakeLists
         RequireExternal(
             TARGET Shinzui
             EXCLUDE
             SKIP_CONFIGURE
             SKIP_BUILD
-            MODULE "boostorg/${dep}:develop"
+            MODULE "boostorg/${dep}:boost-1.69.0"
             INSTALL_INCLUDE
         )
     endforeach()
