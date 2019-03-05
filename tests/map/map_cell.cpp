@@ -12,11 +12,12 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
         TestServer server(12345);
         Map& map = *server.map();
 
-        map.addTo(0, 0, new Entity(0), nullptr);
+        Entity e(0);
+        map.addTo(0, 0, e.asDefault(), nullptr);
         map.runScheduledOperations();
 
         map.cluster()->update(0);
-        map.cluster()->runScheduledOperations();
+        map.cluster()->runScheduledOperations(0);
 
         REQUIRE(map.size() == 7);
         // REQUIRE(map.scheduledSize() == 0);
@@ -56,11 +57,11 @@ SCENARIO("Map cells can be fetched once created", "[map]") {
 
         Entity e(0); e.forceUpdater();
 
-        map.addTo(0, 0, &e, nullptr);
+        map.addTo(0, 0, e.asDefault(), nullptr);
         map.runScheduledOperations();
 
         map.cluster()->update(0);
-        map.cluster()->runScheduledOperations();
+        map.cluster()->runScheduledOperations(0);
 
         REQUIRE(map.size() == 7);
         // REQUIRE(map.scheduledSize() == 0);

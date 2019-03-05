@@ -52,11 +52,13 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         Entity e(0);
         map.addTo3D({ 0, 0, 0 }, e.asDefault(), nullptr);
 
+        // No updates done yet
         REQUIRE(map.size() == 0);
         // REQUIRE(map.scheduledSize() == 1);
 
         WHEN("operations are ran") {
-            map.runScheduledOperations();
+            map.update(1);
+            map.cleanup(1);
 
             THEN("the numbers of cells increase and pending operations are 0") {
                 REQUIRE(map.size() > 0);
@@ -79,16 +81,27 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         Entity e(0);
         map.addTo3D({ 0, 0, 0 }, e.asDefault(), nullptr);
-        map.runScheduledOperations();
+        map.update(1);
+        map.cleanup(1);
 
         REQUIRE(map.size() == 7);
         // REQUIRE(map.scheduledSize() == 0);
 
-        WHEN("the cluster is ran") {
-            map.cluster()->update(0);
+        WHEN("the cluster is ran for a long time") {
+            // Cleans cluster
+            map.update(1000000);
+            map.cleanup(1000000);
 
             THEN("cluster has size 0, non-updating entity!") {
                 REQUIRE(map.cluster()->size() == 0);
+            }
+
+            // Cleans cells
+            map.update(1000000);
+            map.cleanup(1000000);
+
+            THEN("all cells have been fred") {
+                REQUIRE(map.size() == 0);
             }
         }
     }
@@ -101,27 +114,20 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         Entity e2(1);
         map.addTo(0, 0, e1.asDefault(), nullptr);
         map.addTo(4, 0, e2.asDefault(), nullptr);
-        map.runScheduledOperations();
-
-        // TODO(gpascualg): Make its own test
-        // Note, normally we would do
-        //  update -> runScheduledOperations
-        // but doing so would make the cluster not grow
-        // TODO(gpascualg): Think of a better solution for the above
-        map.cluster()->runScheduledOperations();
-        map.cluster()->update(0);
+        map.update(1);
+        map.cleanup(1);
 
         Entity e3(2);
         map.addTo(2, 0, e3.asDefault(), nullptr);
 
+        // There are 14 spawned cells
         REQUIRE(map.size() == 14);
-        // REQUIRE(map.scheduledSize() == 1);
+        // There are no updaters
         REQUIRE(map.cluster()->size() == 0);
 
         WHEN("scheduled operations are ran") {
-            map.runScheduledOperations();
-            map.cluster()->update(0);
-            map.cluster()->runScheduledOperations();
+            map.update(1);
+            map.cleanup(1);
 
             THEN("no clusters should remain") {
                 REQUIRE(map.cluster()->size() == 0);
@@ -144,7 +150,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
         // TODO: Make its own test
         // TODO(gpascualg): Calls below are reordered!
-        map.cluster()->runScheduledOperations();
+        map.cluster()->runScheduledOperations(0);
         map.cluster()->update(0);
 
         map.addTo(1, 0, e3.asDefault(), nullptr);
@@ -157,7 +163,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         WHEN("scheduled operations are ran") {
             map.runScheduledOperations();
             // TODO(gpascualg): Calls below are reordered!
-            map.cluster()->runScheduledOperations();
+            map.cluster()->runScheduledOperations(0);
             map.cluster()->update(0);
 
             THEN("only one cluster should remain") {
@@ -179,7 +185,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.runScheduledOperations();
 
         // TODO(gpascualg): Calls below are reordered!
-        map.cluster()->runScheduledOperations();
+        map.cluster()->runScheduledOperations(0);
         map.cluster()->update(0);
 
         REQUIRE(map.size() == 7);
@@ -191,7 +197,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
             map.runScheduledOperations();
             map.cluster()->update(0);
-            map.cluster()->runScheduledOperations();
+            map.cluster()->runScheduledOperations(0);
 
             THEN("only one entity should remain") {
                 REQUIRE(e1.cell() == nullptr);
@@ -205,7 +211,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
             map.runScheduledOperations();
             map.cluster()->update(0);
-            map.cluster()->runScheduledOperations();
+            map.cluster()->runScheduledOperations(0);
 
             THEN("only one entity should remain") {
                 REQUIRE(e1.cell() == nullptr);
@@ -227,7 +233,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
         map.runScheduledOperations();
 
         // TODO(gpascualg): Calls below are reordered!
-        map.cluster()->runScheduledOperations();
+        map.cluster()->runScheduledOperations(0);
         map.cluster()->update(0);
 
         REQUIRE(map.size() == 7);
@@ -240,7 +246,7 @@ SCENARIO("Map cells can be created and eliminated", "[map]") {
 
             map.runScheduledOperations();
             map.cluster()->update(0);
-            map.cluster()->runScheduledOperations();
+            map.cluster()->runScheduledOperations(0);
 
             THEN("both entities should have the same cell") {
                 REQUIRE(e1.cell() == e2.cell());

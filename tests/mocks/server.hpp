@@ -34,8 +34,14 @@ public:
     {
         return new Entity(id, client);
     }
+
     void destroyMapAwareEntity(MapAwareEntity* entity) override
     {
         delete entity;
+    }
+
+    void iterateClients(std::function<void(Client* client)> callback)
+    {
+        
     }
 };
