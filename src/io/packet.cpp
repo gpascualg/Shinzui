@@ -4,7 +4,6 @@
 #include "debug/debug.hpp"
 #include "debug/reactive.hpp"
 
-boost::object_pool<Packet> Packet::_pool(2048);
 
 Packet::Packet() :
     _read(0),

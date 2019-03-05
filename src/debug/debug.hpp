@@ -38,8 +38,9 @@
 #define LOG_HANDLERS            LOG_ALL & ~LOG_SERVER_LOOP & ~LOG_QUADTREE & ~LOG_CELL_CHANGES
 #define LOG_LEVEL               LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_LEVEL_WARNING | LOG_LEVEL_ERROR
 
-// No Reactive debug
-#define FORCE_ASCII_DEBUG
+// No reactive debug and/or force
+// #define FORCE_ASCII_DEBUG
+// #define _DEBUG
 
 /* =====================================================
    Inner functionality

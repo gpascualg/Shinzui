@@ -12,7 +12,7 @@
 
 INCL_NOWARN
 #include <boost/asio.hpp>
-#include <boost/pool/object_pool.hpp>
+#include <boost/pool/singleton_pool.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <glm/glm.hpp>
 INCL_WARN
@@ -32,9 +32,10 @@ union f2u
     uint32_t u;
 };
 
+class Packet;
+
 class Packet
 {
-    friend class boost::object_pool<Packet>;
     friend inline void intrusive_ptr_add_ref(Packet* x);
     friend inline void intrusive_ptr_release(Packet* x);
 
@@ -43,13 +44,15 @@ public:
 
     static Packet* create()
     {
-        auto packet = _pool.construct();
+        void* mem = boost::singleton_pool<Packet, sizeof(Packet)>::malloc();
+        auto packet = new(mem) Packet();
         return packet;
     }
 
     static Packet* create(uint16_t opcode)
     {
-        auto packet = _pool.construct();
+        void* mem = boost::singleton_pool<Packet, sizeof(Packet)>::malloc();
+        auto packet = new(mem) Packet();
         *packet << opcode;
         *packet << uint16_t{ 0x0000 };
         
@@ -60,7 +63,8 @@ public:
 
     static Packet* copy(Packet* from, uint16_t size)
     {
-        auto packet = _pool.construct();
+        void* mem = boost::singleton_pool<Packet, sizeof(Packet)>::malloc();
+        auto packet = new(mem) Packet();
         memcpy(packet->_buffer, from->_buffer, size);
         packet->_size = size;
 
@@ -181,8 +185,12 @@ public:
     inline boost::asio::mutable_buffers_1 recvBuffer(uint16_t len) { return boost::asio::buffer(_buffer + _size, len); }
     inline void addSize(uint16_t offset) { _size += offset; }
 
-    // TODO(gpascualg): Is object pool threadsafe?
-    inline void destroy() { _pool.destroy(this); }
+    // TODO(gpascualg): It seems boost:object_pool is not thread-safe, but boost::singleton_pool is. Check it up again
+    inline void destroy() 
+    {
+        this->~Packet();
+        boost::singleton_pool<Packet, sizeof(Packet)>::free(static_cast<void*>(this)); 
+    }
 
 private:
     Packet();
@@ -193,8 +201,6 @@ private:
     uint16_t _write;
     uint16_t _refs;
     uint8_t _buffer[1024];
-
-    static boost::object_pool<Packet> _pool;
 };
 
 template <> float Packet::read();
