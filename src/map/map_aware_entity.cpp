@@ -95,25 +95,18 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     return oldCells;
 }
 
-glm::vec4 MapAwareEntity::rect()
+FixedTransform MapAwareEntity::transform()
 {
-    return _boundingBox->rect(position2D());
+    TimePoint now = Server::get()->now();
+    if (_client)
+    {
+        now -= TimeBase(_client->lag());
+    }
+
+    return _transform.at(now);
 }
 
-glm::vec3 MapAwareEntity::position()
-{
-    auto now = Server::get()->now();
-    return _transform.at(now).get(now);
-}
-
-glm::vec2 MapAwareEntity::position2D()
-{
-    glm::vec3 pos = position();
-    return {pos.x, pos.z};
-}
-
-glm::vec3 MapAwareEntity::forward()
-{
-    auto now = Server::get()->now();
-    return _transform.at(now).forward;
-}
+// glm::vec4 MapAwareEntity::rect()
+// {
+//     return _boundingBox->rect(position2D());
+// }

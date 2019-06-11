@@ -22,7 +22,6 @@ class BoundingBox;
 class Cell;
 class Client;
 class MapAwareEntity;
-class Transform;
 class Packet;
 
 
@@ -39,19 +38,16 @@ public:
     inline Cell* cell();
     inline Client* client();
     inline BoundingBox* boundingBox();
-    inline Transform& transform(TimePoint t);
+    inline FixedTransform transform(TimePoint t);
     inline uint64_t id();
+    
+    FixedTransform transform();
 
     void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
 
     virtual void update(uint64_t elapsed);
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
     virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
-
-    glm::vec4 rect();
-    glm::vec3 position();
-    glm::vec2 position2D();
-    glm::vec3 forward();
 
     virtual Packet* spawnPacket() = 0;
     virtual Packet* despawnPacket() = 0;
@@ -66,7 +62,7 @@ protected:
     uint64_t _id;
     Cell* _cell;
     BoundingBox* _boundingBox;
-    Traceable<Transform> _transform;    
+    TraceableTransform _transform;
 
     bool _isUpdater;
 };
@@ -87,7 +83,7 @@ BoundingBox* MapAwareEntity::boundingBox()
     return _boundingBox;
 }
 
-Transform& MapAwareEntity::transform(TimePoint t)
+FixedTransform MapAwareEntity::transform(TimePoint t)
 {
     return _transform.at(t);
 }

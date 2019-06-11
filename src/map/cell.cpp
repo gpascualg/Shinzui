@@ -116,7 +116,7 @@ void Cell::update(uint64_t elapsed)
         // Try to insert into neighbours
         for (auto cell : _map->getSiblings(this))
         {
-            if (cell && cell->_quadTree->contains(updater->position2D()))
+            if (cell && cell->_quadTree->contains(updater->transform().Position2D))
             {
                 cell->_quadTree->insert(updater);
             }

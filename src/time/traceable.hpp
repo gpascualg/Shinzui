@@ -1,85 +1,30 @@
 #include <cstdlib>
+#include <cmath>
 
 #include "defs/common.hpp"
 #include "physics/bounding_box.hpp"
 
 INCL_NOWARN
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/rotate_vector.hpp>
 #include <glm/glm.hpp>
 #include <boost/circular_buffer.hpp>
 INCL_WARN
 
 
-template <typename T>
-class Traceable
+class Transform;
+struct FixedTransform;
+class TraceableTransform;
+
+struct FixedTransform
 {
 public:
-    // Consider at most 50 updates per tick
-    // which is already a lot!
-    Traceable() :
-        buffer(50)
-    {}
+    FixedTransform(TimePoint t, Transform& transform);
 
-    T& at(TimePoint t)
-    {
-        return *iterator(t);
-    }
-
-    template <typename... Args>
-    T& set(TimePoint t, Args... args)
-    {
-        T o = T(t, args...);
-        buffer.push_back(o);
-        return o;
-    }
-
-    template <typename... Args>
-    T& exactly(TimePoint t, Args... args)
-    {
-        if (buffer.empty())
-        {
-            return set(t, args...);
-        }
-
-        T& at = *iterator(t);
-        if (at.t0 == t)
-        {
-            return at;
-        }
-
-        return set(t, args...);
-    }
-
-    void clear()
-    {
-        buffer.clear();
-    }
-
-protected:
-    auto iterator(TimePoint t)
-    {
-        // Maybe last is already fine?
-        if (buffer.back().t0 <= t)
-        {
-            return --(buffer.end());
-        }
-
-        // Otherwise, search for it
-        auto it = buffer.begin();
-        while (it != buffer.end())
-        {
-            if ((*it).t0 >= t)
-            {
-                break;
-            }
-
-            ++it;
-        }
-
-        return it;
-    }
-
-private:
-    boost::circular_buffer<T> buffer;
+    glm::vec3 Position;
+    glm::vec2 Position2D;
+    glm::vec3 Forward;
+    float Speed;
 };
 
 enum class MovementFlags
@@ -94,46 +39,139 @@ class Transform
 {
 public:
     Transform(TimePoint t):
-        t0(t)
+        _t0(t)
     {}
 
-    glm::vec3 position;
-    glm::vec3 forward;
-    uint8_t flags;
-    float speed;
-    TimePoint t0;
+    inline auto t() { return _t0; }
+    inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
+    inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
 
-    inline bool isMoving() { return (flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
-    inline bool isRotating() { return (flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
-
-    inline glm::vec2 to2D(TimePoint t)
+    float speed(TimePoint t)
     {
-        glm::vec3 position = get(t);
-        return { position.x, position.z };
+        // TODO(gpascualg): Acceleration?
+        return _speed;
     }
 
-    glm::vec3 get(TimePoint t1)
+    inline glm::vec2 position2D(TimePoint t)
+    {
+        glm::vec3 pos = position(t);
+        return { pos.x, pos.z };
+    }
+
+    glm::vec3 position(TimePoint t1)
     {
         // If it has stoped, simply return the same point
-        if (std::abs(speed) < 1e-6)
+        if (!isMoving())
         {
-            return position;
+            return _position;
         }
 
-        return position + forward * speed * static_cast<float>((t1 - t0).count());
+        auto time = elapsed(t1);
+
+        if (isRotating())
+        {
+            auto angle = _initialAngle + _angle * time;
+            return _center + glm::vec3 { _radius * std::cos(angle), 0, _radius * std::sin(angle) };
+        }
+
+        return _position + _forward * _speed * time;
     }
+
+    glm::vec3 forward(TimePoint t1)
+    {
+        if (!isRotating())
+        {
+            return _forward;
+        }
+        
+        return glm::normalize(glm::rotateY(_forward, _angle * elapsed(t1)));
+    }
+
+    void startRotation(float angle)
+    {
+        _flags = _flags | (uint8_t)MovementFlags::ROTATING;
+        _angle = angle;
+        _initialAngle = std::atan2(_position.z, _position.x);
+        _center = glm::vec3(_position.x - std::cos(_initialAngle), 0, _position.z - std::sin(_initialAngle));
+        recalcParameters();
+    }
+
+    void setSpeed(float speed)
+    {
+        _speed = speed;
+        recalcParameters();
+    }
+
+private:
+    void recalcParameters()
+    {
+        if (isRotating())
+        {
+            _radius = _speed / _angle;
+        }
+    }
+
+    inline float elapsed(TimePoint t1)
+    {
+        return static_cast<float>((t1 - _t0).count());
+    }
+
+private:
+    glm::vec3 _position;
+    glm::vec3 _forward;
+    glm::vec3 _center;
+    uint8_t _flags;
+    float _speed;
+    float _initialAngle;
+    float _angle;
+    float _radius;
+    TimePoint _t0;
 };
 
-template <typename T>
-struct Fixed
+
+class TraceableTransform
 {
-    template <typename... Args>
-    Fixed(TimePoint t, Args... args):
-        t0(t),
-        value(args...)
+public:
+    // Consider at most 50 updates per tick
+    // which is already a lot!
+    TraceableTransform() :
+        buffer(50)
     {}
 
-    TimePoint t0;
-    T value;
-    T get(TimePoint t1) { return value; }
+    FixedTransform at(TimePoint t)
+    {
+        return FixedTransform(t, *iterator(t));
+    }
+
+    void clear()
+    {
+        buffer.clear();
+    }
+
+protected:
+    boost::circular_buffer<Transform>::iterator iterator(TimePoint t)
+    {
+        // Maybe last is already fine?
+        if (buffer.back().t() <= t)
+        {
+            return --(buffer.end());
+        }
+
+        // Otherwise, search for it
+        auto it = buffer.begin();
+        while (it != buffer.end())
+        {
+            if ((*it).t() >= t)
+            {
+                break;
+            }
+
+            ++it;
+        }
+
+        return it;
+    }
+
+private:
+    boost::circular_buffer<Transform> buffer;
 };

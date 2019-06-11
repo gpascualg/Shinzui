@@ -40,3 +40,4 @@
 using TimePoint = std::chrono::high_resolution_clock::time_point;
 using TimeBase = std::chrono::milliseconds;
 constexpr auto TimeScale = TimeBase(std::chrono::seconds(1)).count();
+constexpr double pi = 3.14159265358979323846;

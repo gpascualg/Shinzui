@@ -29,6 +29,7 @@ if (Shinzui_IS_RESOLVED)
             ${CMAKE_CURRENT_SOURCE_DIR}/physics
             ${CMAKE_CURRENT_SOURCE_DIR}/server
             ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
+            ${CMAKE_CURRENT_SOURCE_DIR}/time
     )
 
     AddToIncludes(

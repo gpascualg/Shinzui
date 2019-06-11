@@ -43,6 +43,7 @@ public:
 
     inline Packet* packet() { return _packet; }
     inline uint8_t readPhase() { return _readTimes; }
+    inline uint16_t lag() { return _lag; }
     inline boost::asio::ip::tcp::socket& socket() { return _socket; }
 
     inline Status status() { return _status; }
@@ -59,5 +60,6 @@ private:
     boost::asio::deadline_timer _timer;
 
     Packet* _packet;
-    uint8_t _readTimes = 0;
+    uint16_t _readTimes = 0;
+    uint8_t _lag = 0;
 };
