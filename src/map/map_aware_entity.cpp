@@ -20,28 +20,26 @@ MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
     _cell(nullptr),
     _boundingBox(nullptr)
 {
-    _motionMaster = new MotionMaster(this);
     _isUpdater = client != nullptr;
 }
 
 MapAwareEntity::~MapAwareEntity()
-{
-    delete _motionMaster;
-}
+{}
 
 void MapAwareEntity::update(uint64_t elapsed)
 {
     Executor<ExecutorQueueMax>::executeJobs();
 
     // Update motion
-    _motionMaster->update(elapsed);
+    // TODO(gpascualg): UPDATE MOVEMENT!
+    // _motionMaster->update(elapsed);
 }
 
 void MapAwareEntity::setupBoundingBox(std::initializer_list<glm::vec2>&& vertices)
 {
     // TODO(gpascualg): Logging friendly assert
     assert(_boundingBox == nullptr);
-    _boundingBox = new RectBoundingBox(_motionMaster, std::move(vertices));
+    _boundingBox = new RectBoundingBox(std::move(vertices));
 }
 
 std::vector<Cell*> MapAwareEntity::onAdded(Cell* cell, Cell* old)
@@ -95,4 +93,27 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     }
 
     return oldCells;
+}
+
+glm::vec4 MapAwareEntity::rect()
+{
+    return _boundingBox->rect(position2D());
+}
+
+glm::vec3 MapAwareEntity::position()
+{
+    auto now = Server::get()->now();
+    return _transform.at(now).get(now);
+}
+
+glm::vec2 MapAwareEntity::position2D()
+{
+    glm::vec3 pos = position();
+    return {pos.x, pos.z};
+}
+
+glm::vec3 MapAwareEntity::forward()
+{
+    auto now = Server::get()->now();
+    return _transform.at(now).forward;
 }

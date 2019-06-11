@@ -23,13 +23,12 @@ class RectBoundingBox : public BoundingBox
     friend class SAT;
 
 public:
-    RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices);
-    RectBoundingBox(const glm::vec3& position, std::initializer_list<glm::vec2>&& vertices);
+    RectBoundingBox(std::initializer_list<glm::vec2>&& vertices);
 
     void rotate(float angle) override;
-    glm::vec4 asRect() override;
-    bool intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr) override;
-    glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const override;
+    glm::vec4 rect(glm::vec2 pos) override;
+    bool intersects(glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr) override;
+    glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis, glm::vec2 pos) const override;
 
 protected:
     const std::vector<glm::vec2>& normals() override;

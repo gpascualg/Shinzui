@@ -11,6 +11,7 @@
 #include "defs/common.hpp"
 #include "debug/debug.hpp"
 #include "executor/executor.hpp"
+#include "time/traceable.hpp"
 
 INCL_NOWARN
 #include <glm/glm.hpp>
@@ -21,7 +22,7 @@ class BoundingBox;
 class Cell;
 class Client;
 class MapAwareEntity;
-class MotionMaster;
+class Transform;
 class Packet;
 
 
@@ -37,8 +38,8 @@ public:
 
     inline Cell* cell();
     inline Client* client();
-    inline MotionMaster* motionMaster();
     inline BoundingBox* boundingBox();
+    inline Transform& transform(TimePoint t);
     inline uint64_t id();
 
     void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
@@ -46,6 +47,11 @@ public:
     virtual void update(uint64_t elapsed);
     virtual std::vector<Cell*> onAdded(Cell* cell, Cell* old);
     virtual std::vector<Cell*> onRemoved(Cell* cell, Cell* to);
+
+    glm::vec4 rect();
+    glm::vec3 position();
+    glm::vec2 position2D();
+    glm::vec3 forward();
 
     virtual Packet* spawnPacket() = 0;
     virtual Packet* despawnPacket() = 0;
@@ -60,8 +66,7 @@ protected:
     uint64_t _id;
     Cell* _cell;
     BoundingBox* _boundingBox;
-
-    MotionMaster* _motionMaster;
+    Traceable<Transform> _transform;    
 
     bool _isUpdater;
 };
@@ -77,16 +82,14 @@ Client* MapAwareEntity::client()
     return _client;
 }
 
-MotionMaster* MapAwareEntity::motionMaster()
-{
-    return _motionMaster;
-}
-
 BoundingBox* MapAwareEntity::boundingBox()
 {
-    LOG_ASSERT(_boundingBox != nullptr, "Calling boundingBox without previous setup!");
-
     return _boundingBox;
+}
+
+Transform& MapAwareEntity::transform(TimePoint t)
+{
+    return _transform.at(t);
 }
 
 uint64_t MapAwareEntity::id()

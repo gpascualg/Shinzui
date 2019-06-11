@@ -116,7 +116,7 @@ void Cell::update(uint64_t elapsed)
         // Try to insert into neighbours
         for (auto cell : _map->getSiblings(this))
         {
-            if (cell && cell->_quadTree->contains(updater->motionMaster()->position2D()))
+            if (cell && cell->_quadTree->contains(updater->position2D()))
             {
                 cell->_quadTree->insert(updater);
             }
@@ -132,7 +132,7 @@ void Cell::physics(uint64_t elapsed)
         auto e1 = pair1.second;
 
         std::list<MapAwareEntity*> candidates;
-        _quadTree->retrieve(candidates, e1->boundingBox()->asRect());
+        _quadTree->retrieve(candidates, e1->rect());
 
         for (auto e2 : candidates)
         {
@@ -141,7 +141,7 @@ void Cell::physics(uint64_t elapsed)
                 continue;
             }
 
-            if (SAT::get()->collides(e1->boundingBox(), e2->boundingBox()))
+            if (SAT::get()->collides(e1->boundingBox(), e1->position2D(), e2->boundingBox(), e2->position2D()))
             {
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }

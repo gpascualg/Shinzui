@@ -153,7 +153,7 @@ std::vector<Cell*> Map::getCellsExcluding(Cell* cell, Cell* exclude)
 
 void Map::onMove(MapAwareEntity* entity)
 {
-    auto& pos = entity->motionMaster()->position();
+    auto pos = entity->position();
     auto offset = offsetOf(pos.x, pos.z);
     Cell* cell = getOrCreate(offset);
 
@@ -166,7 +166,7 @@ void Map::onMove(MapAwareEntity* entity)
 
 void Map::addTo(MapAwareEntity* e, Cell* old)
 {
-    addTo3D(e->motionMaster()->position(), e, old);
+    addTo3D(e->position(), e, old);
 }
 
 void Map::addTo3D(const glm::vec3& pos, MapAwareEntity* e, Cell* old)
@@ -202,7 +202,7 @@ void Map::addTo(Cell* cell, MapAwareEntity* e, Cell* old)
 
 void Map::removeFrom(MapAwareEntity* e, Cell* to)
 {
-    removeFrom3D(e->motionMaster()->position(), e, to);
+    removeFrom3D(e->position(), e, to);
 }
 
 void Map::removeFrom3D(const glm::vec3& pos, MapAwareEntity* e, Cell* to)

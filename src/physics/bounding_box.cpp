@@ -15,12 +15,6 @@ INCL_NOWARN
 INCL_WARN
 
 
-BoundingBox::BoundingBox(MotionMaster* motionMaster, BoundingBoxType type) :
-    Type(type),
-    _position(motionMaster->position())
-{}
-
-BoundingBox::BoundingBox(const glm::vec3& position, BoundingBoxType type) :
-    Type(type),
-    _position(position)
+BoundingBox::BoundingBox(BoundingBoxType type) :
+    Type(type)
 {}

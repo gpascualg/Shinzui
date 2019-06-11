@@ -46,24 +46,24 @@ void MotionMaster::update(uint64_t elapsed)
         }
     }
 
-    if (isRotating())
-    {
-        float elapsedAngle = _rotationAngle * elapsed;
+    // if (isRotating())
+    // {
+    //     float elapsedAngle = _rotationAngle * elapsed;
 
-        _forward = glm::normalize(glm::rotateY(_forward, elapsedAngle));
-        if (auto bb = _owner->boundingBox())
-        {
-            bb->rotate(elapsedAngle);
-        }
-    }
+    //     _forward = glm::normalize(glm::rotateY(_forward, elapsedAngle));
+    //     if (auto bb = _owner->boundingBox())
+    //     {
+    //         bb->rotate(elapsedAngle);
+    //     }
+    // }
 
-    if (!_generator && isMoving())
-    {
-        _position += _forward * (_speed * elapsed);
+    // if (!_generator && isMoving())
+    // {
+    //     _position += _forward * (_speed * elapsed);
 
-        // TODO(gpascualg): This can be throttled, no need to do cell-changer per tick
-        Server::get()->map()->onMove(_owner);
-    }
+    //     // TODO(gpascualg): This can be throttled, no need to do cell-changer per tick
+    //     Server::get()->map()->onMove(_owner);
+    // }
 }
 
 void MotionMaster::teleport(glm::vec3 to)

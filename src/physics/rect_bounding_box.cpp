@@ -18,16 +18,8 @@ INCL_NOWARN
 INCL_WARN
 
 
-RectBoundingBox::RectBoundingBox(MotionMaster* motionMaster, std::initializer_list<glm::vec2>&& vertices) :
-    BoundingBox{ motionMaster, BoundingBoxType::RECT },
-    _recalcNormals(false),
-    _vertices(std::move(vertices))
-{
-    _normals.resize(2);
-}
-
-RectBoundingBox::RectBoundingBox(const glm::vec3& position, std::initializer_list<glm::vec2>&& vertices) :
-    BoundingBox{ position, BoundingBoxType::RECT },
+RectBoundingBox::RectBoundingBox(std::initializer_list<glm::vec2>&& vertices) :
+    BoundingBox{ BoundingBoxType::RECT },
     _recalcNormals(false),
     _vertices(std::move(vertices))
 {
@@ -76,15 +68,14 @@ const std::vector<glm::vec2>& RectBoundingBox::normals()
     return _normals;
 }
 
-glm::vec4 RectBoundingBox::asRect()
+glm::vec4 RectBoundingBox::rect(glm::vec2 pos)
 {
-    const auto pos = position2D();
-    normals();  // Force recalc
-
+    // Call normals to get current min and max
+    normals();
     return { _min.x + pos.x, _min.y + pos.y, _max.x + pos.x, _max.y + pos.y };
 }
 
-bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
+bool RectBoundingBox::intersects(glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 {
     bool check = false;
 
@@ -95,10 +86,10 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 
     for (uint32_t i = 0; i < _vertices.size(); ++i)
     {
-        auto s0_s = _vertices[i] + position2D();
-        auto s0_e = _vertices[(i + 1) % _vertices.size()] + position2D();
+        auto s0_s = _vertices[i] + pos;
+        auto s0_e = _vertices[(i + 1) % _vertices.size()] + pos;
 
-        /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->position2D().x, _motionMaster->position2D().y,
+        /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->pos.x, _motionMaster->pos.y,
         s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/
 
         if (::intersects(s0_s, s0_e, s1_s, s1_e))
@@ -133,7 +124,7 @@ bool RectBoundingBox::intersects(glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
     return check;
 }
 
-glm::vec2 RectBoundingBox::project(CollisionsFramework* framework, glm::vec2 axis) const
+glm::vec2 RectBoundingBox::project(CollisionsFramework* framework, glm::vec2 axis, glm::vec2 pos) const
 {
-    return framework->project(*this, axis);
+    return framework->project(*this, axis, pos);
 }

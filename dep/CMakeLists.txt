@@ -29,6 +29,9 @@ else()
 
         # Bimap
         bimap
+
+        # Circular buffer
+        circular_buffer
     )
 
     foreach (dep ${BOOST_DEPENDENCIES})

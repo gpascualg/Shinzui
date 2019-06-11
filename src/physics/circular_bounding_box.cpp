@@ -16,14 +16,8 @@ INCL_NOWARN
 INCL_WARN
 
 
-CircularBoundingBox::CircularBoundingBox(MotionMaster* motionMaster, glm::vec3 center, float radius) :
-    BoundingBox{ motionMaster, BoundingBoxType::CIRCULAR },
-    _center(center),
-    _radius(radius)
-{}
-
-CircularBoundingBox::CircularBoundingBox(const glm::vec3& position, glm::vec3 center, float radius) :
-    BoundingBox{ position, BoundingBoxType::CIRCULAR },
+CircularBoundingBox::CircularBoundingBox(glm::vec3 center, float radius) :
+    BoundingBox{ BoundingBoxType::CIRCULAR },
     _center(center),
     _radius(radius)
 {}
@@ -40,10 +34,8 @@ const std::vector<glm::vec2>& CircularBoundingBox::normals()
     return {};
 }
 
-glm::vec4 CircularBoundingBox::asRect()
+glm::vec4 CircularBoundingBox::rect(glm::vec2 pos)
 {
-    const auto pos = position2D();
-
     return {  // NOLINT (whitespace/braces)
         _center.x + pos.x - _radius,
         _center.y + pos.y - _radius,
@@ -53,7 +45,7 @@ glm::vec4 CircularBoundingBox::asRect()
 }
 
 // http://csharphelper.com/blog/2014/09/determine-where-a-line-intersects-a-circle-in-c/
-bool CircularBoundingBox::intersects(glm::vec2 p0, glm::vec2 p1, float* dist)
+bool CircularBoundingBox::intersects(glm::vec2 pos, glm::vec2 p0, glm::vec2 p1, float* dist)
 {
     float dx = p1.x - p0.x;
     float dy = p1.y - p0.y;
@@ -66,8 +58,8 @@ bool CircularBoundingBox::intersects(glm::vec2 p0, glm::vec2 p1, float* dist)
         return false;
     }
 
-    float cx = position2D().x + _center.x;
-    float cy = position2D().y + _center.y;
+    float cx = pos.x + _center.x;
+    float cy = pos.y + _center.y;
 
     float B = 2 * (dx * (p0.x - cx) + dy * (p0.y - cy));
     float C = std::pow(p0.x - cx, 2) + std::pow(p0.y - cy, 2) - std::pow(_radius, 2);
@@ -81,7 +73,7 @@ bool CircularBoundingBox::intersects(glm::vec2 p0, glm::vec2 p1, float* dist)
     return true;
 }
 
-glm::vec2 CircularBoundingBox::project(CollisionsFramework* framework, glm::vec2 axis) const
+glm::vec2 CircularBoundingBox::project(CollisionsFramework* framework, glm::vec2 axis, glm::vec2 pos) const
 {
-    return framework->project(*this, axis);
+    return framework->project(*this, axis, pos);
 }

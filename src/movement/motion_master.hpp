@@ -14,13 +14,13 @@ class MapAwareEntity;
 class MovementGenerator;
 
 
-enum class MovementFlags
-{
-    STOPPED =   0x1,
-    IDLE =      0x2,
-    MOVING =    0x4,
-    ROTATING =  0x8
-};
+// enum class MovementFlags
+// {
+//     STOPPED =   0x1,
+//     IDLE =      0x2,
+//     MOVING =    0x4,
+//     ROTATING =  0x8
+// };
 
 
 class MotionMaster
@@ -42,8 +42,8 @@ public:
     void move();
     void stop(bool cleanup = false);
 
-    inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
-    inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
+    // inline bool isMoving() { return (_flags & (uint8_t)MovementFlags::MOVING) == (uint8_t)MovementFlags::MOVING; }
+    // inline bool isRotating() { return (_flags & (uint8_t)MovementFlags::ROTATING) == (uint8_t)MovementFlags::ROTATING; }
 
     inline MovementGenerator* generator() { return _generator; }
     void generator(MovementGenerator* generator) { _generator = generator; }

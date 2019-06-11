@@ -26,6 +26,6 @@ private:
     // Can be used for async jobs
     boost::lockfree::queue<AbstractWork*, boost::lockfree::capacity<MaxQueued>> _jobs;
 
-    // Purely sequential ant time-stamped jobs
+    // Purely sequential and time-stamped jobs
     std::priority_queue<Schedulable<MaxQueued>*, std::vector<Schedulable<MaxQueued>*>, SchedulableComparator<MaxQueued>> _scheduledTasks;
 };

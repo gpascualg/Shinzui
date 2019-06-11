@@ -25,23 +25,19 @@ enum class BoundingBoxType
 class BoundingBox
 {
 public:
-    BoundingBox(MotionMaster* motionMaster, BoundingBoxType type);
-    BoundingBox(const glm::vec3& position, BoundingBoxType type);
+    BoundingBox(BoundingBoxType type);
 
     // Rotate with motion master
     virtual void rotate(float angle) = 0;
 
     // Returns the minimum rect that contains the OBB
-    virtual glm::vec4 asRect() = 0;
+    virtual glm::vec4 rect(glm::vec2 pos) = 0;
 
     // Intersection with a segment
-    virtual bool intersects(glm::vec2 p0, glm::vec2 p1, float* dist) = 0;
+    virtual bool intersects(glm::vec2 pos, glm::vec2 p0, glm::vec2 p1, float* dist) = 0;
 
     // Collisions
-    virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis) const = 0;
-
-    inline const glm::vec3& position() const { return _position; }
-    inline const glm::vec2 position2D() const { return { _position.x, _position.z }; }
+    virtual glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis, glm::vec2 pos) const = 0;
 
 protected:
     // Normals of the edges (if any)
@@ -49,7 +45,4 @@ protected:
 
 public:
     const BoundingBoxType Type;
-
-private:
-    const glm::vec3& _position;
 };

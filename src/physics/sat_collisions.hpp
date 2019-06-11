@@ -21,10 +21,10 @@ INCL_WARN
 class SAT : public CollisionsFramework
 {
 public:
-    bool collides(BoundingBox* a, BoundingBox* b) override;
-    bool collides(RectBoundingBox& a, RectBoundingBox& b);  // NOLINT (runtime/references)
-    bool collides(RectBoundingBox& a, const CircularBoundingBox& b);  // NOLINT (runtime/references)
-    bool collides(const CircularBoundingBox& a, const CircularBoundingBox& b);  // NOLINT (runtime/references)
+    bool collides(BoundingBox* a, glm::vec2 pos_a, BoundingBox* b, glm::vec2 pos_b) override;
+    bool collides(RectBoundingBox& a, glm::vec2 pos_a, RectBoundingBox& b, glm::vec2 pos_b);  // NOLINT (runtime/references)
+    bool collides(RectBoundingBox& a, glm::vec2 pos_a, const CircularBoundingBox& b, glm::vec2 pos_b);  // NOLINT (runtime/references)
+    bool collides(const CircularBoundingBox& a, glm::vec2 pos_a, const CircularBoundingBox& b, glm::vec2 pos_b);  // NOLINT (runtime/references)
 
     inline static SAT* get()
     {
@@ -41,7 +41,7 @@ protected:
     {}
 
 private:
-    bool collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, const BoundingBox* b);
+    bool collides(const std::vector<glm::vec2>& axes, const BoundingBox* a, glm::vec2 pos_a, const BoundingBox* b, glm::vec2 pos_b);
 
 private:
     static SAT* _instance;

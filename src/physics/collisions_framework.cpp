@@ -11,13 +11,13 @@ INCL_NOWARN
 INCL_WARN
 
 
-glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis)
+glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis, glm::vec2 pos)
 {
-    float min = glm::dot(axis, bb._vertices[0] + bb.position2D());
+    float min = glm::dot(axis, bb._vertices[0] + pos);
     float max = min;
     for (uint32_t i = 1; i < bb._vertices.size(); ++i)
     {
-        float tmp = glm::dot(axis, bb._vertices[i] + bb.position2D());
+        float tmp = glm::dot(axis, bb._vertices[i] + pos);
         if (tmp < min)
         {
             min = tmp;
@@ -31,11 +31,11 @@ glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis
     return { min, max };
 }
 
-glm::vec2 CollisionsFramework::project(const CircularBoundingBox& bb, glm::vec2 axis)
+glm::vec2 CollisionsFramework::project(const CircularBoundingBox& bb, glm::vec2 axis, glm::vec2 pos)
 {
     // Project center onto line
-    auto p0 = bb.center2D() + bb.position2D() - axis * bb.radius();
-    auto p1 = bb.center2D() + bb.position2D() + axis * bb.radius();
+    auto p0 = bb.center2D() + pos - axis * bb.radius();
+    auto p1 = bb.center2D() + pos + axis * bb.radius();
 
     auto r0 = glm::dot(axis, p0);
     auto r1 = glm::dot(axis, p1);
