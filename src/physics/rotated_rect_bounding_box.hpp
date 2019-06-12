@@ -16,17 +16,15 @@ INCL_WARN
 
 
 class MotionMaster;
-class RotatedRectBoundingBox;
+class RectBoundingBox;
 
-
-class RectBoundingBox : public BoundingBox
+class RotatedRectBoundingBox : public BoundingBox
 {
     friend class CollisionsFramework;
-    friend class RotatedRectBoundingBox;
     friend class SAT;
 
 public:
-    RectBoundingBox(std::initializer_list<glm::vec2>&& vertices);
+    RotatedRectBoundingBox(RectBoundingBox* bbox, std::vector<glm::vec2> vertices, float angle);
 
     BoundingBox* rotate(float angle) override;
     glm::vec4 rect(glm::vec2 pos) override;
@@ -36,9 +34,8 @@ public:
 protected:
     const std::vector<glm::vec2>& normals() override;
 
-    bool intersects(std::vector<glm::vec2>& vertices, glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, float* dist = nullptr);
-
 protected:
+    RectBoundingBox* _bbox;
     bool _recalcNormals;
     std::vector<glm::vec2> _vertices;
     std::vector<glm::vec2> _normals;

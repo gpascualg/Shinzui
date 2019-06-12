@@ -75,7 +75,7 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
 {
     if (!_nodes.empty())
     {
-        int index = getIndex(entity->rect());
+        int index = getIndex(entity->transform().rect());
         if (index != -1)
         {
             _nodes[index]->insert(entity);
@@ -96,7 +96,7 @@ void QuadTree<MaxEntities, MaxDepth>::insert(MapAwareEntity* entity)
         {
             auto entity = *it;
 
-            int index = getIndex(entity->rect());
+            int index = getIndex(entity->transform().rect());
             if (index != -1)
             {
                 _nodes[index]->insert(entity);

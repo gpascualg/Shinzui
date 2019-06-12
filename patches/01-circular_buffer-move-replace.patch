@@ -1,0 +1,14 @@
+diff --git a/include/boost/circular_buffer/base.hpp b/include/boost/circular_buffer/base.hpp
+index 3502931..9d34c2e 100644
+--- a/include/boost/circular_buffer/base.hpp
++++ b/include/boost/circular_buffer/base.hpp
+@@ -1456,7 +1456,8 @@ private:
+         if (full()) {
+             if (empty())
+                 return;
+-            replace(m_last, value_type(::boost::forward<Args>(args)...));
++            cb_details::allocator_traits<Alloc>::destroy(alloc(), boost::to_address(m_last));
++            cb_details::allocator_traits<Alloc>::construct(alloc(), boost::to_address(m_last), ::boost::forward<Args>(args)...);
+             increment(m_last);
+             m_first = m_last;
+         } else {

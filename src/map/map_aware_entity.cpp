@@ -38,6 +38,7 @@ void MapAwareEntity::update(uint64_t elapsed)
 void MapAwareEntity::setupBoundingBox(std::initializer_list<glm::vec2>&& vertices)
 {
     // TODO(gpascualg): Logging friendly assert
+    LOG_ALWAYS("SETUP BBOX FOR %" PRId64, id());
     assert(_boundingBox == nullptr);
     _boundingBox = new RectBoundingBox(std::move(vertices));
 }
@@ -95,18 +96,37 @@ std::vector<Cell*> MapAwareEntity::onRemoved(Cell* cell, Cell* to)
     return oldCells;
 }
 
-FixedTransform MapAwareEntity::transform()
+TimePoint MapAwareEntity::lag()
 {
     TimePoint now = Server::get()->now();
     if (_client)
     {
         now -= TimeBase(_client->lag());
     }
-
-    return _transform.at(now);
+    return now;
 }
 
-// glm::vec4 MapAwareEntity::rect()
-// {
-//     return _boundingBox->rect(position2D());
-// }
+FixedTransform& MapAwareEntity::transform()
+{
+    return _transform.at(lag(), _boundingBox);
+}
+
+void MapAwareEntity::teleport(glm::vec3 position, glm::vec3 forward)
+{
+    _transform.teleport(lag(), position, forward);
+}
+
+void MapAwareEntity::move(float speed)
+{
+    _transform.move(lag(), speed);
+}
+
+void MapAwareEntity::rotate(float angle)
+{
+    _transform.rotate(lag(), angle);
+}
+
+void MapAwareEntity::stop()
+{
+    _transform.stop(lag());
+}

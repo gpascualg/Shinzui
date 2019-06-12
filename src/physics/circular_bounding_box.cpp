@@ -22,9 +22,10 @@ CircularBoundingBox::CircularBoundingBox(glm::vec3 center, float radius) :
     _radius(radius)
 {}
 
-void CircularBoundingBox::rotate(float angle)
+BoundingBox* CircularBoundingBox::rotate(float angle)
 {
     // No need to do anything! Rotating does not change the center
+    return this;
 }
 
 const std::vector<glm::vec2>& CircularBoundingBox::normals()

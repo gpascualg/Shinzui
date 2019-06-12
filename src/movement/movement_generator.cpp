@@ -38,6 +38,7 @@ boost::intrusive_ptr<Packet> RandomMovement::packet()
 glm::vec3 RandomMovement::update(MapAwareEntity* owner, float elapsed)
 {
     //FIXME(gpascualg): Reenable random movement
+    return {0, 0, 0};
     // if (!_hasPoint)
     // {
     //     // TODO(gpascualg): Move this out to somewhere else

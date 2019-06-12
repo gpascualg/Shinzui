@@ -11,7 +11,7 @@
 #include "defs/common.hpp"
 #include "debug/debug.hpp"
 #include "executor/executor.hpp"
-#include "time/traceable.hpp"
+#include "transform/traceable_transform.hpp"
 
 INCL_NOWARN
 #include <glm/glm.hpp>
@@ -37,11 +37,17 @@ public:
 
     inline Cell* cell();
     inline Client* client();
-    inline BoundingBox* boundingBox();
-    inline FixedTransform transform(TimePoint t);
+    inline FixedTransform& transform(TimePoint t);
     inline uint64_t id();
+    TimePoint lag();
     
-    FixedTransform transform();
+    // Transform related
+    FixedTransform& transform();
+    // void teleport(glm::vec3& position, glm::vec3& forward);  // TODO(gpascualg): Use <const> in Transform
+    void teleport(glm::vec3 position, glm::vec3 forward);
+    void move(float speed);
+    void rotate(float angle);
+    void stop();
 
     void setupBoundingBox(std::initializer_list<glm::vec2>&& vertices);
 
@@ -78,14 +84,9 @@ Client* MapAwareEntity::client()
     return _client;
 }
 
-BoundingBox* MapAwareEntity::boundingBox()
+FixedTransform& MapAwareEntity::transform(TimePoint t)
 {
-    return _boundingBox;
-}
-
-FixedTransform MapAwareEntity::transform(TimePoint t)
-{
-    return _transform.at(t);
+    return _transform.at(t, _boundingBox);
 }
 
 uint64_t MapAwareEntity::id()

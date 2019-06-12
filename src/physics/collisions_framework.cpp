@@ -11,6 +11,11 @@ INCL_NOWARN
 INCL_WARN
 
 
+glm::vec2 CollisionsFramework::project(const RotatedRectBoundingBox& bb, glm::vec2 axis, glm::vec2 pos)
+{
+    return project(reinterpret_cast<const RectBoundingBox&>(bb), axis, pos);
+}
+
 glm::vec2 CollisionsFramework::project(const RectBoundingBox& bb, glm::vec2 axis, glm::vec2 pos)
 {
     float min = glm::dot(axis, bb._vertices[0] + pos);

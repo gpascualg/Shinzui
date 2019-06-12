@@ -18,3 +18,6 @@ INCL_WARN
 BoundingBox::BoundingBox(BoundingBoxType type) :
     Type(type)
 {}
+
+BoundingBox::~BoundingBox()
+{}

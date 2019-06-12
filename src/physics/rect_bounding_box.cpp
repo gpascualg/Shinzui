@@ -4,6 +4,7 @@
 #include "physics/methods.hpp"
 #include "physics/collisions_framework.hpp"
 #include "physics/rect_bounding_box.hpp"
+#include "physics/rotated_rect_bounding_box.hpp"
 #include "movement/motion_master.hpp"
 
 #include <algorithm>
@@ -20,21 +21,17 @@ INCL_WARN
 
 RectBoundingBox::RectBoundingBox(std::initializer_list<glm::vec2>&& vertices) :
     BoundingBox{ BoundingBoxType::RECT },
-    _recalcNormals(false),
+    _recalcNormals(true),
     _vertices(std::move(vertices))
 {
+    // Calculate normals
     _normals.resize(2);
+    normals();
 }
 
-void RectBoundingBox::rotate(float angle)
+BoundingBox* RectBoundingBox::rotate(float angle)
 {
-    for (auto& vertix : _vertices)
-    {
-        // TODO(gpascualg): Do not immediatelly rotate, accumulate and do so in demand
-        vertix = glm::rotate(vertix, angle);
-    }
-
-    _recalcNormals = true;
+    return new RotatedRectBoundingBox(this, _vertices, angle);
 }
 
 const std::vector<glm::vec2>& RectBoundingBox::normals()
@@ -77,6 +74,11 @@ glm::vec4 RectBoundingBox::rect(glm::vec2 pos)
 
 bool RectBoundingBox::intersects(glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
 {
+    return intersects(_vertices, pos, s1_s, s1_e, dist);
+}
+
+bool RectBoundingBox::intersects(std::vector<glm::vec2>& vertices, glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, float* dist)
+{
     bool check = false;
 
     if (dist)
@@ -84,10 +86,10 @@ bool RectBoundingBox::intersects(glm::vec2 pos, glm::vec2 s1_s, glm::vec2 s1_e, 
         *dist = 0;
     }
 
-    for (uint32_t i = 0; i < _vertices.size(); ++i)
+    for (uint32_t i = 0; i < vertices.size(); ++i)
     {
-        auto s0_s = _vertices[i] + pos;
-        auto s0_e = _vertices[(i + 1) % _vertices.size()] + pos;
+        auto s0_s = vertices[i] + pos;
+        auto s0_e = vertices[(i + 1) % vertices.size()] + pos;
 
         /*LOG(LOG_FIRE_LOGIC, "Intersection with (%f,%f)\n\t(%f,%f)-(%f,%f) to (%f,%f)-(%f,%f)", _motionMaster->pos.x, _motionMaster->pos.y,
         s0_s.x, s0_s.y, s0_e.x, s0_e.y, s1_s.x, s1_s.y, s1_e.x, s1_e.y);*/

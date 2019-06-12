@@ -57,12 +57,26 @@
 #define EXPAND(x)               x
 
 #ifndef FUNCTION_NAME
+    constexpr const char* str_end(const char *str) {
+        return *str ? str_end(str + 1) : str;
+    }
+
+    constexpr bool str_slant(const char *str) {
+        return *str == '/' ? true : (*str ? str_slant(str + 1) : false);
+    }
+
+    constexpr const char* r_slant(const char* str) {
+        return *str == '/' ? (str + 1) : r_slant(str - 1);
+    }
+    constexpr const char* file_name(const char* str) {
+        return str_slant(str) ? r_slant(str_end(str)) : str;
+    }
+
+    #define FILE_NAME file_name(__FILE__)
+
     #if defined(_MSC_VER)
         #define FUNCTION_NAME __FUNCTION__
-        #define FILE_NAME __FILE__ + BASE_DIR_LEN
     #else
-        #define FILE_NAME __FILE__ + BASE_DIR_LEN
-
         static inline void __dummy_func__()
         {
             #ifdef __PRETTY_FUNCTION__
@@ -107,7 +121,7 @@ bool nop(First firstValue, Rest... rest)
 #define EXPAND_HELPER(fnc, pre, lvl, fg, bg, fmt, ...) \
     EXPAND(fnc(LOG_FMT(pre, fmt, fg, bg), lvl, FILE_NAME, FUNCTION_NAME, __VA_ARGS__))  // NOLINT(whitespace/line_length)
 
-#define LOG_ALWAYS(...)                         EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, -1, "01;44", __VA_ARGS__, ""))
+#define LOG_ALWAYS(...)                         EXPAND(EXPAND_HELPER(LOG_FNC, LOG_PRE, -1, "01;44", "0;34;49", __VA_ARGS__, ""))
 
 #if !defined(NDEBUG) || defined(_DEBUG)
     #define _STATIC_IF_LOG(lvl, handler)        (((lvl) & (LOG_LEVEL)) && ((handler) & (LOG_HANDLERS)))  // NOLINT

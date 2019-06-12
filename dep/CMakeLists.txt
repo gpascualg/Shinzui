@@ -29,9 +29,6 @@ else()
 
         # Bimap
         bimap
-
-        # Circular buffer
-        circular_buffer
     )
 
     foreach (dep ${BOOST_DEPENDENCIES})
@@ -45,6 +42,25 @@ else()
             INSTALL_INCLUDE
         )
     endforeach()
+
+    # Manually install circular_buffer, which requires a patch
+    set(CIRCULAR_BUFFER_PATCHES
+        "${GIT_EXECUTABLE} stash"
+        "${GIT_EXECUTABLE} clean -fx"
+        "${GIT_EXECUTABLE} fetch origin pull/15/head:pr15"
+        "${GIT_EXECUTABLE} merge pr15"
+        "${GIT_EXECUTABLE} apply --reject --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/../patches/01-circular_buffer-move-replace.patch"
+    )
+
+    RequireExternal(
+        TARGET Shinzui
+        EXCLUDE
+        SKIP_CONFIGURE
+        SKIP_BUILD
+        MODULE "boostorg/circular_buffer:boost-1.69.0"
+        CONFIGURE_STEPS ${CIRCULAR_BUFFER_PATCHES}
+        INSTALL_INCLUDE
+    )
 endif()
 
 # Require GLM

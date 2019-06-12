@@ -1,6 +1,6 @@
 ResolveExternal(TARGET Shinzui)
 if (Shinzui_IS_RESOLVED)
-    string(LENGTH ${CMAKE_SOURCE_DIR} BASE_DIR_LEN)
+    string(LENGTH ${CMAKE_CURRENT_SOURCE_DIR} BASE_DIR_LEN)
     AddToDefinitions(
         TARGET Shinzui
         DEFINITIONS
@@ -29,7 +29,7 @@ if (Shinzui_IS_RESOLVED)
             ${CMAKE_CURRENT_SOURCE_DIR}/physics
             ${CMAKE_CURRENT_SOURCE_DIR}/server
             ${CMAKE_CURRENT_SOURCE_DIR}/threadpool
-            ${CMAKE_CURRENT_SOURCE_DIR}/time
+            ${CMAKE_CURRENT_SOURCE_DIR}/transform
     )
 
     AddToIncludes(

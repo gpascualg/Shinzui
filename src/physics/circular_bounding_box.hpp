@@ -25,7 +25,7 @@ class CircularBoundingBox : public BoundingBox
 public:
     CircularBoundingBox(glm::vec3 center, float radius);
 
-    void rotate(float angle) override;
+    BoundingBox* rotate(float angle) override;
     glm::vec4 rect(glm::vec2 pos) override;
     bool intersects(glm::vec2 pos, glm::vec2 p0, glm::vec2 p1, float* dist = nullptr) override;
     glm::vec2 project(CollisionsFramework* framework, glm::vec2 axis, glm::vec2 pos) const override;

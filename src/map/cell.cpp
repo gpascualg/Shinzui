@@ -130,9 +130,10 @@ void Cell::physics(uint64_t elapsed)
     for (auto pair1 : _entities)
     {
         auto e1 = pair1.second;
+        auto& t1 = e1->transform();
 
         std::list<MapAwareEntity*> candidates;
-        _quadTree->retrieve(candidates, e1->rect());
+        _quadTree->retrieve(candidates, t1.rect());
 
         for (auto e2 : candidates)
         {
@@ -141,7 +142,8 @@ void Cell::physics(uint64_t elapsed)
                 continue;
             }
 
-            if (SAT::get()->collides(e1->boundingBox(), e1->position2D(), e2->boundingBox(), e2->position2D()))
+            auto& t2 = e2->transform();
+            if (SAT::get()->collides(t1.BBox, t1.Position2D, t2.BBox, t2.Position2D))
             {
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }

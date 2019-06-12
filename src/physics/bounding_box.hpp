@@ -26,9 +26,10 @@ class BoundingBox
 {
 public:
     BoundingBox(BoundingBoxType type);
+    virtual ~BoundingBox();
 
     // Rotate with motion master
-    virtual void rotate(float angle) = 0;
+    virtual BoundingBox* rotate(float angle) = 0;
 
     // Returns the minimum rect that contains the OBB
     virtual glm::vec4 rect(glm::vec2 pos) = 0;
