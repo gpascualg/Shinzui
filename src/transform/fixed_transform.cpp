@@ -12,7 +12,9 @@ FixedTransform::FixedTransform(TimePoint t, Transform& transform, BoundingBox* b
     Position(transform.position(t)),
     Position2D(transform.position2D(t)),
     Forward(transform.forward(t)),
-    Speed(transform.speed(t))
+    Speed(transform.speed(t)),
+    IsMoving(transform.isMoving()),
+    IsRotating(transform.isRotating())
 {
     if (bbox)
     {

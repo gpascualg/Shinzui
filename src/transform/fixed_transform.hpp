@@ -26,4 +26,6 @@ public:
     glm::vec2 Position2D;
     glm::vec3 Forward;
     float Speed;
+    bool IsMoving;
+    bool IsRotating;
 };

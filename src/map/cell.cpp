@@ -142,8 +142,9 @@ void Cell::physics(uint64_t elapsed)
                 continue;
             }
 
-            auto& t2 = e2->transform();
-            if (SAT::get()->collides(t1.BBox, t1.Position2D, t2.BBox, t2.Position2D))
+            // Get transform based on entity 1 lag
+            auto& t2 = e2->transform(e1->lag());
+            if (SAT::get()->collides(t1, t2))
             {
                 // TODO(gpascualg): Apply forces to motionMaster, and possibly notify clients?
             }

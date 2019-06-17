@@ -24,22 +24,28 @@ MapAwareEntity::MapAwareEntity(uint64_t id, Client* client) :
 }
 
 MapAwareEntity::~MapAwareEntity()
-{}
+{
+    if (_boundingBox)
+    {
+        delete _boundingBox;
+    }
+}
 
 void MapAwareEntity::update(uint64_t elapsed)
 {
     Executor<ExecutorQueueMax>::executeJobs();
 
-    // Update motion
-    // TODO(gpascualg): UPDATE MOVEMENT!
-    // _motionMaster->update(elapsed);
+    // Assume we are moving without lag, update us
+    // We can add some threshold here (like dX > ?)
+    if (transform().IsMoving)
+    {
+        _cell->map()->onMove(this);
+    }
 }
 
 void MapAwareEntity::setupBoundingBox(std::initializer_list<glm::vec2>&& vertices)
 {
-    // TODO(gpascualg): Logging friendly assert
-    LOG_ALWAYS("SETUP BBOX FOR %" PRId64, id());
-    assert(_boundingBox == nullptr);
+    LOG_ASSERT(_boundingBox == nullptr, "Bounding box should be setup only once");
     _boundingBox = new RectBoundingBox(std::move(vertices));
 }
 
